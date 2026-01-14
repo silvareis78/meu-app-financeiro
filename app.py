@@ -3,47 +3,41 @@ import streamlit as st
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Meu App Financeiro", layout="centered", initial_sidebar_state="collapsed")
 
-# 2. CSS PARA CENTRALIZAR E LIMPAR A INTERFACE
+# 2. CSS "ULTRA-CLEAN" (Remove absolutamente todos os ícones e barras)
 st.markdown("""
     <style>
-    /* Esconder Barra Superior e Botão 'Manage App' */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-    .stDeployButton {display:none;}
-    [data-testid="stStatusWidget"] {display:none;}
+    /* Esconder Header, Rodapé e Menu */
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
+    #MainMenu {visibility: hidden !important;}
     
-    /* Remover espaços em branco no topo */
+    /* Remover TODOS os botões flutuantes e indicadores do canto inferior direito */
+    .stDeployButton {display:none !important;}
+    div[data-testid="stStatusWidget"] {display:none !important;}
+    button[title="Manage app"] {display: none !important;}
+    .stActionButton {display: none !important;}
+    [data-testid="manage-app-button"] {display: none !important;}
+    div[class^="st-emotion-cache-10zv66v"] {display: none !important;} /* Seletor para novos layouts */
+    
+    /* Centralização e Estética */
     .block-container {
-        padding-top: 0rem;
-        padding-bottom: 0rem;
+        padding-top: 2rem;
         display: flex;
+        flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 100vh;
+        height: 80vh;
     }
 
-    /* Container de Login Centralizado */
-    .login-box {
-        background-color: #FFFFFF;
-        padding: 40px;
-        border-radius: 20px;
-        box-shadow: 0 10px 25px rgba(0,0,0,0.05);
-        text-align: center;
-        width: 100%;
-        max-width: 400px;
-    }
-
-    /* Título */
     .logo-text {
         font-family: 'Inter', sans-serif;
         color: #008080;
         font-size: 32px;
         font-weight: 800;
+        text-align: center;
         margin-bottom: 30px;
     }
 
-    /* Botão Acessar */
     .stButton>button {
         width: 100%;
         background-color: #20B2AA !important;
@@ -58,12 +52,12 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. LÓGICA DE LOGIN (Interface Centralizada)
+# 3. LÓGICA DE LOGIN
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    # Usando colunas apenas para garantir a centralização perfeita no Streamlit
+    # Coluna para centralizar no PC
     _, col_central, _ = st.columns([0.1, 0.8, 0.1])
     
     with col_central:
@@ -77,20 +71,18 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.rerun()
             else:
-                st.error("Dados incorretos. Tente novamente.")
+                st.error("Dados incorretos.")
     st.stop()
 
 # ---------------------------------------------------------
-# CONTEÚDO PÓS-LOGIN (Dashboard)
+# CONTEÚDO PÓS-LOGIN (DASHBOARD)
 # ---------------------------------------------------------
-# Aqui reativamos a barra para você poder navegar após o login
-st.markdown("<style>header {visibility: visible;}</style>", unsafe_allow_html=True)
-
 st.title("Olá, Robson!")
-st.write("Seu painel financeiro será montado aqui.")
+st.write("Agora sim! Tela 100% limpa.")
 
 if st.button("Sair"):
     st.session_state.logged_in = False
     st.rerun()
     
+
 
