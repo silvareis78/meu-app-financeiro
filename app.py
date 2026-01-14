@@ -46,6 +46,12 @@ st.markdown("""
         font-size: 11px;
         line-height: 1.2;
         margin-top: -5px;
+
+        /* Estilo da barra grossa */
+    .barra-preta-grossa {
+        border-bottom: 6px solid #000000; /* 6px é a espessura. Aumente se quiser mais grossa */
+        margin-bottom: 20px;              /* Espaço entre a linha e o que vem abaixo */
+        margin-top: 10px;                 /* Espaço entre o título e a linha */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -111,6 +117,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
