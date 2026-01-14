@@ -65,6 +65,25 @@ st.markdown("""
     .receita { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
     .despesa { background: linear-gradient(135deg, #dc3545 0%, #ff4b5c 100%); }
     .saldo   { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); }
+
+    /* CONFIGURA A ALTURA DO PAINEL INICIAL (Cabeçalho) */
+    .block-container {
+        padding-top: 0.5rem !important; /* Quanto menor, mais alto o título fica */
+        margin-top: -40px !important; /* Ajuste aqui (ex: -50px) para subir ainda mais */
+    }
+
+    /* ESPAÇO ENTRE 'MÊS' E A CAIXA DE SELEÇÃO */
+    .label-filtro {
+        font-weight: bold;
+        margin-bottom: -30px !important; /* Aumente para -30px se quiser mais perto */
+        font-size: 14px;
+        color: #000000;
+    }
+
+    /* REMOVE O ESPAÇO EXTRA QUE O STREAMLIT COLOCA EM VOLTA DOS SELECTS */
+    div[data-testid="stSelectbox"] {
+        margin-top: -10px !important; /* Sobe a caixa em direção ao texto 'Mês' */
+    }
     
     </style>
     """, unsafe_allow_html=True)
@@ -92,7 +111,7 @@ if not st.session_state.logged_in:
 # Cabeçalho no topo máximo
 topo_esq, topo_dir = st.columns([5, 1])
 with topo_esq:
-    st.markdown("<h2 style='margin-top: 1px;'>🏠 Painel Inicial</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-top: 0px;'>🏠 Painel Inicial</h2>", unsafe_allow_html=True)
 with topo_dir:
     if st.button("Sair"):
         st.session_state.logged_in = False
@@ -133,7 +152,7 @@ c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_h
 st.markdown("<h3 style='margin-bottom:0px;'>DESPESA</h3>", unsafe_allow_html=True)
 st.markdown('<div class="barra-preta-fina"></div>', unsafe_allow_html=True)
 
-col_info_gastos, col_divisor, col_grafico = st.columns([2, 0.1, 2])
+col_info_gastos, col_divisor, col_grafico = st.columns([1.5, 0.1, 2])
 
 with col_info_gastos:
     st.markdown('<div class="card-cartao-small"><b>Total a pagar:</b> R$ 1.800,00</div>', unsafe_allow_html=True)
@@ -154,6 +173,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
