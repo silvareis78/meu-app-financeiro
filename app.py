@@ -71,7 +71,7 @@ st.markdown("""
     /* 7. FILTROS (Mês e Ano) */
     .label-filtro {
         font-weight: bold;
-        margin-bottom: -25px !important; 
+        margin-bottom: -15px !important; 
         font-size: 14px;
         color: #000000;
         display: block;
@@ -169,6 +169,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
