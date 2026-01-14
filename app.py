@@ -3,30 +3,34 @@ import streamlit as st
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Meu App Financeiro", layout="centered", initial_sidebar_state="collapsed")
 
-# 2. CSS "ULTRA-CLEAN" (Remove absolutamente todos os ícones e barras)
+# 2. CSS "FORÇA BRUTA" PARA SUMIR COM TUDO
 st.markdown("""
     <style>
-    /* Esconder Header, Rodapé e Menu */
-    header {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    #MainMenu {visibility: hidden !important;}
+    /* 1. Remove Header, Footer e Menu */
+    header, footer, #MainMenu {visibility: hidden !important; display: none !important;}
     
-    /* Remover TODOS os botões flutuantes e indicadores do canto inferior direito */
-    .stDeployButton {display:none !important;}
-    div[data-testid="stStatusWidget"] {display:none !important;}
-    button[title="Manage app"] {display: none !important;}
-    .stActionButton {display: none !important;}
-    [data-testid="manage-app-button"] {display: none !important;}
-    div[class^="st-emotion-cache-10zv66v"] {display: none !important;} /* Seletor para novos layouts */
+    /* 2. Ataca os botões flutuantes do canto inferior (Manage App, Deploy, etc) */
+    .stDeployButton, .stActionButton, .stStatusWidget {display: none !important;}
     
-    /* Centralização e Estética */
+    /* 3. Seletores específicos para as versões mobile do Streamlit Cloud */
+    [data-testid="stStatusWidget"], 
+    [data-testid="manage-app-button"], 
+    [data-testid="stActionButton"] {
+        display: none !important;
+        visibility: hidden !important;
+    }
+
+    /* 4. Remove qualquer elemento flutuante no canto inferior direito */
+    div[class^="st-emotion-cache-"] button { display: none !important; }
+    iframe[title="Manage app"] { display: none !important; }
+    
+    /* Centralização do Login */
     .block-container {
-        padding-top: 2rem;
+        padding-top: 0rem;
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
-        height: 80vh;
+        height: 100vh;
     }
 
     .logo-text {
@@ -46,8 +50,6 @@ st.markdown("""
         height: 50px;
         border-radius: 12px;
         font-weight: bold;
-        font-size: 16px;
-        margin-top: 20px;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -57,12 +59,10 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    # Coluna para centralizar no PC
     _, col_central, _ = st.columns([0.1, 0.8, 0.1])
     
     with col_central:
         st.markdown('<p class="logo-text">Meu App Financeiro</p>', unsafe_allow_html=True)
-        
         email = st.text_input("E-mail", placeholder="seuemail@gmail.com")
         senha = st.text_input("Senha", type="password", placeholder="••••••••")
         
@@ -74,15 +74,12 @@ if not st.session_state.logged_in:
                 st.error("Dados incorretos.")
     st.stop()
 
-# ---------------------------------------------------------
-# CONTEÚDO PÓS-LOGIN (DASHBOARD)
-# ---------------------------------------------------------
+# CONTEÚDO PÓS-LOGIN
 st.title("Olá, Robson!")
-st.write("Agora sim! Tela 100% limpa.")
-
 if st.button("Sair"):
     st.session_state.logged_in = False
     st.rerun()
     
+
 
 
