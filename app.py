@@ -31,13 +31,7 @@ st.markdown("""
     .barra-preta-fina {
         border-bottom: 2px solid #000000;
         margin: 10px 0 20px 0;
-    }
-
-    /* Divisor Vertical */
-    .divisor-vertical {
-        border-right: 2px solid #000000;
-        height: 300px;
-        margin-right: 20px;
+  
     }
 
     /* Cards em Gradiente */
@@ -157,6 +151,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
