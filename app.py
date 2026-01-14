@@ -109,8 +109,41 @@ with col_filtros:
 with col_cards:
     c1, c2, c3 = st.columns(3)
     c1.markdown('<div class="card receita">Receita<br>R$ 5.000,00</div>', unsafe_allow_html=True)
-    c2.markdown('<div class="card despesa">Des
+    c2.markdown('<div class="card despesa">Despesa<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+    c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+
+with col_avatar:
+    st.markdown("""
+        <div class="avatar-box">
+            <img src="https://www.w3schools.com/howto/img_avatar.png" width="55" style="border-radius: 50%;">
+            <p style="margin:5px 0; font-size:13px; color: gray;">Gasto: <b>49%</b> do recebido</p>
+        </div>
+    """, unsafe_allow_html=True)
+    st.progress(0.49)
+
+# Linha 2: Descrição Despesa e Detalhes
+st.markdown('<div class="barra-vermelha">DESCRIÇÃO DESPESA</div>', unsafe_allow_html=True)
+
+col_detalhes, col_grafico = st.columns([1, 1])
+
+with col_detalhes:
+    st.info("📌 **Total a pagar no mês:** R$ 1.800,00")
+    st.warning("💳 **Nubank:** R$ 450,00")
+    st.warning("💳 **Visa:** R$ 200,00")
+
+with col_grafico:
+    # Gráfico de exemplo
+    dados = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
+    st.bar_chart(dados.set_index('Cat'))
+
+# Menu Lateral
+with st.sidebar:
+    st.markdown("## ⚙️ Menu")
+    st.button("📊 Dashboard", use_container_width=True)
+    st.button("💸 Lançamentos", use_container_width=True)
+    st.button("📋 Extrato", use_container_width=True)
     
+
 
 
 
