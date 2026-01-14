@@ -73,6 +73,27 @@ with t2: st.button("Sair")
 
 st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 
+# --- LINHA DO AVATAR E FILTROS ---
+# Para encurtar esta linha, aumente os números das colunas vazias (os 0.5)
+_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([0.1, 1.2, 0.5, 1, 1, 0.1])
+
+with col_avatar:
+    st.markdown("""
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://www.w3schools.com/howto/img_avatar.png" width="40" style="border-radius: 50%;">
+            <span style="font-size: 12px; font-weight: bold;">Gasto: 49%</span>
+        </div>
+    """, unsafe_allow_html=True)
+    st.progress(0.49)
+
+with col_mes:
+    st.markdown('<span class="label-custom">Mês</span>', unsafe_allow_html=True)
+    st.selectbox("", ["JANEIRO", "FEVEREIRO", "MARÇO"], key="mes_dashboard")
+
+with col_ano:
+    st.markdown('<span class="label-custom">Ano</span>', unsafe_allow_html=True)
+    st.selectbox("", ["2026", "2027"], key="ano_dashboard")
+
 # Filtros e Avatar
 c_av, c_m, c_a = st.columns([2, 1, 1])
 with c_av: 
@@ -80,6 +101,27 @@ with c_av:
     st.caption("Gasto: 49%")
 with c_m: st.selectbox("Mês", ["JANEIRO", "FEVEREIRO"], label_visibility="collapsed")
 with c_a: st.selectbox("Ano", ["2026"], label_visibility="collapsed")
+
+# --- LINHA DO AVATAR E FILTROS ---
+# Para encurtar esta linha, aumente os números das colunas vazias (os 0.5)
+_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([0.1, 1.2, 0.5, 1, 1, 0.1])
+
+with col_avatar:
+    st.markdown("""
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="https://www.w3schools.com/howto/img_avatar.png" width="40" style="border-radius: 50%;">
+            <span style="font-size: 12px; font-weight: bold;">Gasto: 49%</span>
+        </div>
+    """, unsafe_allow_html=True)
+    st.progress(0.49)
+
+with col_mes:
+    st.markdown('<span class="label-custom">Mês</span>', unsafe_allow_html=True)
+    st.selectbox("", ["JANEIRO", "FEVEREIRO", "MARÇO"], key="mes_dashboard")
+
+with col_ano:
+    st.markdown('<span class="label-custom">Ano</span>', unsafe_allow_html=True)
+    st.selectbox("", ["2026", "2027"], key="ano_dashboard")
 
 # --- AJUSTE DE COMPRIMENTO DOS CARDS ---
 # Usei colunas vazias [1, 4, 1] para o card não ficar esticado na tela toda
@@ -107,6 +149,7 @@ with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200) # Ajuste o HEIGHT para mudar altura do gráfico
     
+
 
 
 
