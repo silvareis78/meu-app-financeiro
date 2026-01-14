@@ -22,8 +22,7 @@ st.markdown("""
     .block-container {
         padding-top: 0rem !important;
         margin-top: -10px !important; /* Ajuste aqui para subir ainda mais */
-    }
-
+    
     /* 2. REMOVE ELEMENTOS NATIVOS */
     header, footer, .stDeployButton {visibility: hidden; display: none !important;}
     }
@@ -174,6 +173,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
