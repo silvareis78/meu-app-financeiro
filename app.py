@@ -41,7 +41,7 @@ st.markdown("""
 
     /* 4. CARDS DE DESPESA/CARTÃO */
     .card-cartao-small {
-        padding: 8px 15px;   /* Primeiro número muda a altura */
+        padding: 8px 9px;   /* Primeiro número muda a altura */
         font-size: 14px;     /* Letra da lista */
         background-color: #F8FAFC;
         border: 1px solid #CBD5E1;
@@ -173,6 +173,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
