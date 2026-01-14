@@ -81,7 +81,7 @@ st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 st.markdown('<div class="espaco-topo"></div>', unsafe_allow_html=True)
 
 # Usei colunas vazias nas pontas [2, 1.5, 1.2, 0.8, 0.8, 2] para encurtar os seletores
-_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([2, 1.5, 1, 1, 0.8, 2])
+_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([-1, 1.5, 1, 1, 0.8, -1])
 
 with col_avatar:
     st.markdown("""
@@ -128,6 +128,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=180, color="#000000")
+
 
 
 
