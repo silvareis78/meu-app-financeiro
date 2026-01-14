@@ -1,100 +1,118 @@
 import streamlit as st
-from streamlit_gsheets import GSheetsConnection
-import pandas as pd
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Meu App Financeiro", layout="wide", initial_sidebar_state="collapsed")
 
-# 2. CSS PARA INTERFACE PROFISSIONAL
+# 2. ESTILIZAÇÃO CSS AVANÇADA
 st.markdown("""
     <style>
-    /* Fundo da tela */
-    .stApp {
-        background-color: #F8FAFC;
-    }
+    /* Remover margens padrão */
+    .block-container { padding: 0px; }
+    footer {visibility: hidden;}
     
-    /* Centralizar conteúdo do login */
-    .login-container {
+    /* Fundo em degradê suave */
+    .stApp {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    }
+
+    /* Container Principal */
+    .main-container {
         display: flex;
-        flex-direction: column;
         align-items: center;
         justify-content: center;
+        height: 100vh;
         padding: 20px;
     }
 
-    /* Estilo do Título */
-    .main-title {
-        color: #1E293B;
-        font-size: 28px;
-        font-weight: 800;
-        text-align: center;
-        margin-top: 10px;
-        margin-bottom: 5px;
+    /* Estilo do Título (Verde Água) */
+    .logo-text {
         font-family: 'Inter', sans-serif;
+        color: #008080;
+        font-size: 35px;
+        font-weight: 800;
+        line-height: 1;
+        margin-bottom: 5px;
     }
-
-    /* Subtítulo */
-    .sub-title {
-        color: #64748B;
-        font-size: 16px;
-        text-align: center;
+    .fature-text {
+        color: #1E293B;
+        font-size: 14px;
+        letter-spacing: 2px;
+        font-weight: 500;
         margin-bottom: 30px;
     }
 
-    /* Botão Entrar */
+    /* Estilo dos Inputs */
+    .stTextInput>div>div>input {
+        background-color: #f0f2f6;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+    }
+
+    /* Botão Acessar (Igual da imagem) */
     .stButton>button {
         width: 100%;
-        background-color: #0F172A;
-        color: white;
-        height: 50px;
-        border-radius: 12px;
-        font-weight: 600;
+        background-color: #20B2AA !important;
+        color: white !important;
         border: none;
-        margin-top: 10px;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: bold;
+        transition: 0.3s;
     }
-    
-    /* Campos de Input */
-    .stTextInput>div>div>input {
-        border-radius: 12px;
-        height: 50px;
+    .stButton>button:hover {
+        background-color: #008080 !important;
+        transform: translateY(-2px);
+    }
+
+    /* Imagem Arredondada */
+    .img-rounded {
+        border-radius: 30px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
     </style>
     """, unsafe_allow_html=True)
 
-# 3. LÓGICA DE ACESSO
+# 3. LÓGICA DE LOGIN
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    # Criando colunas para centralizar o login no PC, mas no Celular elas se empilham
-    _, col_central, _ = st.columns([0.1, 0.8, 0.1])
-    
-    with col_central:
-        st.markdown("<div class='login-container'>", unsafe_allow_html=True)
+    # Criando as duas colunas (Esquerda: Login | Direita: Imagem)
+    col1, col2 = st.columns([1, 1.2], gap="large")
+
+    with col1:
+        st.markdown("<div style='padding: 50px;'>", unsafe_allow_html=True)
         
-        # IMAGEM DO TEMA (Cofre com moedas)
-        st.image("https://cdn-icons-png.flaticon.com/512/5551/5551382.png", width=120)
+        # Logo e Título
+        st.markdown('<p class="logo-text">MeuApp<br>Financeiro</p>', unsafe_allow_html=True)
+        st.markdown('<p class="fature-text">FATURE SISTEMAS</p>', unsafe_allow_html=True)
         
-        st.markdown("<div class='main-title'>Meu App Financeiro</div>", unsafe_allow_html=True)
-        st.markdown("<div class='sub-title'>Gestão de Gastos - Robson</div>", unsafe_allow_html=True)
+        # Inputs
+        email = st.text_input("E-mail", placeholder="seuemail@exemplo.com")
+        senha = st.text_input("Senha", type="password", placeholder="••••••••")
         
-        # CAMPO DE SENHA
-        senha = st.text_input("Senha de Acesso", type="password", placeholder="Digite sua senha secreta")
+        st.markdown("<br>", unsafe_allow_html=True)
         
-        if st.button("Acessar Carteira"):
+        if st.button("Acessar"):
             if senha == "2026":
                 st.session_state.logged_in = True
                 st.rerun()
             else:
-                st.error("Senha incorreta. Tente novamente.")
-        
+                st.error("Dados incorretos.")
         st.markdown("</div>", unsafe_allow_html=True)
+
+    with col2:
+        # Imagem que remete à prosperidade e crescimento (como na sua referência)
+        st.markdown('<div style="padding: 20px;">', unsafe_allow_html=True)
+        st.image("https://img.freepik.com/fotos-gratis/conceito-de-crescimento-de-negocios-com-moedas-e-planta_23-2148803930.jpg", use_container_width=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+
     st.stop()
 
 # ---------------------------------------------------------
-# CÓDIGO APÓS LOGIN (Aparece quando você acerta a senha)
+# CONTEÚDO PÓS-LOGIN (O que aparece depois de entrar)
 # ---------------------------------------------------------
-st.success("Você está logado! Em breve montaremos o Dashboard aqui.")
+st.title("Bem-vindo ao seu Dashboard!")
 if st.button("Sair"):
     st.session_state.logged_in = False
     st.rerun()
