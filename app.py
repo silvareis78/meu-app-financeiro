@@ -68,7 +68,7 @@ st.markdown("""
 
     /* CONFIGURA A ALTURA DO PAINEL INICIAL (Cabeçalho) */
     .block-container {
-        padding-top: 0.5rem !important; /* Quanto menor, mais alto o título fica */
+        padding-top: 1.3rem !important; /* Quanto menor, mais alto o título fica */
         margin-top: -40px !important; /* Ajuste aqui (ex: -50px) para subir ainda mais */
     }
 
@@ -152,7 +152,7 @@ c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_h
 st.markdown("<h3 style='margin-bottom:0px;'>DESPESA</h3>", unsafe_allow_html=True)
 st.markdown('<div class="barra-preta-fina"></div>', unsafe_allow_html=True)
 
-col_info_gastos, col_divisor, col_grafico = st.columns([1.5, 0.1, 2])
+col_info_gastos, col_divisor, col_grafico = st.columns([1, 0, 2])
 
 with col_info_gastos:
     st.markdown('<div class="card-cartao-small"><b>Total a pagar:</b> R$ 1.800,00</div>', unsafe_allow_html=True)
@@ -173,6 +173,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
