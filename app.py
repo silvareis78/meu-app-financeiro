@@ -5,7 +5,7 @@ from streamlit_gsheets import GSheetsConnection
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Financeiro Pro", layout="wide", initial_sidebar_state="auto")
 
-# 2. CSS "MODO INVISÍVEL" + ESTILO DOS CARDS
+# 2. CSS CUSTOMIZADO + SCRIPT DE LIMPEZA + AJUSTE DE TOPO
 st.markdown("""
     <script>
     function fecharBotoes() {
@@ -18,51 +18,54 @@ st.markdown("""
     </script>
 
     <style>
-   header {visibility: hidden; display: none !important;}
-    .block-container {padding-top: 0rem;} /* Sobe o Painel Inicial ao máximo */
-
-    /* Barra Preta Grossa */
-    .barra-preta-grossa {
-        border-bottom: 6px solid #000000;
-        margin-bottom: 20px;
+    /* 1. SOBE O CONTEÚDO AO MÁXIMO (Diminui espaço do Painel Inicial) */
+    .block-container {
+        padding-top: 0rem !important;
+        margin-top: -30px !important; /* Ajuste aqui para subir ainda mais */
     }
 
-    /* Barra Preta Fina para Divisões */
-    .barra-preta-fina {
-        border-bottom: 2px solid #000000;
-        margin: 10px 0 20px 0;
-  
-    }
+    /* 2. REMOVE ELEMENTOS NATIVOS */
+    header, footer, .stDeployButton {visibility: hidden; display: none !important;}
 
-    /* Cards em Gradiente */
+    /* 3. CARDS COLORIDOS (Ajuste de Tamanho aqui) */
     .card {
-        padding: 20px;
+        padding: 20px;       /* Altura interna */
+        font-size: 18px;     /* Tamanho da letra */
         border-radius: 12px;
         color: white !important;
         font-weight: bold;
         text-align: center;
         margin-bottom: 15px;
-    }
-    .receita { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-    .despesa { background: linear-gradient(135deg, #dc3545 0%, #ff4b5c 100%); }
-    .saldo { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); }
-    
-    /* Cards de Cartão Menores */
-    .card-cartao-small {
-        background-color: #F8FAFC;
-        border: 1px solid #CBD5E1;
-        padding: 8px 10px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-        font-size: 14px;
+        width: 100%;
     }
 
-    /* Labels de Filtros */
-    .label-filtro {
-        font-weight: bold;
-        margin-bottom: -15px;
-        font-size: 14px;
+    /* 4. CARDS DE DESPESA/CARTÃO */
+    .card-cartao-small {
+        padding: 8px 15px;   /* Primeiro número muda a altura */
+        font-size: 14px;     /* Letra da lista */
+        background-color: #F8FAFC;
+        border: 1px solid #CBD5E1;
+        border-radius: 8px;
+        margin-bottom: 8px;
     }
+
+    /* 5. BARRAS PRETAS E DIVISORES */
+    .barra-preta-grossa {
+        border-bottom: 6px solid #000000;
+        margin-bottom: 20px;
+    }
+
+    .barra-preta-fina {
+        border-bottom: 2px solid #000000;
+        margin: 10px 0 20px 0;
+ 
+    }
+
+    /* 6. CORES DOS GRADIENTES */
+    .receita { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
+    .despesa { background: linear-gradient(135deg, #dc3545 0%, #ff4b5c 100%); }
+    .saldo   { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); }
+    
     </style>
     """, unsafe_allow_html=True)
 
@@ -98,7 +101,7 @@ with topo_dir:
 st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 
 # Linha 1: Avatar/Gasto e Filtros Verticais
-col_avatar, col_vazio, col_mes, col_ano = st.columns([1.5, 1.5, 1, 1])
+col_avatar, col_vazio, col_mes, col_ano = st.columns([1.5, 1.5, 0.5, 0.5])
 
 with col_avatar:
     st.markdown(f"""
@@ -151,6 +154,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
