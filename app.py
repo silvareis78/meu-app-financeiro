@@ -21,46 +21,29 @@ st.markdown("""
     /* Esconder elementos nativos */
     header, footer, .stDeployButton {visibility: hidden; display: none !important;}
 
-    /* Título do Login */
-    .logo-text-login {
-        color: #008080;
-        font-size: 32px;
-        font-weight: 800;
-        text-align: center;
-        margin-bottom: 20px;
+    /* Barra cinza mais grossa no topo */
+    .divisor-grossa { 
+        border-bottom: 4px solid #E2E8F0; 
+        margin-bottom: 20px; 
+        margin-top: -10px;
     }
-
-    /* Estilização dos Cards em Gradiente */
-    .card {
-        padding: 20px;
-        border-radius: 15px;
-        color: white !important;
-        font-weight: bold;
-        text-align: center;
-        margin-bottom: 10px;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.1);
-    }
-    .receita { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-    .despesa { background: linear-gradient(135deg, #dc3545 0%, #ff4b5c 100%); }
-    .saldo { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); }
     
-    /* Barra Vermelha Lateral */
-    .barra-vermelha {
-        border-left: 6px solid #dc3545;
-        padding-left: 12px;
-        font-weight: bold;
-        font-size: 18px;
-        color: #1E293B;
-        margin: 25px 0 15px 0;
+    /* Ajuste para filtros ficarem na mesma linha (Label + Input) */
+    .filter-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
     }
 
-    /* Container do Avatar */
-    .avatar-box {
-        text-align: center;
-        padding: 10px;
-        background: white;
-        border-radius: 15px;
-        border: 1px solid #eee;
+    /* Cards de Cartão mais elegantes */
+    .card-cartao {
+        background-color: #F1F5F9;
+        border-left: 5px solid #475569;
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 10px;
+        color: #1E293B;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -88,61 +71,69 @@ if not st.session_state.logged_in:
 # 4. DASHBOARD (SÓ EXECUTA APÓS O LOGIN)
 # ---------------------------------------------------------
 
-# Cabeçalho: Painel Inicial (Esquerda) e Sair (Direita)
+# Cabeçalho mais alto e barra grossa
 topo_esq, topo_dir = st.columns([5, 1])
 with topo_esq:
-    st.markdown("### 🏠 Painel Inicial")
+    st.markdown("<h2 style='margin-bottom: 0px;'>🏠 Painel Inicial</h2>", unsafe_allow_html=True)
 with topo_dir:
     if st.button("Sair"):
         st.session_state.logged_in = False
         st.rerun()
 
-st.divider()
+st.markdown('<div class="divisor-grossa"></div>', unsafe_allow_html=True)
 
-# Linha 1: Filtros, Cards e Avatar
-col_filtros, col_cards, col_avatar = st.columns([1, 2.5, 1.2])
-
-with col_filtros:
-    mes = st.selectbox("Mês", ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"])
-    ano = st.selectbox("Ano", ["2025", "2026", "2027"])
-
-with col_cards:
-    c1, c2, c3 = st.columns(3)
-    c1.markdown('<div class="card receita">Receita<br>R$ 5.000,00</div>', unsafe_allow_html=True)
-    c2.markdown('<div class="card despesa">Despesa<br>R$ 2.450,00</div>', unsafe_allow_html=True)
-    c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+# No Celular: Avatar e Porcentagem aparecem PRIMEIRO
+col_avatar, col_filtros = st.columns([1, 1])
 
 with col_avatar:
     st.markdown("""
-        <div class="avatar-box">
-            <img src="https://www.w3schools.com/howto/img_avatar.png" width="55" style="border-radius: 50%;">
-            <p style="margin:5px 0; font-size:13px; color: gray;">Gasto: <b>49%</b> do recebido</p>
+        <div style="display: flex; align-items: center; gap: 15px; background: white; padding: 10px; border-radius: 15px; border: 1px solid #eee;">
+            <img src="https://www.w3schools.com/howto/img_avatar.png" width="50" style="border-radius: 50%;">
+            <div>
+                <p style="margin:0; font-size:12px; color: gray;">Gasto Total</p>
+                <p style="margin:0; font-weight: bold; color: #1E293B;">49% do Recebido</p>
+            </div>
         </div>
     """, unsafe_allow_html=True)
     st.progress(0.49)
 
-# Linha 2: Descrição Despesa e Detalhes
-st.markdown('<div class="barra-vermelha">DESCRIÇÃO DESPESA</div>', unsafe_allow_html=True)
+with col_filtros:
+    # Filtros com Label e Caixa lado a lado usando colunas internas
+    f1, f2 = st.columns(2)
+    with f1:
+        st.selectbox("Mês", ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"], label_visibility="collapsed")
+    with f2:
+        st.selectbox("Ano", ["2025", "2026", "2027"], label_visibility="collapsed")
+
+st.markdown("<br>", unsafe_allow_html=True)
+
+# Cards de Receita, Despesa e Saldo
+c1, c2, c3 = st.columns(3)
+c1.markdown('<div class="card receita">Receita<br>R$ 5.000,00</div>', unsafe_allow_html=True)
+c2.markdown('<div class="card despesa">Despesa<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+
+# Seção de Despesas
+st.markdown('<div class="barra-vermelha">DESPESA</div>', unsafe_allow_html=True)
 
 col_detalhes, col_grafico = st.columns([1, 1])
 
 with col_detalhes:
-    st.info("📌 **Total a pagar no mês:** R$ 1.800,00")
-    st.warning("💳 **Nubank:** R$ 450,00")
-    st.warning("💳 **Visa:** R$ 200,00")
+    st.markdown('<div class="card-cartao"><b>Total a pagar:</b> R$ 1.800,00</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-cartao"><b>💳 Nubank:</b> R$ 450,00</div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-cartao"><b>💳 Visa:</b> R$ 200,00</div>', unsafe_allow_html=True)
 
 with col_grafico:
-    # Gráfico de exemplo
     dados = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
-    st.bar_chart(dados.set_index('Cat'))
+    st.bar_chart(dados.set_index('Cat'), color="#dc3545")
 
 # Menu Lateral
 with st.sidebar:
     st.markdown("## ⚙️ Menu")
     st.button("📊 Dashboard", use_container_width=True)
     st.button("💸 Lançamentos", use_container_width=True)
-    st.button("📋 Extrato", use_container_width=True)
     
+
 
 
 
