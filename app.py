@@ -116,7 +116,7 @@ with topo_dir:
 st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 
 # Linha 1: Avatar/Gasto e Filtros Verticais
-col_avatar, col_vazio, col_mes, col_ano = st.columns([1.5, 1.5, 0.5, 0.5])
+col_avatar, col_vazio, col_mes, col_ano = st.columns([1.5, 1.5, 0.3, 0.3])
 
 with col_avatar:
     st.markdown(f"""
@@ -169,6 +169,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
