@@ -120,7 +120,7 @@ st.markdown("<h3 style='font-size: 18px;'>DESPESA</h3>", unsafe_allow_html=True)
 st.markdown('<div class="barra-preta-fina"></div>', unsafe_allow_html=True)
 
 # Encurtei os cards de baixo também com colunas vazias
-_, col_gastos, col_espaco, col_graf, _ = st.columns([0.8, 2, 0.3, 2, 0.8])
+_, col_gastos, col_espaco, col_graf, _ = st.columns([0.8, 2, 0.8, 2, 0.8])
 
 with col_gastos:
     st.markdown('<div class="card-cartao-small"><b>Total a pagar:</b> R$ 1.800,00</div>', unsafe_allow_html=True)
@@ -130,6 +130,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=180, color="#000000")
+
 
 
 
