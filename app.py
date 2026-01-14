@@ -18,16 +18,19 @@ st.markdown("""
     </script>
 
     <style>
-    /* 1. SOBE O CONTEÚDO AO MÁXIMO (Diminui espaço do Painel Inicial) */
+    /* 1. CONFIGURAÇÃO DO TOPO (Ajustado para não cortar) */
     .block-container {
-        padding-top: 0rem !important;
-        margin-top: -40px !important; /* Ajuste aqui para subir ainda mais */
-    
-    /* 2. REMOVE ELEMENTOS NATIVOS */
-    header, footer, .stDeployButton {visibility: hidden; display: none !important;}
+        padding-top: 1rem !important; 
+        margin-top: -20px !important; 
     }
 
-    /* 3. CARDS COLORIDOS (Ajuste de Tamanho aqui) */
+    /* 2. REMOVE ELEMENTOS NATIVOS */
+    header, footer, .stDeployButton {
+        visibility: hidden; 
+        display: none !important;
+    }
+
+    /* 3. CARDS COLORIDOS */
     .card {
         padding: 20px;       /* Altura interna */
         font-size: 18px;     /* Tamanho da letra */
@@ -41,8 +44,8 @@ st.markdown("""
 
     /* 4. CARDS DE DESPESA/CARTÃO */
     .card-cartao-small {
-        padding: 8px 5px;   /* Primeiro número muda a altura */
-        font-size: 14px;     /* Letra da lista */
+        padding: 8px 5px;   
+        font-size: 14px;     
         background-color: #F8FAFC;
         border: 1px solid #CBD5E1;
         border-radius: 8px;
@@ -57,8 +60,7 @@ st.markdown("""
 
     .barra-preta-fina {
         border-bottom: 2px solid #000000;
-        margin: 10px 0 20px 0;
- 
+        margin: 5px 0 15px 0;
     }
 
     /* 6. CORES DOS GRADIENTES */
@@ -66,23 +68,17 @@ st.markdown("""
     .despesa { background: linear-gradient(135deg, #dc3545 0%, #ff4b5c 100%); }
     .saldo   { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); }
 
-    /* CONFIGURA A ALTURA DO PAINEL INICIAL (Cabeçalho) */
-    .block-container {
-        padding-top: 1.3rem !important; /* Quanto menor, mais alto o título fica */
-        margin-top: -40px !important; /* Ajuste aqui (ex: -50px) para subir ainda mais */
-    }
-
-    /* ESPAÇO ENTRE 'MÊS' E A CAIXA DE SELEÇÃO */
+    /* 7. FILTROS (Mês e Ano) */
     .label-filtro {
         font-weight: bold;
-        margin-bottom: -30px !important; /* Aumente para -30px se quiser mais perto */
+        margin-bottom: -25px !important; 
         font-size: 14px;
         color: #000000;
+        display: block;
     }
 
-    /* REMOVE O ESPAÇO EXTRA QUE O STREAMLIT COLOCA EM VOLTA DOS SELECTS */
     div[data-testid="stSelectbox"] {
-        margin-top: -10px !important; /* Sobe a caixa em direção ao texto 'Mês' */
+        margin-top: -5px !important;
     }
     
     </style>
@@ -173,6 +169,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
