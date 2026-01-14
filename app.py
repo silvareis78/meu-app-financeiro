@@ -52,7 +52,7 @@ st.markdown("""
     }
 
     .espacamento-secao {
-        margin-top: 70px; /* AJUSTE AQUI O ESPAÇO ENTRE A LINHA GROSSA E A FINA */
+        margin-top: 20px; /* AJUSTE AQUI O ESPAÇO ENTRE A LINHA GROSSA E A FINA */
     }
 
     h3 { margin-bottom: 0px !important; } /* Tira espaço abaixo do título Despesa */
@@ -107,6 +107,7 @@ with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200) # Ajuste o HEIGHT para mudar altura do gráfico
     
+
 
 
 
