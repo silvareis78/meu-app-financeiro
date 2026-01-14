@@ -21,7 +21,7 @@ st.markdown("""
     /* 1. SOBE O CONTEÚDO AO MÁXIMO (Diminui espaço do Painel Inicial) */
     .block-container {
         padding-top: 0rem !important;
-        margin-top: -20px !important; /* Ajuste aqui para subir ainda mais */
+        margin-top: -40px !important; /* Ajuste aqui para subir ainda mais */
     }
 
     /* 2. REMOVE ELEMENTOS NATIVOS */
@@ -173,6 +173,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
