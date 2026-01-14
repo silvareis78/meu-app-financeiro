@@ -3,27 +3,35 @@ import streamlit as st
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Meu App Financeiro", layout="centered", initial_sidebar_state="collapsed")
 
-# 2. CSS "FORÇA BRUTA" PARA SUMIR COM TUDO
+# 2. CSS "MODO INVISÍVEL" + JAVASCRIPT PARA REMOVER BOTÕES TEIMOSOS
 st.markdown("""
+    <script>
+    // Função para remover os botões chatos do Streamlit no celular
+    function fecharBotoes() {
+        const botoes = document.querySelectorAll('button[title="Manage app"], .stActionButton, .stDeployButton, footer, #MainMenu, header');
+        botoes.forEach(el => el.remove());
+        
+        // Remove indicadores de status no canto inferior
+        const status = document.querySelectorAll('[data-testid="stStatusWidget"]');
+        status.forEach(el => el.remove());
+    }
+    // Executa a cada meio segundo para garantir que eles não voltem
+    setInterval(fecharBotoes, 500);
+    </script>
+
     <style>
-    /* 1. Remove Header, Footer e Menu */
-    header, footer, #MainMenu {visibility: hidden !important; display: none !important;}
-    
-    /* 2. Ataca os botões flutuantes do canto inferior (Manage App, Deploy, etc) */
-    .stDeployButton, .stActionButton, .stStatusWidget {display: none !important;}
-    
-    /* 3. Seletores específicos para as versões mobile do Streamlit Cloud */
-    [data-testid="stStatusWidget"], 
-    [data-testid="manage-app-button"], 
-    [data-testid="stActionButton"] {
+    /* Esconder tudo que for do Streamlit */
+    header, footer, #MainMenu, .stDeployButton, .stActionButton {
         display: none !important;
         visibility: hidden !important;
     }
-
-    /* 4. Remove qualquer elemento flutuante no canto inferior direito */
-    div[class^="st-emotion-cache-"] button { display: none !important; }
-    iframe[title="Manage app"] { display: none !important; }
     
+    /* Tenta esconder o container dos botões no celular */
+    div[data-testid="stStatusWidget"], 
+    [data-testid="manage-app-button"] {
+        display: none !important;
+    }
+
     /* Centralização do Login */
     .block-container {
         padding-top: 0rem;
@@ -51,6 +59,12 @@ st.markdown("""
         border-radius: 12px;
         font-weight: bold;
     }
+    
+    /* Remove bordas de foco que aparecem no mobile */
+    input:focus {
+        outline: none !important;
+        border: 2px solid #20B2AA !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -59,7 +73,7 @@ if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
 if not st.session_state.logged_in:
-    _, col_central, _ = st.columns([0.1, 0.8, 0.1])
+    _, col_central, _ = st.columns([0.05, 0.9, 0.05])
     
     with col_central:
         st.markdown('<p class="logo-text">Meu App Financeiro</p>', unsafe_allow_html=True)
@@ -71,15 +85,20 @@ if not st.session_state.logged_in:
                 st.session_state.logged_in = True
                 st.rerun()
             else:
-                st.error("Dados incorretos.")
+                st.error("Senha ou e-mail incorretos.")
     st.stop()
 
+# ---------------------------------------------------------
 # CONTEÚDO PÓS-LOGIN
+# ---------------------------------------------------------
 st.title("Olá, Robson!")
+st.write("Estamos dentro!")
+
 if st.button("Sair"):
     st.session_state.logged_in = False
     st.rerun()
     
+
 
 
 
