@@ -30,6 +30,8 @@ st.markdown("""
         font-weight: bold;
         text-align: center;
         margin-bottom: 10px;
+        margin-left: 40px;   /* Espaço na esquerda */
+        margin-right: 40px;  /* Espaço na direita */
         line-height: 1.2;    /* Deixa o texto e o valor mais próximos */
     }
     .receita { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
@@ -81,7 +83,7 @@ st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 st.markdown('<div class="espaco-topo"></div>', unsafe_allow_html=True)
 
 # Usei colunas vazias nas pontas [2, 1.5, 1.2, 0.8, 0.8, 2] para encurtar os seletores
-_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([0.2, 1.5, 1, 1, 0.8, 0.2])
+_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([1, 1.5, 1, 1, 0.8, 1])
 
 with col_avatar:
     st.markdown("""
@@ -106,7 +108,7 @@ with col_ano:
 _, col_cards_corpo, _ = st.columns([1.5, 4, 1.5]) 
 
 with col_cards_corpo:
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3 = st.columns(3, gap="large")
     c1.markdown('<div class="card receita">Receita<br>R$ 5.000,00</div>', unsafe_allow_html=True)
     c2.markdown('<div class="card despesa">Despesa<br>R$ 2.450,00</div>', unsafe_allow_html=True)
     c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_html=True)
@@ -128,6 +130,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=180, color="#000000")
+
 
 
 
