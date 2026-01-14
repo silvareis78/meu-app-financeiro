@@ -15,63 +15,45 @@ st.markdown("""
     </script>
 
     <style>
+    /* 1. CONFIGURAÇÃO GERAL */
     .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
-    header, footer, .stDeployButton { visibility: hidden; display: none !important; }
+    header, footer { visibility: hidden; display: none !important; }
 
-    /* --- ESPAÇAMENTO DO TOPO --- */
-    .espaco-topo { margin-top: 25px; } /* Desce o Avatar e Filtros da linha grossa */
-
-    /* --- CARDS PRINCIPAIS (Receita/Despesa/Saldo) --- */
+    /* 2. CARDS IGUAIS À FOTO (Texto e Valor bem próximos) */
     .card {
-        padding: 10px;       /* APROXIMA o nome do valor (diminui altura interna) */
-        font-size: 15px;     
-        border-radius: 10px;
+        padding: 5px 10px !important; 
+        font-size: 13px !important;   /* Letra menor para caber tudo na linha */
+        border-radius: 5px;
         color: white !important;
         font-weight: bold;
         text-align: center;
-        margin-bottom: 10px;
-        margin-left: 40px;   /* Espaço na esquerda */
-        margin-right: 40px;  /* Espaço na direita */
-        line-height: 1.2;    /* Deixa o texto e o valor mais próximos */
+        line-height: 1.1 !important;  /* COLA o nome no valor */
     }
-    .receita { background: linear-gradient(135deg, #28a745 0%, #20c997 100%); }
-    .despesa { background: linear-gradient(135deg, #dc3545 0%, #ff4b5c 100%); }
-    .saldo   { background: linear-gradient(135deg, #007bff 0%, #6610f2 100%); }
+    /* CORES DA FOTO */
+    .receita { background-color: #008080; } 
+    .despesa { background-color: #B22222; } 
+    .saldo   { background-color: #DAA520; } 
 
-    /* --- CARDS DE DESPESA (Lista) --- */
-    .card-cartao-small {
-        padding: 8px 12px;   /* Card mais justo */
-        font-size: 13px;
-        background-color: #F8FAFC;
-        border: 1px solid #CBD5E1;
-        border-radius: 6px;
-        margin-bottom: 5px;
-    }
+    /* 3. DIMINUI O TAMANHO DOS SELETORES (Mês/Ano) */
+    div[data-testid="stSelectbox"] { margin-top: -15px !important; }
+    div[data-baseweb="select"] { height: 35px !important; min-height: 35px !important; }
 
-    /* --- BARRAS --- */
-    .barra-preta-grossa { border-bottom: 6px solid #000000; }
-    
-    .barra-preta-fina { 
-        border-bottom: 2px solid #000000; 
-        margin-top: -8px !important; /* TEXTO DESPESA COLADO NA LINHA */
-        margin-bottom: 20px; 
-    }
-
-    .espacamento-secao { margin-top: 40px; }
-
-    /* TEXTO MÊS/ANO */
-    .label-custom {
-        font-weight: bold;
-        font-size: 13px;
-        margin-bottom: -32px; 
-        display: block;
+    /* 4. AVATAR E FRASE LATERAL */
+    .avatar-container {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 11px;
+        line-height: 1.2;
+        margin-top: -5px;
     }
     </style>
     """, unsafe_allow_html=True)
 
 # --- CABEÇALHO ---
 t1, t2 = st.columns([5, 1])
-with t1: st.markdown("## 🏠 Painel Inicial")
+with t1: 
+    st.markdown("## 🏠 Painel Inicial")
 with t2: 
     if st.button("Sair"):
         st.session_state.logged_in = False
@@ -79,48 +61,47 @@ with t2:
 
 st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 
-# --- LINHA DO AVATAR E FILTROS (MAIS BAIXO E CURTO) ---
-st.markdown('<div class="espaco-topo"></div>', unsafe_allow_html=True)
+# --- LINHA ÚNICA (REPLICANDO A FOTO) ---
+# [Filtros, Receita, Despesa, Saldo, Avatar]
+# AJUSTE DE LARGURA: Altere os números abaixo para encurtar ou esticar cada item
+col_filtro, col_rec, col_desp, col_sal, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 2.5])
 
-# Usei colunas vazias nas pontas [2, 1.5, 1.2, 0.8, 0.8, 2] para encurtar os seletores
-_, col_avatar, col_vazia, col_mes, col_ano, _ = st.columns([1, 1.5, 1, 1, 0.8, 1])
+with col_filtro:
+    # Mês e Ano bem compactos
+    st.selectbox("", ["AGOSTO"], key="mes_f", label_visibility="collapsed")
+    st.selectbox("", ["2024"], key="ano_f", label_visibility="collapsed")
 
-with col_avatar:
+with col_rec:
+    # Card de Receita (Verde Água)
+    st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
+
+with col_desp:
+    # Card de Despesa (Vermelho)
+    st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+
+with col_sal:
+    # Card de Saldo (Amarelo/Ouro)
+    st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+
+with col_ava:
+    # Avatar e frase lateral colados nos cards
     st.markdown("""
-        <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="avatar-container">
             <img src="https://www.w3schools.com/howto/img_avatar.png" width="35" style="border-radius: 50%;">
-            <span style="font-size: 11px; font-weight: bold;">Gasto: 49%</span>
+            <div>Opa! Você gastou <b>49%</b> do que recebeu!</div>
         </div>
     """, unsafe_allow_html=True)
     st.progress(0.49)
 
-with col_mes:
-    st.markdown('<span class="label-custom">Mês</span>', unsafe_allow_html=True)
-    st.selectbox("", ["JANEIRO", "FEVEREIRO", "MARÇO"], key="mes_dash", label_visibility="collapsed")
 
-with col_ano:
-    st.markdown('<span class="label-custom">Ano</span>', unsafe_allow_html=True)
-    st.selectbox("", ["2026", "2027"], key="ano_dash", label_visibility="collapsed")
-
-
-# --- CARDS PRINCIPAIS (CURTOS E CENTRALIZADOS) ---
-# Aumentei as colunas vazias [2, 4, 2] para os cards ficarem estreitos
-_, col_cards_corpo, _ = st.columns([1.5, 4, 1.5]) 
-
-with col_cards_corpo:
-    c1, c2, c3 = st.columns(3, gap="large")
-    c1.markdown('<div class="card receita">Receita<br>R$ 5.000,00</div>', unsafe_allow_html=True)
-    c2.markdown('<div class="card despesa">Despesa<br>R$ 2.450,00</div>', unsafe_allow_html=True)
-    c3.markdown('<div class="card saldo">Saldo<br>R$ 2.550,00</div>', unsafe_allow_html=True)
-
-
-# --- SEÇÃO DE DESPESAS ---
+# --- SEÇÃO DE DESPESAS (PARTE DE BAIXO) ---
 st.markdown('<div class="espacamento-secao"></div>', unsafe_allow_html=True)
 st.markdown("<h3 style='font-size: 18px;'>DESPESA</h3>", unsafe_allow_html=True)
 st.markdown('<div class="barra-preta-fina"></div>', unsafe_allow_html=True)
 
-# Encurtei os cards de baixo também com colunas vazias
-_, col_gastos, col_espaco, col_graf, _ = st.columns([0.8, 2, 0.8, 2, 0.8])
+# Layout de duas colunas para as contas e o gráfico
+# [Cards de Contas, Espaço, Gráfico]
+col_gastos, col_espaco, col_graf = st.columns([2, 0.5, 2])
 
 with col_gastos:
     st.markdown('<div class="card-cartao-small"><b>Total a pagar:</b> R$ 1.800,00</div>', unsafe_allow_html=True)
@@ -129,7 +110,8 @@ with col_gastos:
 
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
-    st.bar_chart(chart_data.set_index('Cat'), height=180, color="#000000")
+    st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
