@@ -26,6 +26,7 @@ st.markdown("""
 
     /* 2. REMOVE ELEMENTOS NATIVOS */
     header, footer, .stDeployButton {visibility: hidden; display: none !important;}
+    }
 
     /* 3. CARDS COLORIDOS (Ajuste de Tamanho aqui) */
     .card {
@@ -173,6 +174,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
