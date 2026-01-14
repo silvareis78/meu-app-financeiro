@@ -92,7 +92,7 @@ if not st.session_state.logged_in:
 # Cabeçalho no topo máximo
 topo_esq, topo_dir = st.columns([5, 1])
 with topo_esq:
-    st.markdown("<h2 style='margin-top: 0.5px;'>🏠 Painel Inicial</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='margin-top: 1px;'>🏠 Painel Inicial</h2>", unsafe_allow_html=True)
 with topo_dir:
     if st.button("Sair"):
         st.session_state.logged_in = False
@@ -154,6 +154,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
