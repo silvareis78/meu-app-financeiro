@@ -51,7 +51,7 @@ st.markdown("""
     .card-cartao-small {
         background-color: #F8FAFC;
         border: 1px solid #CBD5E1;
-        padding: 8px 15px;
+        padding: 8px 10px;
         border-radius: 8px;
         margin-bottom: 8px;
         font-size: 14px;
@@ -151,6 +151,7 @@ with st.sidebar:
     st.button("Dashboard", use_container_width=True)
     st.button("Lançamentos", use_container_width=True)
     
+
 
 
 
