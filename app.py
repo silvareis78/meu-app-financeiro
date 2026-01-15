@@ -155,38 +155,51 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 1. FUNÇÃO DO FORMULÁRIO (DEVE FICAR NO TOPO) ---
+# --- FUNÇÃO ATUALIZADA: FORMULÁRIO DE DESPESA (TOPO DO SCRIPT) ---
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
-    # 'categoria_nome' recebe o nome do botão que você clicou
     with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
         st.subheader(f"Categoria: {categoria_nome}")
         
         desc = st.text_input("Descrição da Despesa")
         
-        # [1, 3] -> O 3 controla a largura da caixa de seleção
+        # --- LINHA 1: TIPO E PARCELAS ---
+        col_tipo, col_parc = st.columns([2, 1])
+        with col_tipo:
+            tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"], key=f"t_d_{categoria_nome}")
+        with col_parc:
+            # Se for 1, é à vista. Se for maior que 1, o sistema tratará como parcelado.
+            parcelas = st.number_input("Qtde Parcelas", min_value=1, max_value=48, value=1, key=f"p_d_{categoria_nome}")
+        
+        # --- LINHA 2: VALOR E FORMA ---
         c1, c2 = st.columns([1, 3])
         with c1:
-            valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f")
+            valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f", key=f"v_d_{categoria_nome}")
         with c2:
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"])
+            forma_selecionada = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"], key=f"f_d_{categoria_nome}")
         
-        data_l = st.date_input("Data", format="DD/MM/YYYY")
+        data_l = st.date_input("Data da Compra", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
         
         st.markdown("---")
         
-        # Botão Salvar: Cor configurada no Item 13 do seu CSS
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
+            # Busca os detalhes da forma de pagamento para aplicar a regra do cartão depois
+            detalhes_pagto = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_selecionada), None)
+            
             novo_item = {
                 "Categoria": categoria_nome,
                 "Descrição": desc,
+                "Tipo": tipo_desp,
+                "Parcelas": parcelas,
                 "Valor": valor,
-                "Pagamento": forma,
-                "Data": data_l.strftime("%d/%m/%Y")
+                "Pagamento": forma_selecionada,
+                "Data": data_l.strftime("%d/%m/%Y"),
+                "Info_Pagto": detalhes_pagto # Guarda fechamento/vencimento para o cálculo
             }
+            
             st.session_state.despesas.append(novo_item)
-            st.success(f"Lançamento em {categoria_nome} realizado!")
+            st.success(f"Lançamento de {categoria_nome} ({tipo_desp}) salvo!")
             st.rerun()
 
 # --- FUNÇÃO DO FORMULÁRIO DE RECEITA (TOPO DO SCRIPT) ---
@@ -393,6 +406,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
