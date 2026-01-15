@@ -50,9 +50,18 @@ st.markdown("""
         margin-top: 10px !important;
         display: block !important;
         width: 100% !important;
+
+   /* 5. SEGUNDA BARRA COM AFASTAMENTO DE 3CM */
+    .barra-afastada {
+        border-bottom: 6px solid #000000 !important; /* Mesma espessura da primeira */
+        width: 100% !important;
+        margin-top: 115px !important; /* Isso equivale a +- 3 centímetros */
+        margin-bottom: 20px !important;
+        display: block !important;
+       
     }
 
-    /* 5. CAIXA DE COMBINAÇÃO (SELECTBOX) - CORRIGIDO */
+    /* 6. CAIXA DE COMBINAÇÃO (SELECTBOX) - CORRIGIDO */
     
     /* Estilo do nome 'Mês' e 'Ano' (Rótulo) */
     [data-testid="stWidgetLabel"] p {
@@ -126,7 +135,9 @@ with col_filtro:
     # Certifique-se de que estas linhas abaixo tenham exatamente o mesmo alinhamento
     st.selectbox("Mês", meses, index=7, key="combo_mes")
     st.selectbox("Ano", ["2024", "2025", "2026"], index=0, key="combo_ano")
-   
+
+st.markdown('<div class="barra-afastada"></div>', unsafe_allow_html=True)
+
 with col_rec:
     # Card de Receita (Verde Água)
     st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
@@ -167,6 +178,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
