@@ -187,12 +187,19 @@ with st.sidebar:
     selecionado = st.radio(
         "Selecione a tela:",
         options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
-        key="menu_principal" # Adicionei uma chave para o controle interno
+        key="menu_mobile" # Chave para o Streamlit identificar a mudança
     )
     
-    # --- ESTA É A LINHA QUE FAZ O MENU SUMIR AUTOMATICAMENTE ---
-    # Ela chama a função 'recolherMenu' que está lá no seu script lá em cima
-    st.components.v1.html(f"<script>window.parent.recolherMenu();</script>", height=0)
+    # --- COMANDO OBRIGATÓRIO PARA FECHAR NO CELULAR ---
+    # Este componente invisível dispara o fechamento toda vez que você seleciona uma tela
+    st.components.v1.html(
+        f"""
+        <script>
+            window.parent.recolherMenu();
+        </script>
+        """,
+        height=0,
+    )
 
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -237,6 +244,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
