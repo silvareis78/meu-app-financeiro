@@ -6,12 +6,22 @@ st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout l
 # 2. CSS CUSTOMIZADO
 st.markdown("""
     <script>
+    // Função para limpar botões administrativos
     function fecharBotoes() {
-        // Remove elementos administrativos do Streamlit para limpar o visual
         const botoes = document.querySelectorAll('button[title="Manage app"], .stActionButton, .stDeployButton, footer, #MainMenu, header');
         botoes.forEach(el => el.remove());
     }
-    setInterval(fecharBotoes, 500); // Executa a função a cada 500ms
+    
+    // FUNÇÃO NOVA: Fecha o menu lateral automaticamente
+    function recolherMenu() {
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const botaoFechar = window.parent.document.querySelector('button[kind="headerNoContext"]');
+        if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
+            botaoFechar.click();
+        }
+    }
+
+    setInterval(fecharBotoes, 500);
     </script>
 
     <style>
@@ -122,30 +132,31 @@ st.markdown("""
         color: #1E293B;                               /* Cor padrão para parágrafos Markdown */
     }
 
-    /* 5. MENU LATERAL (Ajuste de fonte) */
+    /* 9. Garante que o botão de abrir o menu (setinha/barras) sempre esteja visível e preto */
+    button[kind="headerNoContext"] {
+        display: flex !important;
+        visibility: visible !important;
+        color: black !important;
+        background-color: transparent !important;
+    } 
+    /* 10. MENU LATERAL (Ajuste de fonte) */
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
     </style>
     """, unsafe_allow_html=True)
 
-# 3. MENU LATERAL (ESTRUTURA DAS 3 BARRAS)
+# 3. MENU LATERAL
 with st.sidebar:
-    st.markdown("## ☰ Navegação") # Título com o ícone de 3 barras
-    st.divider() # Linha divisória
-    
-    # Cria o menu de seleção por rádio (mais limpo que o combobox)
+    st.markdown("## ☰ Navegação")
+    st.divider()
     selecionado = st.radio(
         "Selecione a tela:",
-        options=[
-            "Painel Inicial", 
-            "Despesa", 
-            "Receita", 
-            "Cartões", 
-            "Cadastros Iniciais", 
-            "Configurações"
-        ],
-        index=0 # Define 'Painel Inicial' como padrão
+        options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"]
     )
+    
+    # Este comando avisa ao JavaScript para fechar o menu
+    if selecionado:
+        st.components.v1.html("<script>window.parent.recolherMenu();</script>", height=0)
 
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -190,6 +201,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
