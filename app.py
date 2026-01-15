@@ -218,32 +218,38 @@ def modal_despesa():
         desc = st.text_input("Descrição")
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
-        # Proporção balanceada para alinhar e dar espaço
+        # Criando as colunas: 1 parte para o valor e 4 partes para a forma
         col_v, col_f = st.columns([1, 4]) 
         
-        # Valor - O CSS acima vai tirar o +/-
+        # Note que o 'valor' e a 'forma_s' estão exatamente embaixo um do outro
         valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
         
-        # Forma de Pagamento - Agora com espaço lateral maior
-       forma_s = col_f.selectbox("Forma de Pagamento", options=["Dinheiro", "Cartão", "Pix"])
+        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
         st.markdown("---")
+        
         col_parc, col_data = st.columns(2)
         info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
         
         parcelas = 1
-        if info_f and info_f.get('tipo') == "Cartão de Crédito":
+        if info_f and "cartão" in str(info_f.get('tipo', '')).lower():
             parcelas = col_parc.number_input("Parcelas", 1, 12, 1, step=1)
         
         data_l = col_data.date_input("Data de Lançamento", format="DD/MM/YYYY")
         
         if st.form_submit_button("Salvar Despesa", use_container_width=True):
             st.session_state.despesas.append({
-                "desc": desc, "tipo_desp": tipo_desp, "valor": valor, 
-                "forma": forma_s, "data": data_l, "vencimento": data_l, "parcelas": parcelas
+                "desc": desc, 
+                "tipo_desp": tipo_desp, 
+                "valor": valor, 
+                "forma": forma_s, 
+                "data": data_l, 
+                "vencimento": data_l, 
+                "parcelas": parcelas
             })
             st.rerun()
-
+            
 @st.dialog("💰 Inserir Nova Receita")
 def modal_receita():
     with st.form("form_rec", clear_on_submit=True):
@@ -384,6 +390,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
