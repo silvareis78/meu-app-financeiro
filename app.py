@@ -63,7 +63,7 @@ st.markdown("""
     .barra-afastada {
         border-bottom: 6px solid #000000 !important; /* Mesma espessura da primeira */
         width: 100% !important;
-        margin-top: 85px !important; /* Isso equivale a +- 3 centímetros */
+        margin-top: 70px !important; /* Isso equivale a +- 3 centímetros */
         margin-bottom: 20px !important;
         display: block !important;
 
@@ -192,6 +192,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
