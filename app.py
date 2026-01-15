@@ -21,7 +21,7 @@ st.markdown("""
 
     /* 2. CARDS IGUAIS À FOTO */
     .card {
-        padding: 5px 10px !important; 
+        padding: 10px 15px !important; 
         font-size: 13px !important;
         border-radius: 5px;
         color: white !important;
@@ -45,7 +45,7 @@ st.markdown("""
         font-size: 11px;
         line-height: 1.2;
         margin-top: -5px;
-    } /* AQUI ESTAVA FALTANDO ESSA CHAVE PARA FECHAR */
+    } 
 
     /* 5. ESTILO DA BARRA GROSSA */
     .barra-preta-grossa {
@@ -119,6 +119,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
