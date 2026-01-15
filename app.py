@@ -197,7 +197,74 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. MENU LATERAL ---
+# --- 3.FUNÇÕES PARA OS FORMULÁRIOS SUSPENSOS ---
+
+@st.dialog("➕ Inserir Nova Despesa")
+def modal_despesa():
+    with st.form("form_desp", clear_on_submit=True):
+        desc = st.text_input("Descrição")
+        col_v, col_f = st.columns(2)
+        valor = col_v.number_input("Valor", min_value=0.0, format="%.2f")
+        
+        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        
+        info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
+        parcelas = 1
+        if info_f and info_f['tipo'] == "Cartão de Crédito":
+            parcelas = st.number_input("Número de Parcelas", 1, 12, 1)
+        
+        data_l = st.date_input("Data de Lançamento")
+        
+        if st.form_submit_button("Salvar Despesa"):
+            data_venc = data_l
+            if info_f and info_f['tipo'] == "Cartão de Crédito":
+                if data_l.day >= info_f['fechamento']:
+                    prox_mes = data_l.month % 12 + 1
+                    ano_v = data_l.year + (1 if data_l.month == 12 else 0)
+                    data_venc = datetime(ano_v, prox_mes, info_f['vencimento']).date()
+                else:
+                    data_venc = datetime(data_l.year, data_l.month, info_f['vencimento']).date()
+
+            st.session_state.despesas.append({
+                "desc": desc, "valor": valor, "forma": forma_s, 
+                "data": data_l, "vencimento": data_venc, "parcelas": parcelas
+            })
+            st.rerun()
+
+@st.dialog("💰 Inserir Nova Receita")
+def modal_receita():
+    with st.form("form_rec", clear_on_submit=True):
+        desc_r = st.text_input("Descrição")
+        valor_r = st.number_input("Valor", min_value=0.0, format="%.2f")
+        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_r = st.selectbox("Forma de Recebimento", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        data_r = st.date_input("Data")
+        
+        if st.form_submit_button("Salvar Receita"):
+            st.session_state.receitas.append({
+                "desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r
+            })
+            st.rerun()
+
+@st.dialog("💳 Cadastrar Forma de Pagamento")
+def modal_pagamento():
+    with st.form("form_pagto", clear_on_submit=True):
+        nome_f = st.text_input("Nome (ex: Cartão NuBank)")
+        tipo_f = st.selectbox("Tipo", ["Dinheiro/PIX", "Cartão de Crédito", "Débito"])
+        
+        c1, c2 = st.columns(2)
+        fechamento = c1.number_input("Dia do Fechamento", 1, 31, 1)
+        vencimento = c2.number_input("Dia do Vencimento", 1, 31, 10)
+        
+        if st.form_submit_button("Salvar Forma"):
+            st.session_state.formas_pagamento.append({
+                "nome": nome_f, "tipo": tipo_f, 
+                "fechamento": fechamento, "vencimento": vencimento
+            })
+            st.rerun()
+            
+# --- 4. MENU LATERAL ---
 with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
@@ -256,99 +323,22 @@ elif selecionado == "Receita":
 elif selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Gestão de Cadastros")
 
-    # Cria 3 colunas para os botões ficarem um ao lado do outro
+    # Botões lado a lado
     col_btn1, col_btn2, col_btn3 = st.columns(3)
 
-    # Botão 1: Despesa
     if col_btn1.button("➕ Inserir Despesa", use_container_width=True):
-        st.session_state.aba_ativa = "despesa"
+        modal_despesa()
 
-    # Botão 2: Receita
     if col_btn2.button("💰 Inserir Receita", use_container_width=True):
-        st.session_state.aba_ativa = "receita"
+        modal_receita()
 
-    # Botão 3: Forma de Pagto
     if col_btn3.button("💳 Forma de Pagamento", use_container_width=True):
-        st.session_state.aba_ativa = "pagamento"
+        modal_pagamento()
 
-    st.divider()
-
-    # --- 1. FORMULÁRIO FORMA DE PAGAMENTO ---
-    if st.session_state.get('aba_ativa') == "pagamento":
-        with st.form("form_pagto", clear_on_submit=True):
-            st.subheader("Cadastrar Forma de Pagamento")
-            nome_f = st.text_input("Nome da Forma de Pagamento (ex: Cartão NuBank)")
-            tipo_f = st.selectbox("Tipo", ["Dinheiro/PIX", "Cartão de Crédito", "Débito"])
-            
-            c1, c2 = st.columns(2)
-            fechamento = c1.number_input("Dia do Fechamento", 1, 31, 1)
-            vencimento = c2.number_input("Dia do Vencimento", 1, 31, 10)
-            
-            if st.form_submit_button("Salvar Forma"):
-                st.session_state.formas_pagamento.append({
-                    "nome": nome_f, "tipo": tipo_f, 
-                    "fechamento": fechamento, "vencimento": vencimento
-                })
-                st.success("Forma salva!")
-
-    # --- 2. FORMULÁRIO DESPESA ---
-    if st.session_state.get('aba_ativa') == "despesa":
-        with st.form("form_desp", clear_on_submit=True):
-            st.subheader("Inserir Nova Despesa")
-            desc = st.text_input("Descrição")
-            col_v, col_f = st.columns(2)
-            valor = col_v.number_input("Valor", min_value=0.0, format="%.2f")
-            
-            opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
-            
-            # Busca infos da forma para ver se é cartão
-            info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
-            parcelas = 1
-            if info_f and info_f['tipo'] == "Cartão de Crédito":
-                parcelas = st.number_input("Número de Parcelas", 1, 12, 1)
-            
-            data_l = st.date_input("Data de Lançamento")
-            
-            if st.form_submit_button("Salvar Despesa"):
-                # Regra de data para Cartão
-                data_venc = data_l
-                if info_f and info_f['tipo'] == "Cartão de Crédito":
-                    if data_l.day >= info_f['fechamento']:
-                        # Mes seguinte
-                        prox_mes = data_l.month % 12 + 1
-                        ano_v = data_l.year + (1 if data_l.month == 12 else 0)
-                        data_venc = datetime(ano_v, prox_mes, info_f['vencimento']).date()
-                    else:
-                        data_venc = datetime(data_l.year, data_l.month, info_f['vencimento']).date()
-
-                st.session_state.despesas.append({
-                    "desc": desc, "valor": valor, "forma": forma_s, 
-                    "data": data_l, "vencimento": data_venc, "parcelas": parcelas
-                })
-                st.success("Despesa salva!")
-
-    # --- 3. FORMULÁRIO RECEITA ---
-    if st.session_state.get('aba_ativa') == "receita":
-        with st.form("form_rec", clear_on_submit=True):
-            st.subheader("Inserir Nova Receita")
-            desc_r = st.text_input("Descrição")
-            valor_r = st.number_input("Valor", min_value=0.0, format="%.2f")
-            opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma_r = st.selectbox("Forma de Recebimento", options=opcoes_f if opcoes_f else ["Dinheiro"])
-            data_r = st.date_input("Data")
-            
-            if st.form_submit_button("Salvar Receita"):
-                st.session_state.receitas.append({
-                    "desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r
-                })
-                st.success("Receita salva!")
-
-    # --- EXIBIÇÃO DOS CARDS (Sempre visíveis abaixo) ---
     st.divider()
     st.write("### 📋 Lançamentos Recentes")
     
-    # Exemplo de card para despesas usando seu CSS
+    # Exibição dos Cards embaixo (Mantendo seu estilo)
     for d in reversed(st.session_state.despesas):
         st.markdown(f"""
             <div class="card-vertical card-despesa" style="background-color: #B22222; margin-bottom:10px;">
@@ -357,6 +347,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
