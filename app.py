@@ -50,13 +50,13 @@ st.markdown("""
         padding: 12px 25px !important;          /* Aumentando o 2º valor, você ganha respiro lateral */
 
         /* --- AJUSTE DE LARGURA --- */
-        width: 200px !important;                /* Aumente este valor para o card ficar mais largo */
+        width: 250px !important;                /* Aumente este valor para o card ficar mais largo */
 
         /* --- ESTILO VISUAL --- */
         border-radius: 10px !important;         /* Bordas arredondadas */
         text-align: left !important;            /* Alinha o texto à esquerda */
         margin-bottom: 12px !important;         /* Espaço entre um card e outro */
-        font-size: 22px !important;             /* Texto levemente maior */
+        font-size: 18px !important;             /* Texto levemente maior */
         font-weight: 900 !important;            /* Negrito máximo */
         color: #FFFFFF !important;              /* Texto branco */
         box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra */
@@ -190,6 +190,7 @@ st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA: R$ 80
 st.markdown('<div class="card-vertical card-cartao"><b>NUBANK: R$ 450,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>INTER: R$ 320,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>OUTROS: R$ 150,00</b></div>', unsafe_allow_html=True)
+
 
 
 
