@@ -110,13 +110,27 @@ st.markdown("""
     }
     [data-testid="stSidebarCollapsedControl"] button { color: white !important; }
 
-    /* 12. REMOÇÃO DE BOTÕES +/- NO VALOR */
+    /* 12. REMOÇÃO TOTAL DE BOTÕES +/- E AJUSTE DE BORDA */
+    /* Remove os botões de incremento e decremento (Sinais de + e -) */
     div[data-testid="stNumberInputStepDown"], 
-    div[data-testid="stNumberInputStepUp"] {
-        display: none !important;              /* Esconde os botões de mais e menos dos campos de número */
+    div[data-testid="stNumberInputStepUp"],
+    button[data-testid="stNumberInputStepDown"],
+    button[data-testid="stNumberInputStepUp"],
+    .step-down, .step-up {
+        display: none !important; /* Esconde os botões */
     }
+
+    /* Remove o espaço extra que os botões ocupavam e centraliza o texto */
     div[data-testid="stNumberInputContainer"] input {
-        padding-right: 1rem !important;        /* Ajusta o texto dentro da caixa após sumir o +/- */
+        padding-right: 10px !important; /* Ajusta o espaço interno à direita */
+        -moz-appearance: textfield !important; /* Remove setas no Firefox */
+    }
+
+    /* Remove as setinhas padrão que o navegador às vezes coloca */
+    input::-webkit-outer-spin-button,
+    input::-webkit-inner-spin-button {
+        -webkit-appearance: none !important;
+        margin: 0 !important;
     }
 
     /* 13. ESTILO DO BOTÃO SALVAR (BOTÃO DE FORMULÁRIO) */
@@ -328,6 +342,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
