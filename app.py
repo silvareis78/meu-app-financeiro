@@ -230,29 +230,46 @@ def modal_receita_categoria(categoria_nome):
 def modal_forma_pagamento():
     with st.form(key="form_cadastro_pagamento", clear_on_submit=True):
         st.write("### Cadastrar Nova")
-        nova_f = st.text_input("Nome da Forma (Ex: Cartão Nubank)")
+        nova_f = st.text_input("Nome da Forma (Ex: Nubank)")
         
-        # Botão Salvar (Verde conforme Item 13 do seu CSS)
+        # Pergunta se é cartão para abrir as opções de data
+        tipo_forma = st.selectbox("Tipo", ["Dinheiro/Débito", "Cartão de Crédito"])
+        
+        fechamento = 0
+        vencimento = 0
+        
+        if tipo_forma == "Cartão de Crédito":
+            col1, col2 = st.columns(2)
+            with col1:
+                fechamento = st.number_input("Dia Fechamento", min_value=1, max_value=31, value=1)
+            with col2:
+                vencimento = st.number_input("Dia Vencimento", min_value=1, max_value=31, value=6)
+        
         if st.form_submit_button("Confirmar Cadastro", use_container_width=True):
             if nova_f:
                 if 'formas_pagamento' not in st.session_state:
                     st.session_state.formas_pagamento = []
-                # Salva como dicionário para facilitar expansões futuras
-                st.session_state.formas_pagamento.append({"nome": nova_f})
+                
+                # Agora salvamos também os dias de fechamento e vencimento
+                st.session_state.formas_pagamento.append({
+                    "nome": nova_f,
+                    "tipo": tipo_forma,
+                    "fechamento": fechamento,
+                    "vencimento": vencimento
+                })
                 st.success(f"'{nova_f}' cadastrada!")
                 st.rerun()
 
-    # --- ÁREA DE CORREÇÃO/VISUALIZAÇÃO ---
+    # --- LISTA PARA CORREÇÃO ---
     if st.session_state.formas_pagamento:
         st.markdown("---")
         st.write("### Formas Já Cadastradas")
         for i, item in enumerate(st.session_state.formas_pagamento):
-            col_nome, col_lixo = st.columns([4, 1])
-            with col_nome:
-                st.info(item['nome'])
-            with col_lixo:
-                # Botão para excluir caso tenha digitado errado
-                if st.button("🗑️", key=f"del_f_{i}"):
+            with st.expander(f"✅ {item['nome']}"):
+                st.write(f"Tipo: {item['tipo']}")
+                if item['tipo'] == "Cartão de Crédito":
+                    st.write(f"Fechamento: Dia {item['fechamento']} | Vencimento: Dia {item['vencimento']}")
+                if st.button("Remover", key=f"del_f_{i}"):
                     st.session_state.formas_pagamento.pop(i)
                     st.rerun()
                     
@@ -370,6 +387,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
