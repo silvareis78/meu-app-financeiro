@@ -154,7 +154,7 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
 
- /* 11. BOTÃO DE ABRIR (AS 3 BARRAS) */
+ /* 11. BOTÃO DE ABRIR (AS 3 BARRAS) - ESTILO FLUTUANTE */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
@@ -162,50 +162,53 @@ st.markdown("""
         position: fixed !important;
         top: 15px !important;
         left: 15px !important;
-        background-color: #000000 !important; /* Fundo preto */
-        border-radius: 8px !important;
-        width: 45px !important;
-        height: 45px !important;
+        background-color: #000000 !important; /* Fundo Preto */
+        border-radius: 10px !important;
+        width: 50px !important;
+        height: 50px !important;
         justify-content: center !important;
         align-items: center !important;
+        box-shadow: 0px 4px 10px rgba(0,0,0,0.3) !important;
     }
 
-    /* 12. CORREÇÃO DE SOBREPOSIÇÃO */
+    /* Garante que o ícone das 3 barras seja branco */
     [data-testid="stSidebarCollapsedControl"] button {
         color: white !important;
+        transform: scale(1.2); /* Aumenta um pouco o tamanho do ícone */
     }
 
-    /* Remove a barra cinza mas mantém o botão de abrir */
-    header[data-testid="stHeader"] {
-        background: transparent !important;
-        color: transparent !important;
+    /* 12. AJUSTE PARA O CONTEÚDO NÃO FICAR EMBAIXO DO BOTÃO NO MOBILE */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 3.5rem !important; /* Dá espaço para o botão preto não cobrir o texto */
+        }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. MENU LATERAL (SISTEMA ANTI-TRAVAMENTO MOBILE) ---
+# --- 3. MENU LATERAL ---
 with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
 
-    telas = ["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"]
+    selecionado = st.radio(
+        "Selecione a tela:",
+        options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
+        key="menu_radio"
+    )
 
-    # Verifica qual tela está na URL (isso força o fechamento no celular)
-    query_params = st.query_params
-    tela_atual = query_params.get("tela", "Painel Inicial")
-
-    for tela in telas:
-        # Estilo do botão: azul se selecionado, cinza se não
-        tipo = "primary" if tela_atual == tela else "secondary"
-        
-        if st.button(tela, use_container_width=True, type=tipo):
-            # 1. Salva a escolha
-            st.query_params["tela"] = tela
-            # 2. Força o fechamento imediato limpando o cache de renderização
-            st.rerun()
-
-    # Define a variável selecionado para o resto do seu código
-    selecionado = tela_atual
+    st.markdown("---")
+    # Botão grande para facilitar no celular
+    if st.button("✅ Aplicar e Fechar Menu", use_container_width=True):
+        # Esse comando de JavaScript é o mais potente para forçar o fechamento
+        st.components.v1.html("""
+            <script>
+            var container = window.parent.document;
+            var botao = container.querySelector('button[kind="headerNoContext"]');
+            if (botao) { botao.click(); }
+            </script>
+        """, height=0)
+        st.rerun()
     
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -250,6 +253,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
