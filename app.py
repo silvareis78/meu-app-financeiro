@@ -155,6 +155,40 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
+# --- 1. FUNÇÃO DO FORMULÁRIO (DEVE FICAR NO TOPO) ---
+@st.dialog("🚀 Novo Lançamento")
+def modal_lancamento_categoria(categoria_nome):
+    # 'categoria_nome' recebe o nome do botão que você clicou
+    with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
+        st.subheader(f"Categoria: {categoria_nome}")
+        
+        desc = st.text_input("Descrição da Despesa")
+        
+        # [1, 3] -> O 3 controla a largura da caixa de seleção
+        c1, c2 = st.columns([1, 3])
+        with c1:
+            valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f")
+        with c2:
+            opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
+            forma = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"])
+        
+        data_l = st.date_input("Data", format="DD/MM/YYYY")
+        
+        st.markdown("---")
+        
+        # Botão Salvar: Cor configurada no Item 13 do seu CSS
+        if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
+            novo_item = {
+                "Categoria": categoria_nome,
+                "Descrição": desc,
+                "Valor": valor,
+                "Pagamento": forma,
+                "Data": data_l.strftime("%d/%m/%Y")
+            }
+            st.session_state.despesas.append(novo_item)
+            st.success(f"Lançamento em {categoria_nome} realizado!")
+            st.rerun()
+
 # --- 1. NAVEGAÇÃO POR BOTÕES (SIDEBAR) ---
 st.sidebar.title("MENU PRINCIPAL") # Título do menu
 
@@ -276,6 +310,7 @@ def modal_lancamento_categoria(categoria_nome):
             st.session_state.despesas.append(novo_item)
             st.success(f"Lançamento em {categoria_nome} realizado!")
             st.rerun()
+
 
 
 
