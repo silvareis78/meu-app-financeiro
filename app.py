@@ -155,9 +155,25 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 1. DEFINIÇÃO DA NAVEGAÇÃO ---
-# Adicionamos "Cadastros Iniciais" como uma opção oficial do menu
-selecionado = st.sidebar.selectbox("Navegação", ["Painel Inicial", "Cadastros Iniciais", "Relatórios"])
+# --- 1. NAVEGAÇÃO POR BOTÕES (SIDEBAR) ---
+st.sidebar.title("MENU PRINCIPAL") # Título do menu
+
+# Criamos botões que, ao serem clicados, mudam o valor de 'selecionado' no session_state
+if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
+    st.session_state.pagina = "Painel Inicial"
+
+if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
+    st.session_state.pagina = "Cadastros Iniciais"
+
+if st.sidebar.button("📈 Relatórios", use_container_width=True):
+    st.session_state.pagina = "Relatórios"
+
+# Define um valor padrão caso o usuário tenha acabado de abrir o app
+if 'pagina' not in st.session_state:
+    st.session_state.pagina = "Painel Inicial"
+
+# Atribuímos o valor da página à variável 'selecionado' para não quebrar seus IFs abaixo
+selecionado = st.session_state.pagina
 
 # 2. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -244,6 +260,7 @@ if selecionado == "Cadastros Iniciais":
                     st.session_state.despesas.append({"Categoria": cat, "Valor": valor})
                     st.success("Dados registrados!")
                     st.rerun()
+
 
 
 
