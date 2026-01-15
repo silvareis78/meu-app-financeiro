@@ -211,55 +211,71 @@ if selecionado == "Painel Inicial":
     st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
     st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-# --- 3.TELA: CADASTROS INICIAIS ---
+# --- TELA: CADASTROS INICIAIS ---
 if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
 
-    # Colunas para organizar os botões de inserção
-    col_cat, col_forma = st.columns([1, 1])
-
-    with col_cat:
-        # Botão para criar Categorias
+    # 1. BOTÃO DE CRIAR CATEGORIA
+    # [1, 2] -> Ajuste o primeiro número se quiser o botão de inserir mais largo
+    col_btn, col_vazia = st.columns([1, 2])
+    
+    with col_btn:
         with st.popover("➕ Inserir Nova Categoria", use_container_width=True):
-            nova_cat = st.text_input("Nome da Categoria (Ex: Casa)", key="input_cat_tela")
-            if st.button("Confirmar Categoria", use_container_width=True):
+            nova_cat = st.text_input("Nome da Categoria", key="input_nova_cat_tela")
+            if st.button("Confirmar", use_container_width=True):
                 if nova_cat and nova_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(nova_cat)
                     st.rerun()
 
-    with col_forma:
-        # Botão para criar Formas de Pagamento
-        with st.popover("💳 Inserir Forma de Pagamento", use_container_width=True):
-            nova_forma = st.text_input("Nome da Forma (Ex: Nubank)", key="input_forma_tela")
-            if st.button("Confirmar Forma", use_container_width=True):
-                if nova_forma:
-                    st.session_state.formas_pagamento.append({"nome": nova_forma})
-                    st.rerun()
+    st.write("") # Espaço entre o botão de inserir e a lista de categorias
 
-    st.write("") 
-    st.markdown("### 📂 Gerenciar Lançamentos")
-    st.info("Abaixo você pode abrir cada categoria para lançar despesas.")
+    # 2. LISTA DE CATEGORIAS (BOTÕES QUE ABREM O FORMULÁRIO)
+    # Criamos a grade com 3 colunas. Mude o número 3 se quiser mais botões por linha.
+    cols = st.columns(3) 
+    
+    for i, cat in enumerate(st.session_state.categorias):
+        # O cálculo 'i % 3' organiza os botões automaticamente nas colunas
+        with cols[i % 3]:
+            # Este botão abre o formulário suspenso (Dialog)
+            if st.button(f"📁 {cat.upper()}", use_container_width=True, key=f"btn_cat_{cat}"):
+                modal_lancamento_categoria(cat)
 
-    # Loop que cria os expansores (pastas) apenas nesta tela
-    for cat in st.session_state.categorias:
-        with st.expander(f"📁 {cat.upper()}", expanded=False):
-            with st.form(key=f"form_tela_{cat}", clear_on_submit=True):
-                desc = st.text_input("Descrição", key=f"d_t_{cat}")
-                
-                # Ajuste de colunas [1, 4] para layout profissional
-                c1, c2 = st.columns([1, 4])
-                with c1:
-                    valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f", key=f"v_t_{cat}")
-                with c2:
-                    opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-                    forma = st.selectbox("Forma", options=opcoes if opcoes else ["Dinheiro"], key=f"s_t_{cat}")
-                
-                if st.form_submit_button("Salvar na Planilha", use_container_width=True):
-                    # Aqui incluiremos a função de salvar na planilha no próximo passo
-                    st.session_state.despesas.append({"Categoria": cat, "Valor": valor})
-                    st.success("Dados registrados!")
-                    st.rerun()
+# --- 3. FORMULÁRIO SUSPENSO (FORA DO IF DE NAVEGAÇÃO) ---
+# Mantenha esta função isolada para que o Streamlit a encontre corretamente
+@st.dialog("🚀 Novo Lançamento")
+def modal_lancamento_categoria(categoria_nome):
+    with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
+        st.subheader(f"Categoria: {categoria_nome}")
+        
+        desc = st.text_input("Descrição da Despesa")
+        
+        # Colunas internas: [1, 3] -> O 3 controla o tamanho da caixa de Forma de Pagamento
+        c1, c2 = st.columns([1, 3])
+        with c1:
+            # step=1.0 respeita o CSS que remove o +/-
+            valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f")
+        with c2:
+            opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
+            forma = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"])
+        
+        data_l = st.date_input("Data", format="DD/MM/YYYY")
+        
+        st.markdown("---")
+        
+        # Botão Salvar: Herda a cor definida no Item 13 do seu CSS
+        if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
+            novo_item = {
+                "Categoria": categoria_nome,
+                "Descrição": desc,
+                "Valor": valor,
+                "Pagamento": forma,
+                "Data": data_l.strftime("%d/%m/%Y")
+            }
+            # Por enquanto salvando na memória; próximo passo: PLANILHA
+            st.session_state.despesas.append(novo_item)
+            st.success(f"Lançamento em {categoria_nome} realizado!")
+            st.rerun()
 
 
 
