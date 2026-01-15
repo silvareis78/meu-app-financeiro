@@ -33,6 +33,14 @@ st.markdown("""
     .despesa { background-color: #B22222; } 
     .saldo   { background-color: #DAA520; } 
 
+     /* Novos Cards de Despesa */
+    .card-pagar { background-color: #FFEDD5; border-left: 5px solid #F97316; color: #7C2D12; }
+    .card-prevista { background-color: #F1F5F9; border-left: 5px solid #64748B; color: #1E293B; }
+    .card-cartao { background-color: #E0F2FE; border-left: 5px solid #0EA5E9; color: #0C4A6E; }
+
+    /* Espaçamento para descer cards principais */
+    .espaco-cards { margin-top: 55px !important; }
+    
     /* 3. AVATAR E FRASE (REDUZIDOS) */
     .avatar-container {
         display: flex;
@@ -177,23 +185,22 @@ with col_ava:
     st.progress(0.49)
 
 
-# --- SEÇÃO DE DESPESAS (PARTE DE BAIXO) ---
-st.markdown('<div class="espacamento-secao"></div>', unsafe_allow_html=True)
-st.markdown("<h3 style='font-size: 30px;'>DESPESA</h3>", unsafe_allow_html=True)
-st.markdown('<div class="barra-preta-fina"></div>', unsafe_allow_html=True)
+# --- 5. DETALHAMENTO DE DESPESAS (ABAIXO DA BARRA) ---
+st.markdown('<p class="titulo-secao">Detalhamento de Despesas</p>', unsafe_allow_html=True)
 
-# Layout de duas colunas para as contas e o gráfico
-# [Cards de Contas, Espaço, Gráfico]
-col_gastos, col_espaco, col_graf = st.columns([2, 0.5, 2])
+c1, c2, c3, c4, c5 = st.columns(5)
 
-with col_gastos:
-    st.markdown('<div class="card-cartao-small"><b>Total a pagar:</b> R$ 1.800,00</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-cartao-small">💳 <b>Nubank:</b> R$ 450,00</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card-cartao-small">💳 <b>Visa:</b> R$ 200,00</div>', unsafe_allow_html=True)
+with c1:
+    st.markdown('<div class="card card-pagar">DESPESA A PAGAR<br>R$ 1.200,00</div>', unsafe_allow_html=True)
+with c2:
+    st.markdown('<div class="card card-prevista">DESPESA PREVISTA<br>R$ 800,00</div>', unsafe_allow_html=True)
+with c3:
+    st.markdown('<div class="card card-cartao">NUBANK<br>R$ 450,00</div>', unsafe_allow_html=True)
+with c4:
+    st.markdown('<div class="card card-cartao">INTER<br>R$ 320,00</div>', unsafe_allow_html=True)
+with c5:
+    st.markdown('<div class="card card-cartao">OUTROS<br>R$ 150,00</div>', unsafe_allow_html=True)
 
-with col_graf:
-    chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
-    st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
 
 
 
