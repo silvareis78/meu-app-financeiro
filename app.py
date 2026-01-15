@@ -162,50 +162,50 @@ st.markdown("""
         position: fixed !important;
         top: 15px !important;
         left: 15px !important;
-        background-color: #000000 !important;
+        background-color: #000000 !important; /* Fundo preto */
         border-radius: 8px !important;
         width: 45px !important;
         height: 45px !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
 
-    /* 12. AJUSTE PARA MOBILE (FORÇAR RECOLHIMENTO) */
-    @media (max-width: 768px) {
-        /* Se o menu estiver aberto e você clicar em algo, ele perde a prioridade */
-        [data-testid="stSidebar"][aria-expanded="true"] {
-            width: 85vw !important;
-            z-index: 1000000 !important;
-        }
-        
-        /* Remove o bloqueio de tela cinza que impede o clique de fechar */
-        [data-testid="stSidebarUserContent"] {
-            padding-top: 2rem !important;
-        }
+    /* 12. CORREÇÃO DE SOBREPOSIÇÃO */
+    [data-testid="stSidebarCollapsedControl"] button {
+        color: white !important;
+    }
+
+    /* Remove a barra cinza mas mantém o botão de abrir */
+    header[data-testid="stHeader"] {
+        background: transparent !important;
+        color: transparent !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. MENU LATERAL (AÇÃO DIRETA) ---
+# --- 3. MENU LATERAL (SISTEMA ANTI-TRAVAMENTO MOBILE) ---
 with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
 
     telas = ["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"]
 
-    if 'selecionado' not in st.session_state:
-        st.session_state.selecionado = "Painel Inicial"
+    # Verifica qual tela está na URL (isso força o fechamento no celular)
+    query_params = st.query_params
+    tela_atual = query_params.get("tela", "Painel Inicial")
 
     for tela in telas:
-        if st.button(tela, use_container_width=True, type="primary" if st.session_state.selecionado == tela else "secondary"):
-            st.session_state.selecionado = tela
-            # O truque: Avisamos ao sistema que o menu deve ser recolhido
-            st.components.v1.html("""
-                <script>
-                window.parent.document.querySelector('button[kind="headerNoContext"]').click();
-                </script>
-            """, height=0)
+        # Estilo do botão: azul se selecionado, cinza se não
+        tipo = "primary" if tela_atual == tela else "secondary"
+        
+        if st.button(tela, use_container_width=True, type=tipo):
+            # 1. Salva a escolha
+            st.query_params["tela"] = tela
+            # 2. Força o fechamento imediato limpando o cache de renderização
             st.rerun()
 
-    selecionado = st.session_state.selecionado
+    # Define a variável selecionado para o resto do seu código
+    selecionado = tela_atual
     
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -250,6 +250,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
