@@ -203,8 +203,10 @@ st.markdown("""
 def modal_despesa():
     with st.form("form_desp", clear_on_submit=True):
         desc = st.text_input("Descrição")
-        col_v, col_f = st.columns(2)
-        valor = col_v.number_input("Valor", min_value=0.0, format="%.2f")
+        
+        # Ajuste de tamanho: Valor menor, Forma de Pagamento maior
+        col_v, col_f = st.columns([1, 2]) 
+        valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0) # step remove o +/-
         
         opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
         forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
@@ -214,9 +216,10 @@ def modal_despesa():
         if info_f and info_f['tipo'] == "Cartão de Crédito":
             parcelas = st.number_input("Número de Parcelas", 1, 12, 1)
         
-        data_l = st.date_input("Data de Lançamento")
+        # Formato de data dd/mm/aaaa
+        data_l = st.date_input("Data de Lançamento", format="DD/MM/YYYY")
         
-        if st.form_submit_button("Salvar Despesa"):
+        if st.form_submit_button("Salvar Despesa", use_container_width=True):
             data_venc = data_l
             if info_f and info_f['tipo'] == "Cartão de Crédito":
                 if data_l.day >= info_f['fechamento']:
@@ -236,12 +239,17 @@ def modal_despesa():
 def modal_receita():
     with st.form("form_rec", clear_on_submit=True):
         desc_r = st.text_input("Descrição")
-        valor_r = st.number_input("Valor", min_value=0.0, format="%.2f")
-        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_r = st.selectbox("Forma de Recebimento", options=opcoes_f if opcoes_f else ["Dinheiro"])
-        data_r = st.date_input("Data")
         
-        if st.form_submit_button("Salvar Receita"):
+        # Ajuste de tamanho similar à despesa
+        col_v, col_f = st.columns([1, 2])
+        valor_r = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
+        
+        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_r = col_f.selectbox("Recebido via", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        
+        data_r = st.date_input("Data", format="DD/MM/YYYY")
+        
+        if st.form_submit_button("Salvar Receita", use_container_width=True):
             st.session_state.receitas.append({
                 "desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r
             })
@@ -250,17 +258,28 @@ def modal_receita():
 @st.dialog("💳 Cadastrar Forma de Pagamento")
 def modal_pagamento():
     with st.form("form_pagto", clear_on_submit=True):
-        nome_f = st.text_input("Nome (ex: Cartão NuBank)")
-        tipo_f = st.selectbox("Tipo", ["Dinheiro/PIX", "Cartão de Crédito", "Débito"])
+        nome_f = st.text_input("Nome da Forma (ex: Cartão NuBank)")
         
+        # Aumentei o campo Tipo para não cortar o texto
+        tipo_f = st.selectbox("Tipo de Pagamento", ["Dinheiro/PIX", "Cartão de Crédito", "Débito Automático"])
+        
+        # Campo de banco aparece se for Débito Automático
+        banco = ""
+        if tipo_f == "Débito Automático":
+            banco = st.text_input("Nome do Banco para Débito")
+        
+        st.write("Configuração de Vencimento (Para Cartões):")
         c1, c2 = st.columns(2)
         fechamento = c1.number_input("Dia do Fechamento", 1, 31, 1)
         vencimento = c2.number_input("Dia do Vencimento", 1, 31, 10)
         
-        if st.form_submit_button("Salvar Forma"):
+        if st.form_submit_button("Salvar Forma de Pagamento", use_container_width=True):
             st.session_state.formas_pagamento.append({
-                "nome": nome_f, "tipo": tipo_f, 
-                "fechamento": fechamento, "vencimento": vencimento
+                "nome": nome_f, 
+                "tipo": tipo_f, 
+                "banco": banco,
+                "fechamento": fechamento, 
+                "vencimento": vencimento
             })
             st.rerun()
             
@@ -347,6 +366,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
