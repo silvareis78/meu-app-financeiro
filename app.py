@@ -1,5 +1,35 @@
 import streamlit as st
 import pandas as pd
+from streamlit_option_menu import option_menu
+
+# --- CONFIGURAÇÃO DO MENU LATERAL ---
+with st.sidebar:
+    # O componente option_menu cria as 3 barras e gerencia o clique
+    selecionado = option_menu(
+        menu_title="Menu Principal",  # Título do topo do menu
+        options=["Home", "Receitas", "Despesas", "Cartões", "Configurações"], # Nome das telas
+        icons=["house", "cash-stack", "receipt", "credit-card", "gear"], # Ícones (Bootstrap Icons)
+        menu_icon="cast", # Ícone do título do menu
+        default_index=0, # Tela que começa selecionada
+        styles={
+            "container": {"padding": "5px", "background-color": "#F8FAFC"},
+            "icon": {"color": "#1E293B", "font-size": "20px"}, 
+            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#E2E8F0"},
+            "nav-link-selected": {"background-color": "#0747A6"}, # Cor quando selecionado
+        }
+    )
+
+# --- LÓGICA DE TROCA DE TELAS ---
+if selecionado == "Home":
+    st.write("### Você está na Home")
+    # Aqui você coloca todo aquele código dos cards que fizemos
+    
+elif selecionado == "Receitas":
+    st.write("### Tela de Receitas")
+    # Código da tela de receitas aqui
+
+# E assim por diante para as outras telas...
+
 
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Financeiro Pro", layout="wide", initial_sidebar_state="auto")
@@ -58,7 +88,7 @@ st.markdown("""
         border-radius: 10px !important;         /* Bordas arredondadas */
         text-align: center !important;          /* Alinha o texto ao centro */
         margin-bottom: 12px !important;         /* Espaço entre um card e outro */
-        font-size: 25px !important;             /* Texto levemente maior */
+        font-size: 18px !important;             /* Texto levemente maior */
         font-weight: 900 !important;            /* Negrito máximo */
         color: #FFFFFF !important;              /* Texto branco */
         box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra */
@@ -192,6 +222,7 @@ st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 
 st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>INTER<br>R$ 320,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>OUTROS<br>R$ 150,00</b></div>', unsafe_allow_html=True)
+
 
 
 
