@@ -33,11 +33,27 @@ st.markdown("""
     .despesa { background-color: #B22222; } 
     .saldo   { background-color: #DAA520; } 
 
-     /* Novos Cards de Despesa */
-    .card-pagar { background-color: #FFEDD5; border-left: 5px solid #F97316; color: #7C2D12; }
-    .card-prevista { background-color: #F1F5F9; border-left: 5px solid #64748B; color: #1E293B; }
-    .card-cartao { background-color: #E0F2FE; border-left: 5px solid #0EA5E9; color: #0C4A6E; }
+     /* Cores Fortes e Sólidas para tirar o esbranquiçado */
+    .card-pagar { background-color: #E65100 !important; } /* Laranja Escuro */
+    .card-prevista { background-color: #374151 !important; } /* Grafite */
+    .card-cartao { background-color: #0747A6 !important; } /* Azul Royal */
 
+    /* Estilo do Card Vertical com Texto Grande e Negrito */
+    .card-vertical 
+        padding: 12px 20px !important;
+        border-radius: 10px !important;
+        text-align: left !important;
+        margin-bottom: 10px !important;
+        width: 350px !important; /* Aumentei um pouco a largura para o texto grande caber */
+        
+        /* AQUI ESTÁ O QUE VOCÊ PEDIU: Texto Grande e Negrito */
+        font-size: 20px !important; 
+        font-weight: 900 !important; /* Negrito extra forte */
+        color: #FFFFFF !important;  /* Texto sempre branco para contraste */
+        
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important;
+        display: block !important;
+    }
     /* Espaçamento para descer cards principais */
     .espaco-cards { margin-top: 55px !important; }
     
@@ -188,18 +204,12 @@ with col_ava:
 # --- 5. DETALHAMENTO DE DESPESAS (ABAIXO DA BARRA) ---
 st.markdown('<p class="titulo-secao">Detalhamento de Despesas</p>', unsafe_allow_html=True)
 
-c1, c2, c3, c4, c5 = st.columns(5)
-
-with c1:
     st.markdown('<div class="card card-pagar">DESPESA A PAGAR<br>R$ 1.200,00</div>', unsafe_allow_html=True)
-with c2:
     st.markdown('<div class="card card-prevista">DESPESA PREVISTA<br>R$ 800,00</div>', unsafe_allow_html=True)
-with c3:
     st.markdown('<div class="card card-cartao">NUBANK<br>R$ 450,00</div>', unsafe_allow_html=True)
-with c4:
     st.markdown('<div class="card card-cartao">INTER<br>R$ 320,00</div>', unsafe_allow_html=True)
-with c5:
     st.markdown('<div class="card card-cartao">OUTROS<br>R$ 150,00</div>', unsafe_allow_html=True)
+
 
 
 
