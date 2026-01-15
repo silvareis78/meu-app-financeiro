@@ -168,7 +168,6 @@ def modal_lancamento_categoria(categoria_nome):
         with col_tipo:
             tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"], key=f"t_d_{categoria_nome}")
         with col_parc:
-            # Se for 1, é à vista. Se for maior que 1, o sistema tratará como parcelado.
             parcelas = st.number_input("Qtde Parcelas", min_value=1, max_value=48, value=1, key=f"p_d_{categoria_nome}")
         
         # --- LINHA 2: VALOR E FORMA ---
@@ -184,11 +183,10 @@ def modal_lancamento_categoria(categoria_nome):
         st.markdown("---")
         
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-            # Busca os detalhes da forma de pagamento para aplicar a regra do cartão depois
+            # 1. Busca os detalhes da forma de pagamento
             detalhes_pagto = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_selecionada), None)
-            st.success(f"✅ Categoria '{n}' cadastrada com sucesso!")
-            st.rerun()
             
+            # 2. Cria o dicionário com os dados
             novo_item = {
                 "Categoria": categoria_nome,
                 "Descrição": desc,
@@ -197,11 +195,18 @@ def modal_lancamento_categoria(categoria_nome):
                 "Valor": valor,
                 "Pagamento": forma_selecionada,
                 "Data": data_l.strftime("%d/%m/%Y"),
-                "Info_Pagto": detalhes_pagto # Guarda fechamento/vencimento para o cálculo
+                "Info_Pagto": detalhes_pagto 
             }
             
+            # 3. SALVA na memória (ou na planilha no futuro)
+            if 'despesas' not in st.session_state:
+                st.session_state.despesas = []
             st.session_state.despesas.append(novo_item)
-            st.success(f"Lançamento de {categoria_nome} ({tipo_desp}) salvo!")
+            
+            # 4. MOSTRA A MENSAGEM (Usando o nome correto da variável: categoria_nome)
+            st.success(f"✅ Lançamento em '{categoria_nome}' cadastrado com sucesso!")
+            
+            # 5. REINICIA (Sempre por último)
             st.rerun()
 
 # --- FUNÇÃO DO FORMULÁRIO DE RECEITA (TOPO DO SCRIPT) ---
@@ -212,32 +217,41 @@ def modal_receita_categoria(categoria_nome):
         
         desc = st.text_input("Descrição da Receita (Ex: Salário Mensal)")
         
-        # Layout de colunas: [1, 3] -> Valor e Forma de Recebimento
+        # Layout de colunas: [2, 4] conforme seu padrão
         c1, c2 = st.columns([2, 4])
         with c1:
-            valor = st.number_input("Valor Recebido", min_value=0.0, step=1.0, format="%.2f")
+            valor = st.number_input("Valor Recebido", min_value=0.0, step=1.0, format="%.2f", key=f"val_r_{categoria_nome}")
         with c2:
-            # Puxa as mesmas formas de pagamento/recebimento
+            # Puxa as formas de pagamento cadastradas
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"])
+            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"], key=f"sel_r_{categoria_nome}")
         
-        data_r = st.date_input("Data do Recebimento", format="DD/MM/YYYY")
+        data_r = st.date_input("Data do Recebimento", format="DD/MM/YYYY", key=f"dat_r_{categoria_nome}")
         
         st.markdown("---")
         
-        # Botão Salvar (Herda a cor verde do seu CSS)
+        # Botão Salvar
         if st.form_submit_button("Confirmar Receita", use_container_width=True):
             nova_rec = {
                 "Tipo": "Receita",
                 "Categoria": categoria_nome,
                 "Descrição": desc,
-                "Valor": valor, # Valor positivo
+                "Valor": valor, 
                 "Pagamento": forma,
                 "Data": data_r.strftime("%d/%m/%Y")
             }
-            # Adiciona na lista geral de transações
+            
+            # Garante que a lista de despesas/transações exista
+            if 'despesas' not in st.session_state:
+                st.session_state.despesas = []
+            
+            # Adiciona na lista geral
             st.session_state.despesas.append(nova_rec)
-            st.success(f"Receita de {categoria_nome} registada!")
+            
+            # Mensagem de sucesso com a variável correta
+            st.success(f"✅ Receita de '{categoria_nome}' cadastrada com sucesso!")
+            
+            # Reinicia para fechar o diálogo e atualizar a tela
             st.rerun()
 
 # --- FUNÇÃO ATUALIZADA: GERENCIAR FORMAS DE PAGAMENTO (TOPO DO SCRIPT) ---
@@ -246,7 +260,7 @@ def modal_forma_pagamento():
     with st.form(key="form_cadastro_pagamento", clear_on_submit=True):
         st.write("### Cadastrar Nova")
         
-        # Agora o nome e o tipo são campos de texto livre
+        # Inputs de texto livre conforme solicitado
         nova_f = st.text_input("Nome da Forma (Ex: Nubank)")
         tipo_forma = st.text_input("Tipo da Forma (Ex: Cartão de Crédito, Débito, Pix)")
         
@@ -254,10 +268,9 @@ def modal_forma_pagamento():
         
         col1, col2 = st.columns(2)
         with col1:
-            # Mantive como número para facilitar o cálculo matemático depois
-            fechamento = st.number_input("Dia Fechamento", min_value=0, max_value=31, value=0, help="Dia que a fatura fecha")
+            fechamento = st.number_input("Dia Fechamento", min_value=0, max_value=31, value=0)
         with col2:
-            vencimento = st.number_input("Dia Vencimento", min_value=0, max_value=31, value=0, help="Dia que você paga a fatura")
+            vencimento = st.number_input("Dia Vencimento", min_value=0, max_value=31, value=0)
         
         st.markdown("---")
         
@@ -266,22 +279,25 @@ def modal_forma_pagamento():
                 if 'formas_pagamento' not in st.session_state:
                     st.session_state.formas_pagamento = []
                 
-                # Salvando os dados conforme você preencheu
+                # Salva os dados na memória
                 st.session_state.formas_pagamento.append({
                     "nome": nova_f,
                     "tipo": tipo_forma,
                     "fechamento": fechamento,
                     "vencimento": vencimento
                 })
-                st.success(f"'{nova_f}' cadastrada com sucesso!")
+                
+                # Mensagem de sucesso ANTES do rerun
+                st.success(f"✅ Forma de Pagamento '{nova_f}' cadastrada com sucesso!")
                 st.rerun()
+            else:
+                st.error("Por favor, insira o nome da forma de pagamento.")
 
     # --- LISTA PARA CORREÇÃO E VISUALIZAÇÃO ---
-    if st.session_state.formas_pagamento:
+    if 'formas_pagamento' in st.session_state and st.session_state.formas_pagamento:
         st.markdown("---")
         st.write("### Formas Já Cadastradas")
         for i, item in enumerate(st.session_state.formas_pagamento):
-            # Usando expander para não ocupar muito espaço na tela do celular
             with st.expander(f"✅ {item['nome']} ({item['tipo']})"):
                 if item['fechamento'] > 0:
                     st.write(f"📅 Fechamento: Dia {item['fechamento']}")
@@ -289,9 +305,11 @@ def modal_forma_pagamento():
                 else:
                     st.write("ℹ️ Forma de pagamento à vista.")
                 
-                # Botão para excluir se precisar corrigir
+                # Botão de remover com chave única
                 if st.button("Remover", key=f"del_f_{i}", use_container_width=True):
+                    nome_removido = st.session_state.formas_pagamento[i]['nome']
                     st.session_state.formas_pagamento.pop(i)
+                    st.warning(f"A forma '{nome_removido}' foi removida.")
                     st.rerun()
                     
 
@@ -408,6 +426,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
