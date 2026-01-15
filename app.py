@@ -51,6 +51,7 @@ st.markdown("""
         display: block !important;
         width: 100% !important;
 
+    }
    /* 5. SEGUNDA BARRA COM AFASTAMENTO DE 3CM */
     .barra-afastada {
         border-bottom: 6px solid #000000 !important; /* Mesma espessura da primeira */
@@ -178,6 +179,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
