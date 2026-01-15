@@ -40,7 +40,7 @@ st.markdown("""
         gap: 6px;             /* Diminuído o espaço entre foto e texto */
         font-size: 10px;       /* Texto menor */
         line-height: 1.1;
-        margin-top: -5px;
+        margin-top: 2px;
     }
 
     /* Comando para garantir que a imagem do avatar fique pequena */
@@ -192,6 +192,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
