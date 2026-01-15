@@ -51,8 +51,8 @@ st.markdown("""
         text-align: center !important;          /* Garante que o texto de cada linha fique no centro */
 
         /* --- DIMENSÕES (Ajuste conforme sua preferência) --- */
-        width: 250px !important;                /* Largura do card */
-        height: 100px !important;               /* Altura fixa para dar espaço às duas linhas */
+        width: 200px !important;                /* Largura do card */
+        height: 90px !important;               /* Altura fixa para dar espaço às duas linhas */
 
         /* --- ESTILO VISUAL --- */
         border-radius: 10px !important;         /* Bordas arredondadas */
@@ -192,6 +192,7 @@ st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 
 st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>INTER<br>R$ 320,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>OUTROS<br>R$ 150,00</b></div>', unsafe_allow_html=True)
+
 
 
 
