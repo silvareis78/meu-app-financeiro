@@ -143,7 +143,7 @@ def modal_despesa():
         desc = st.text_input("Descrição")
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
-        # AJUSTE DE LARGURA: [1, 4] significa que a Forma de Pagamento é 4x maior que o Valor.
+        # AJUSTE DE LARGURA: [2, 4] significa que a Forma de Pagamento é 4x maior que o Valor.
         # Se o nome "Forma de Pagamento" ainda quebrar, mude o 4 para 5 ou 6.
         col_v, col_f = st.columns([1, 4]) 
         
@@ -177,23 +177,36 @@ def modal_despesa():
             
 @st.dialog("💰 Inserir Nova Receita")
 def modal_receita():
-    with st.form("form_rec", clear_on_submit=True):
-        desc_r = st.text_input("Descrição da Receita")
+    with st.form("form_receita", clear_on_submit=True):
+        # Campo de descrição da entrada
+        desc = st.text_input("Descrição")
         
-        # Ajustado para [2, 4] para o Valor não ficar espremido
-        col_v, col_f = st.columns([2, 3])
-        valor_r = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=0.0)
+        # --- AJUSTE DE LAYOUT (COLUNAS) ---
+        # [1, 3] define que a segunda coluna é 3x maior que a primeira
+        col_v, col_d = st.columns([1, 3]) 
         
-        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_r = col_f.selectbox("Recebido via", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        with col_v:
+            # AQUI O SEGREDO: O 'step=1.0' faz o CSS esconder o sinal de -/+
+            valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
+            
+        with col_d:
+            # Data de recebimento alinhada ao lado do valor
+            data_r = st.date_input("Data de Recebimento", format="DD/MM/YYYY")
+            
+        st.markdown("---") # Linha divisória para estética
         
-        data_r = st.date_input("Data do Recebimento", format="DD/MM/YYYY")
-        
+        # O botão 'Salvar' vai herdar a cor que configuramos no Item 13 do seu CSS
         if st.form_submit_button("Salvar Receita", use_container_width=True):
-            st.session_state.receitas.append({
-                "desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r
-            })
-            st.rerun()
+            if desc and valor > 0:
+                st.session_state.receitas.append({
+                    "desc": desc, 
+                    "valor": valor, 
+                    "data": data_r
+                })
+                st.success("Receita salva com sucesso!")
+                st.rerun()
+            else:
+                st.error("Preencha a descrição e o valor.")
 
 @st.dialog("💳 Cadastrar Forma de Pagamento")
 def modal_pagamento():
@@ -315,6 +328,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
