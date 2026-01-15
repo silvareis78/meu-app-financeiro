@@ -54,7 +54,7 @@ st.markdown("""
 
         /* --- ESTILO VISUAL --- */
         border-radius: 10px !important;         /* Bordas arredondadas */
-        text-align: left !important;            /* Alinha o texto à esquerda */
+        text-align: center !important;          /* Alinha o texto ao centro */
         margin-bottom: 12px !important;         /* Espaço entre um card e outro */
         font-size: 18px !important;             /* Texto levemente maior */
         font-weight: 900 !important;            /* Negrito máximo */
@@ -185,11 +185,12 @@ with col_ava:
 st.markdown('<p class="titulo-secao">Detalhamento de Despesas</p>', unsafe_allow_html=True)
 
 # Verifique se NÃO existe nenhum espaço antes de 'st.markdown' abaixo:
-st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR: R$ 1.200,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA: R$ 800,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-cartao"><b>NUBANK: R$ 450,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-cartao"><b>INTER: R$ 320,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-cartao"><b>OUTROS: R$ 150,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-cartao"><b>INTER<br>R$ 320,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-cartao"><b>OUTROS<br>R$ 150,00</b></div>', unsafe_allow_html=True)
+
 
 
 
