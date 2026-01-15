@@ -200,7 +200,12 @@ st.markdown("""
     /* Garante que o campo de seleção (selectbox) use todo o espaço e não corte o texto */
     div[data-testid="stSelectbox"] > div { width: 100% !important; }
     .stSelectbox div[data-baseweb="select"] > div { white-space: normal !important; }         
-        }
+
+    /* Impede que o título dos campos (labels) quebrem em duas linhas */
+    div[data-testid="stWidgetLabel"] p {
+        white-space: nowrap !important;
+        word-break: keep-all !important;
+    
     }
     </style>
     """, unsafe_allow_html=True)
@@ -394,6 +399,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
