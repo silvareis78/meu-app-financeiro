@@ -76,13 +76,7 @@ st.markdown("""
         padding-right: 30px !important; 
     }
 
-    /* Ajuste fino do texto dentro da caixa */
-    div[data-baseweb="select"] > div {
-        padding: 0 5px !important;
-        line-height: 35px !important;
-    }
-
-    /* Cor do texto nos parágrafos */
+      /* Cor do texto nos parágrafos */
     div[data-testid="stMarkdownContainer"] p {
         color: #1E293B;
     }
@@ -151,6 +145,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
