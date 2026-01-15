@@ -5,28 +5,42 @@ st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout l
 
 # 2. CSS CUSTOMIZADO
 st.markdown("""
-    </script> 
+    st.markdown("""
+    <script>
+    // Agora o código está dentro da tag script correta
     function fecharBotoes() {
-        // Esconde o menu de 3 pontos e o "Manage App", mas mantém o botão de abrir a lateral
         const itensParaEsconder = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu');
         itensParaEsconder.forEach(el => el.style.display = 'none');
         
-        // Remove o fundo cinza do header mas mantém o espaço para o botão do menu
         const header = document.querySelector('header');
         if (header) {
             header.style.backgroundColor = 'transparent';
             header.style.border = 'none';
         }
     }
+    
+    function recolherMenu() {
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        const botaoFechar = window.parent.document.querySelector('button[kind="headerNoContext"]');
+        if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
+            botaoFechar.click();
+        }
+    }
+
+    setInterval(fecharBotoes, 500);
     </script>
 
     <style>
-    /* 1. CONFIGURAÇÃO GERAL - CORRIGIDA */
+    /* 1. CONFIGURAÇÃO GERAL */
     .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
+    
+    /* REMOVIDO O DISPLAY:NONE DO HEADER PARA O MENU NÃO SUMIR */
     footer { visibility: hidden; display: none !important; } 
+    header { background-color: transparent !important; border: none !important; box-shadow: none !important; } 
     
     /* Importante: Não esconda o HEADER com display:none, use apenas para tirar a cor */
     header { background-color: transparent !important; }
+    
     /* 2. CARDS PRINCIPAIS (RECEITA, DESPESA, SALDO) */
     .card {
         padding: 30px 45px !important;        /* Tamanho interno do card (espaçamento) */
@@ -224,6 +238,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
