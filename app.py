@@ -128,15 +128,25 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. MENU LATERAL (Configuração conforme sua ordem)
+# --- 3. MENU LATERAL (OPÇÃO NATIVA SEM ERRO) ---
 with st.sidebar:
-    selecionado = option_menu(
-        menu_title="Navegação", 
-        options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
-        icons=["house", "dash-circle", "plus-circle", "credit-card", "clipboard-plus", "gear"],
-        menu_icon="list", default_index=0,
-        styles={"nav-link-selected": {"background-color": "#0747A6"}}
+    st.title("Navegação") # Título do Menu
+    
+    # Cria os botões de rádio que funcionam como menu
+    selecionado = st.radio(
+        "Selecione a tela:",
+        options=[
+            "Painel Inicial", 
+            "Despesa", 
+            "Receita", 
+            "Cartões", 
+            "Cadastros Iniciais", 
+            "Configurações"
+        ],
+        index=0 # Começa no Painel Inicial
     )
+    
+    st.divider() # Linha divisória lateral
 
 # 4. LÓGICA DAS TELAS
 if selecionado == "Painel Inicial":
@@ -176,6 +186,7 @@ if selecionado == "Painel Inicial":
 
 else:
     st.write(f"### Bem-vindo à tela: {selecionado}") # Mensagem para as outras telas
+
 
 
 
