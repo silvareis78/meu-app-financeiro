@@ -9,7 +9,6 @@ st.markdown("""
     function fecharBotoes() {
         const itensParaEsconder = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu');
         itensParaEsconder.forEach(el => el.style.display = 'none');
-        
         const header = document.querySelector('header');
         if (header) {
             header.style.backgroundColor = 'transparent';
@@ -17,12 +16,13 @@ st.markdown("""
         }
     }
     
-    // ESTA FUNÇÃO PRECISA ESTAR EXATAMENTE ASSIM:
+    // Versão otimizada para Celular
     function recolherMenu() {
-        const botaoFechar = window.parent.document.querySelector('button[kind="headerNoContext"]');
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        var v_document = window.parent.document;
+        // Tenta encontrar o botão de fechar (X) ou a seta do menu lateral
+        var botaoFechar = v_document.querySelector('button[kind="headerNoContext"]');
+        var sidebar = v_document.querySelector('[data-testid="stSidebar"]');
         
-        // Se o menu estiver aberto (expanded=true), ele clica no botão de fechar
         if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
             botaoFechar.click();
         }
@@ -30,7 +30,6 @@ st.markdown("""
 
     setInterval(fecharBotoes, 500);
     </script>
-
     <style>
     /* 1. CONFIGURAÇÃO GERAL */
     .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
@@ -238,6 +237,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
