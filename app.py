@@ -14,7 +14,6 @@ if 'receitas' not in st.session_state:
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout largo e título da aba
 
-# 2. CSS CUSTOMIZADO
 st.markdown("""
     <script>
     function fecharBotoes() {
@@ -27,188 +26,114 @@ st.markdown("""
         }
     }
     
-    // Versão otimizada para Celular
     function recolherMenu() {
         var v_document = window.parent.document;
-        // Tenta encontrar o botão de fechar (X) ou a seta do menu lateral
         var botaoFechar = v_document.querySelector('button[kind="headerNoContext"]');
         var sidebar = v_document.querySelector('[data-testid="stSidebar"]');
-        
         if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
             botaoFechar.click();
         }
     }
-
     setInterval(fecharBotoes, 500);
     </script>
     <style>
     /* 1. CONFIGURAÇÃO GERAL */
-    .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
+    .block-container { padding-top: 1rem !important; margin-top: -20px !important; } /* Ajusta o respiro do topo da página */
+    footer { visibility: hidden; display: none !important; } /* Esconde o rodapé 'Made with Streamlit' */
+    header { background-color: transparent !important; border: none !important; } /* Deixa o cabeçalho invisível */
     
-    /* Mantém o header existindo (para o botão não sumir) mas invisível */
-    footer { visibility: hidden; display: none !important; } 
-    header { background-color: transparent !important; border: none !important; box-shadow: none !important; }
-    
-    /* 2. CARDS PRINCIPAIS (RECEITA, DESPESA, SALDO) */
+    /* 2. CARDS PRINCIPAIS */
     .card {
-        padding: 30px 45px !important;        /* Tamanho interno do card (espaçamento) */
-        font-size: 20px !important;           /* Tamanho da fonte do texto principal */
-        border-radius: 5px;                    /* Arredondamento das bordas */
-        color: white !important;               /* Cor do texto (sempre branco) */
-        font-weight: bold;                     /* Texto em negrito */
-        text-align: center;                    /* Centraliza o texto horizontalmente */
-        line-height: 1.1 !important;           /* Espaçamento entre as linhas do texto */
+        padding: 30px 45px !important;        /* Aumente/diminua aqui para mudar o tamanho interno dos cards superiores */
+        font-size: 20px !important;           /* Altera o tamanho da letra do valor nos cards */
+        border-radius: 5px;                    /* Arredondamento das quinas dos cards */
+        color: white !important;               /* Cor da letra sempre branca */
+        font-weight: bold;                     /* Deixa o texto em negrito */
+        text-align: center;                    /* Centraliza o texto */
+        line-height: 1.1 !important;           
     }
-    .receita { background-color: #008080; }    /* Cor Verde Petróleo para Receita */
-    .despesa { background-color: #B22222; }    /* Cor Vermelha para Despesa */
-    .saldo   { background-color: #DAA520; }    /* Cor Dourada para Saldo */
+    .receita { background-color: #008080; }    /* Mude aqui para trocar a cor do card de Receita */
+    .despesa { background-color: #B22222; }    /* Mude aqui para trocar a cor do card de Despesa */
+    .saldo   { background-color: #DAA520; }    /* Mude aqui para trocar a cor do card de Saldo */
 
-    /* 3. CORES DOS CARDS VERTICAIS (DETALHAMENTO) */
-    .card-pagar { background-color: #E65100 !important; }    /* Laranja Sólido (A Pagar) */
-    .card-prevista { background-color: #374151 !important; } /* Grafite Sólido (Prevista) */
-    .card-cartao { background-color: #0747A6 !important; }   /* Azul Royal (Cartões) */
+    /* 3. CORES DOS CARDS VERTICAIS */
+    .card-pagar { background-color: #E65100 !important; }    /* Cor do card 'A Pagar' */
+    .card-prevista { background-color: #374151 !important; } /* Cor do card 'Prevista' */
+    .card-cartao { background-color: #0747A6 !important; }   /* Cor do card 'Cartões' */
 
-    /* 4. ESTILO DOS CARDS VERTICAIS (EM FILA) */
+    /* 4. ESTILO DOS CARDS VERTICAIS */
     .card-vertical {
-        padding: 12px 20px !important;         /* Espaçamento interno reduzido */
-        border-radius: 10px !important;        /* Bordas mais arredondadas */
-        text-align: left !important;           /* Alinha o texto à esquerda */
-        margin-bottom: 10px !important;        /* Espaço entre um card e outro */
-        width: 350px !important;               /* Largura fixa para os cards verticais */
-        font-size: 20px !important;            /* Texto grande para facilitar leitura */
-        font-weight: 900 !important;            /* Negrito extra forte */
-        color: #FFFFFF !important;             /* Texto branco para contraste */
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra para profundidade */
-        display: block !important;             /* Garante que ocupem a linha toda */
+        padding: 12px 20px !important;         /* Espaço interno dos cards de detalhamento */
+        border-radius: 10px !important;        /* Arredondamento */
+        text-align: left !important;           
+        margin-bottom: 10px !important;        /* Espaço entre um card e outro na vertical */
+        width: 350px !important;               /* Largura do card (ajuste se ficar muito largo no PC) */
+        font-size: 20px !important;            
+        font-weight: 900 !important;            
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra preta suave */
+        display: block !important;             
     }
 
-    /* 5. AVATAR E MENSAGEM DO TOPO */
-    .avatar-container {
-        display: flex;                         /* Alinha imagem e texto lado a lado */
-        align-items: center;                   /* Centraliza verticalmente foto e texto */
-        gap: 6px;                              /* Espaço entre a foto e a frase */
-        font-size: 10px;                       /* Tamanho pequeno da fonte */
-        line-height: 1.1;                      /* Altura da linha do texto */
-        margin-top: 15px;                      /* Distância do topo */
-        color: #1E293B !important;             /* Cor cinza escuro para o texto */
-    }
-    .img-avatar {
-        width: 30px !important;                /* Largura da imagem do avatar */
-        height: 30px !important;               /* Altura da imagem do avatar */
-        border-radius: 50% !important;         /* Faz a imagem ficar redonda */
-        object-fit: cover !important;          /* Não distorce a imagem ao redimensionar */
-    }
+    /* 5. AVATAR E MENSAGEM */
+    .avatar-container { display: flex; align-items: center; gap: 6px; margin-top: 15px; }
+    .img-avatar { width: 30px !important; height: 30px !important; border-radius: 50% !important; }
 
-    /* 6. BARRAS DIVISÓRIAS (PRETAS) */
-    .barra-preta-grossa {
-        border-bottom: 6px solid #000000 !important; /* Estilo da primeira barra */
-        margin-bottom: 20px !important;               /* Espaço abaixo da barra */
-        margin-top: 10px !important;                  /* Espaço acima da barra */
-        display: block !important;                    /* Garante visualização total */
-        width: 100% !important;                       /* Largura total da tela */
-    }
-    .barra-afastada {
-        border-bottom: 6px solid #000000 !important; /* Estilo da segunda barra */
-        width: 100% !important;                       /* Largura total da tela */
-        margin-top: 70px !important;                  /* Distância de 3cm do conteúdo acima */
-        margin-bottom: 20px !important;               /* Espaço abaixo da barra */
-        display: block !important;                    /* Garante visualização total */
-    }
-
-    /* 7. ESPAÇAMENTO COMPLEMENTAR */
-    .espaco-cards {
-        margin-top: 55px !important;                  /* Empurra os cards principais para baixo */
-    }   
+    /* 6. BARRAS DIVISÓRIAS */
+    .barra-preta-grossa { border-bottom: 6px solid #000000 !important; margin-bottom: 20px !important; width: 100% !important; }
+    .barra-afastada { border-bottom: 6px solid #000000 !important; margin-top: 70px !important; width: 100% !important; }
 
     /* 8. CAIXAS DE SELEÇÃO (MÊS E ANO) */
     [data-testid="stWidgetLabel"] p {
-        font-size: 18px !important;                   /* Tamanho da palavra 'Mês' e 'Ano' */
-        font-weight: bold !important;                 /* Títulos em negrito */
-        color: #000000 !important;                    /* Cor preta sólida */
-        margin-bottom: -5px !important;               /* Aproxima o título da caixa */
+        font-size: 18px !important;            /* Tamanho do rótulo (ex: 'Descrição', 'Valor') */
+        font-weight: bold !important;          /* Deixa os rótulos em negrito */
+        color: #000000 !important;             /* Cor dos rótulos em preto */
+        white-space: nowrap !important;        /* IMPEDE QUEBRA DE LINHA: Mantém o texto em uma linha só */
     }
-    div[data-testid="stSelectbox"] {
-        width: 150px !important;                      /* Largura da caixa de seleção */
-        margin-top: 5px !important;                   /* Ajuste de posição */
+    
+    /* LARGURA FIXA PARA MÊS/ANO NO MENU LATERAL */
+    div[data-testid="stSidebar"] div[data-testid="stSelectbox"] {
+        width: 150px !important;               /* Mude aqui se quiser o Mês e Ano mais largos ou estreitos */
     }
+
+    /* CENTRALIZAÇÃO DO TEXTO DENTRO DAS CAIXAS */
     div[data-baseweb="select"] > div {
-        text-align: center !important;                /* Centraliza o texto do mês/ano */
-        justify-content: center !important;           /* Alinha ao centro */
-        display: flex !important;                     /* Ativa o modo flexível */
-        align-items: center !important;               /* Centralização vertical */
-        padding-left: 1px !important;                 /* Ajuste fino lateral */
-        padding-right: 10px !important;               /* Espaço para a seta */
-        height: 35px !important;                      /* Altura da caixa */
-        min-height: 35px !important;                  /* Altura mínima da caixa */
-    }
-    div[data-baseweb="select"] [data-testid="stSelectbox"] div:last-child {
-        margin-right: -1px !important;                /* Cola a seta no canto direito */
-    }
-    div[data-baseweb="select"] span {
-        white-space: nowrap !important;               /* Impede quebra de linha no texto */
-        overflow: visible !important;                 /* Permite ver o texto todo */
-        font-size: 14px !important;                   /* Tamanho da fonte interna */
-    }
-    div[data-testid="stMarkdownContainer"] p {
-        color: #1E293B;                               /* Cor padrão para parágrafos Markdown */
+        text-align: center !important;                
+        height: 35px !important;               /* Altura das caixas de seleção */
     }
 
-    /* 9. Garante que o botão de abrir o menu (setinha/barras) sempre esteja visível e preto */
-    button[kind="headerNoContext"] {
-        display: flex !important;
-        visibility: visible !important;
-        color: black !important;
-        background-color: transparent !important;
-    } 
-
-    /* 10. MENU LATERAL (Ajuste de fonte) */
-    [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
-    .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
-
- /* 11. BOTÃO DE ABRIR (AS 3 BARRAS) - ESTILO FLUTUANTE */
+    /* 11. BOTÃO DO MENU (3 BARRAS) */
     [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important;
-        visibility: visible !important;
-        z-index: 1000001 !important;
-        position: fixed !important;
-        top: 15px !important;
-        left: 15px !important;
-        background-color: #000000 !important; /* Fundo Preto */
+        background-color: #000000 !important;  /* Cor de fundo do botão do menu no mobile */
         border-radius: 10px !important;
         width: 50px !important;
         height: 50px !important;
-        justify-content: center !important;
-        align-items: center !important;
-        box-shadow: 0px 4px 10px rgba(0,0,0,0.3) !important;
     }
+    [data-testid="stSidebarCollapsedControl"] button { color: white !important; }
 
-    /* Garante que o ícone das 3 barras seja branco */
-    [data-testid="stSidebarCollapsedControl"] button {
-        color: white !important;
-        transform: scale(1.2); /* Aumenta um pouco o tamanho do ícone */
-    }
-
-    /* 12. AJUSTE PARA O CONTEÚDO NÃO FICAR EMBAIXO DO BOTÃO NO MOBILE */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-top: 3.5rem !important; /* Dá espaço para o botão preto não cobrir o texto */
-
-   /* Remove botões +/- e ajusta o preenchimento */
+    /* 12. REMOÇÃO DE BOTÕES +/- NO VALOR */
     div[data-testid="stNumberInputStepDown"], 
     div[data-testid="stNumberInputStepUp"] {
-        display: none !important;
+        display: none !important;              /* Esconde os botões de mais e menos dos campos de número */
     }
     div[data-testid="stNumberInputContainer"] input {
-        padding-right: 1rem !important;
+        padding-right: 1rem !important;        /* Ajusta o texto dentro da caixa após sumir o +/- */
     }
 
-    /* Força o título a ficar em uma linha só */
-    label[data-testid="stWidgetLabel"] p {
-        white-space: nowrap !important;
-        width: auto !important;
+    /* 13. ESTILO DO BOTÃO SALVAR (BOTÃO DE FORMULÁRIO) */
+    div.stFormSubmitButton > button {
+        background-color: #2E7D32 !important;  /* COR DO BOTÃO: Altere este código para mudar a cor do botão Salvar */
+        color: white !important;               /* Cor do texto do botão */
+        font-weight: bold !important;          
+        border-radius: 8px !important;         /* Arredondamento do botão */
+        height: 3.5rem !important;             /* Altura do botão */
+        width: 100% !important;                /* Faz o botão ocupar a largura toda do formulário */
+        border: none !important;               /* Remove bordas feias */
+    }
+    div.stFormSubmitButton > button:hover {
+        background-color: #1B5E20 !important;  /* Cor de quando você passa o mouse por cima */
     }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
 # --- 3.FUNÇÕES PARA OS FORMULÁRIOS SUSPENSOS ---
 
@@ -218,20 +143,22 @@ def modal_despesa():
         desc = st.text_input("Descrição")
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
-        # AQUI O AJUSTE FINAL: 1 para o Valor e 5 para a Forma de Pagamento
-        # Isso força o navegador a dar quase todo o espaço para a combobox
-        col_v, col_f = st.columns([1, 5]) 
+        # AJUSTE DE LARGURA: [1, 4] significa que a Forma de Pagamento é 4x maior que o Valor.
+        # Se o nome "Forma de Pagamento" ainda quebrar, mude o 4 para 5 ou 6.
+        col_v, col_f = st.columns([1, 4]) 
         
         with col_v:
+            # O 'step=1.0' faz o CSS identificar que deve esconder os botões +/-
             valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
             
         with col_f:
             opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
+            # Esta caixa vai crescer conforme o número que você colocou lá no st.columns
             forma_s = st.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
-        st.markdown("---")
+        st.markdown("---") # Linha de separação
         
-        col_parc, col_data = st.columns(2)
+        col_parc, col_data = st.columns(2) # Divide a linha de baixo ao meio (50% cada)
         info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
         
         parcelas = 1
@@ -240,6 +167,7 @@ def modal_despesa():
         
         data_l = col_data.date_input("Data de Lançamento", format="DD/MM/YYYY")
         
+        # O botão 'Salvar' vai obedecer automaticamente a cor que você colocou no Item 13 do CSS acima
         if st.form_submit_button("Salvar Despesa", use_container_width=True):
             st.session_state.despesas.append({
                 "desc": desc, "tipo_desp": tipo_desp, "valor": valor, 
@@ -387,6 +315,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
