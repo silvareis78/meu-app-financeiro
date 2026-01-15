@@ -57,25 +57,23 @@ st.markdown("""
 
     /* Estilo do nome 'Mês' e 'Ano' que fica em cima */
     [data-testid="stWidgetLabel"] p {
-        font-size: 13px !important;
+        font-size: 18px !important; 
         font-weight: bold !important;
         color: #000000 !important;
-        margin-bottom: -10px !important; /* Aproxima o nome da caixa */
+        margin-bottom: -5px !important;
     }
 
     /* Ajusta o espaçamento geral do seletor */
     div[data-testid="stSelectbox"] {
-        margin-top: 5px !important;
-        margin-bottom: 5px !important;
+        width: 140px !important;  /* Diminui a largura */
+        margin-top: 0px !important;
     }
     
-    div[data-baseweb="select"] {
-        border: 1px solid #CBD5E1 !important;
-        border-radius: 8px !important;
-        background-color: white !important;
-        font-size: 14px !important;
-        height: 35px !important;
-        min-height: 35px !important;
+    div[data-baseweb="select"] > div {
+        text-align: center !important;
+        justify-content: center !important;
+        display: flex !important;
+        padding-right: 30px !important; 
     }
 
     /* Ajuste fino do texto dentro da caixa */
@@ -153,6 +151,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
