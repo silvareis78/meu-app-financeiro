@@ -3,6 +3,10 @@ import streamlit as st
 import pandas as pd
 from datetime import datetime, timedelta
 
+# Verificação inicial: se não existir a lista de categorias na memória, ele cria uma vazia
+if 'categorias' not in st.session_state:
+    st.session_state.categorias = [] # Lista que armazenará os nomes das suas categorias
+
 # Inicializa as listas de dados se não existirem
 if 'formas_pagamento' not in st.session_state:
     st.session_state.formas_pagamento = []
@@ -149,127 +153,78 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3.FUNÇÕES PARA OS FORMULÁRIOS SUSPENSOS ---
+# --- NOVO BLOCO: CADASTROS E CATEGORIAS ---
 
-@st.dialog("➕ Inserir Nova Despesa")
-def modal_despesa():
-    with st.form("form_desp", clear_on_submit=True):
-        desc = st.text_input("Descrição")
-        tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
-        
-        # AJUSTE DE LARGURA: [2, 4] significa que a Forma de Pagamento é 4x maior que o Valor.
-        # Se o nome "Forma de Pagamento" ainda quebrar, mude o 4 para 5 ou 6.
-        col_v, col_f = st.columns([2, 3]) 
-        
-        with col_v:
-            # O 'step=1.0' faz o CSS identificar que deve esconder os botões +/-
-            valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
-            
-        with col_f:
-            opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-            # Esta caixa vai crescer conforme o número que você colocou lá no st.columns
-            forma_s = st.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
-        
-        st.markdown("---") # Linha de separação
-        
-        col_parc, col_data = st.columns(2) # Divide a linha de baixo ao meio (50% cada)
-        info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
-        
-        parcelas = 1
-        if info_f and "cartão" in str(info_f.get('tipo', '')).lower():
-            parcelas = col_parc.number_input("Parcelas", 1, 12, 1, step=1)
-        
-        data_l = col_data.date_input("Data de Lançamento", format="DD/MM/YYYY")
-        
-        # O botão 'Salvar' vai obedecer automaticamente a cor que você colocou no Item 13 do CSS acima
-        if st.form_submit_button("Salvar Despesa", use_container_width=True):
-            st.session_state.despesas.append({
-                "desc": desc, "tipo_desp": tipo_desp, "valor": valor, 
-                "forma": forma_s, "data": data_l, "vencimento": data_l, "parcelas": parcelas
-            })
+# Título Principal no topo
+st.markdown("## ⚙️ Cadastros Iniciais")
+st.markdown("---") # Linha horizontal para separar o título do conteúdo
+
+# Criando colunas para organizar os botões de cadastro
+# [1, 1, 1] cria 3 colunas iguais. Você pode adicionar mais se precisar de outros cadastros.
+col_cat, col_forma, col_vazia = st.columns([1, 1, 1])
+
+with col_cat:
+    # Botão Inserir Categoria (Usando popover para abrir a caixa de texto)
+    with st.popover("➕ Inserir Categoria", use_container_width=True):
+        nova_cat = st.text_input("Nome da Nova Categoria", placeholder="Ex: Mercado")
+        if st.button("Salvar Categoria", use_container_width=True):
+            if nova_cat and nova_cat not in st.session_state.categorias:
+                st.session_state.categorias.append(nova_cat)
+                st.rerun()
+
+with col_forma:
+    # Botão para Formas de Pagamento (Seguindo a mesma lógica)
+    with st.popover("💳 Inserir Forma de Pagamento", use_container_width=True):
+        nova_forma = st.text_input("Ex: Cartão Nubank")
+        if st.button("Salvar Forma", use_container_width=True):
+            # Aqui você mantém sua lógica de salvar formas de pagamento
+            st.session_state.formas_pagamento.append({"nome": nova_forma})
             st.rerun()
-            
-@st.dialog("💰 Inserir Nova Receita")
-def modal_receita():
-    with st.form("form_receita", clear_on_submit=True):
-        # Campo de descrição da entrada
-        desc = st.text_input("Descrição")
-        
-        # --- AJUSTE DE LAYOUT (COLUNAS) ---
-        # [1, 3] define que a segunda coluna é 3x maior que a primeira
-        col_v, col_d = st.columns([2, 2]) 
-        
-        with col_v:
-            # AQUI O SEGREDO: O 'step=1.0' faz o CSS esconder o sinal de -/+
-            valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
-            
-        with col_d:
-            # Data de recebimento alinhada ao lado do valor
-            data_r = st.date_input("Data de Recebimento", format="DD/MM/YYYY")
-            
-        st.markdown("---") # Linha divisória para estética
-        
-        # O botão 'Salvar' vai herdar a cor que configuramos no Item 13 do seu CSS
-        if st.form_submit_button("Salvar Receita", use_container_width=True):
-            if desc and valor > 0:
-                st.session_state.receitas.append({
-                    "desc": desc, 
-                    "valor": valor, 
-                    "data": data_r
-                })
-                st.success("Receita salva com sucesso!")
-                st.rerun()
-            else:
-                st.error("Preencha a descrição e o valor.")
 
-@st.dialog("💳 Cadastrar Forma de Pagamento")
-def modal_pagamento():
-    with st.form("form_pagto", clear_on_submit=True):
-        # 1. Nome da Forma
-        nome_f = st.text_input("Nome da Forma de Pagamento")
-        
-        # 2. Tipo de Pagamento (Texto livre)
-        tipo_f = st.text_input("Tipo de Pagamento (Ex: Cartão de Crédito, Débito, PIX)")
-        
-        # 3. Nome do Banco
-        banco = st.text_input("Nome do Banco")
-        
-        st.markdown("---")
-        st.write("📅 **Configuração de Vencimento**")
-        
-        # 4. Campos de Fechamento e Vencimento (CORRIGIDOS)
-        col_fech, col_venc = st.columns(2)
-        
-        # Mudamos o step para 1 para evitar o erro de tipos mistos
-        dia_fechamento = col_fech.number_input("Dia de Fechamento", min_value=1, max_value=31, value=1, step=1)
-        dia_vencimento = col_venc.number_input("Dia de Vencimento", min_value=1, max_value=31, value=10, step=1)
-        
-        # O botão de salvar DEVE estar dentro do 'with st.form'
-        if st.form_submit_button("Salvar Forma de Pagamento", use_container_width=True):
-            if nome_f and tipo_f:
-                st.session_state.formas_pagamento.append({
-                    "nome": nome_f, 
-                    "tipo": tipo_f, 
-                    "banco": banco,
-                    "fechamento": dia_fechamento, 
-                    "vencimento": dia_vencimento
-                })
-                st.success(f"Forma '{nome_f}' salva!")
-                st.rerun()
-            else:
-                st.warning("Preencha o Nome e o Tipo de Pagamento.")
-            
-# --- 4. MENU LATERAL ---
-with st.sidebar:
-    st.markdown("## ☰ Navegação")
-    st.divider()
+st.write("") # Adiciona um pequeno espaço vertical (pular linha)
+st.markdown("### 📂 Selecione uma Categoria para Lançar")
 
-    # Voltamos ao seu rádio original, sem scripts de fechamento
-    selecionado = st.radio(
-        "Selecione a tela:",
-        options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
-        key="menu_principal"
-    )
+# --- 3.GERADOR AUTOMÁTICO DE CATEGORIAS ---
+# Este bloco cria os "botões" (expansores) para cada categoria cadastrada
+for cat in st.session_state.categorias:
+    
+    # Cada categoria vira um expansor (que parece um botão largo)
+    with st.expander(f"📁 {cat.upper()}", expanded=False):
+        
+        # Formulário interno para a despesa
+        with st.form(key=f"form_{cat}", clear_on_submit=True):
+            st.write(f"Novo lançamento em **{cat}**")
+            
+            desc = st.text_input("Descrição da Despesa", key=f"desc_{cat}")
+            
+            # Layout de colunas: [1, 4] -> o 4 deixa o campo de pagamento bem largo
+            c1, c2 = st.columns([1, 4])
+            
+            with c1:
+                # 'step=1.0' garante que o sinal de +/- não apareça pelo CSS
+                valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f", key=f"val_{cat}")
+            
+            with c2:
+                # Puxa as formas de pagamento cadastradas no botão ao lado
+                opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
+                forma = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"], key=f"sel_{cat}")
+            
+            data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"dat_{cat}")
+
+            # Botão Salvar que herda a cor VERDE do seu CSS
+            if st.form_submit_button("Confirmar Lançamento", use_container_width=True):
+                # Aqui você prepara os dados para a planilha
+                nova_linha = {
+                    "Categoria": cat,
+                    "Descrição": desc,
+                    "Valor": valor,
+                    "Pagamento": forma,
+                    "Data": data_l
+                }
+                # Salva na memória (e depois chamaremos a função da planilha)
+                st.session_state.despesas.append(nova_linha)
+                st.success(f"Lançamento em {cat} realizado!")
+                st.rerun()
     
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -342,6 +297,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
