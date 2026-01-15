@@ -277,20 +277,23 @@ def modal_receita():
 @st.dialog("💳 Cadastrar Forma de Pagamento")
 def modal_pagamento():
     with st.form("form_pagto", clear_on_submit=True):
-        # Nome da forma (ex: Cartão NuBank)
+        # 1. Nome da Forma (Ex: Cartão Nubank)
         nome_f = st.text_input("Nome da Forma de Pagamento")
         
-        # Campo de texto livre conforme você pediu, ocupando a largura total
-        tipo_f = st.text_input("Tipo de Pagamento (ex: Cartão, Débito, PIX, etc.)")
+        # 2. Tipo de Pagamento (Texto livre e grande)
+        tipo_f = st.text_input("Tipo de Pagamento (Ex: Cartão de Crédito, Débito, PIX)")
         
-        # Campo de banco opcional
-        banco = st.text_input("Nome do Banco (Opcional)")
+        # 3. Nome do Banco
+        banco = st.text_input("Nome do Banco")
         
-        st.divider()
-        st.write("**Configuração de Vencimento (Para Cartões):**")
-        c1, c2 = st.columns(2)
-        fechamento = c1.number_input("Dia do Fechamento", 1, 31, 1, step=0.0)
-        vencimento = c2.number_input("Dia do Vencimento", 1, 31, 10, step=0.0)
+        st.markdown("---")
+        st.write("📅 **Configuração de Vencimento**")
+        st.caption("Preencha se for Cartão de Crédito para o cálculo automático:")
+        
+        # 4. Campos de Fechamento e Vencimento lado a lado
+        col_fech, col_venc = st.columns(2)
+        dia_fechamento = col_fech.number_input("Dia de Fechamento", min_value=1, max_value=31, value=1, step=0.0)
+        dia_vencimento = col_venc.number_input("Dia de Vencimento", min_value=1, max_value=31, value=10, step=0.0)
         
         if st.form_submit_button("Salvar Forma de Pagamento", use_container_width=True):
             if nome_f and tipo_f:
@@ -298,13 +301,13 @@ def modal_pagamento():
                     "nome": nome_f, 
                     "tipo": tipo_f, 
                     "banco": banco,
-                    "fechamento": fechamento, 
-                    "vencimento": vencimento
+                    "fechamento": dia_fechamento, 
+                    "vencimento": dia_vencimento
                 })
-                st.success(f"'{nome_f}' cadastrado!")
+                st.success(f"Forma '{nome_f}' salva com sucesso!")
                 st.rerun()
             else:
-                st.error("Por favor, preencha o Nome e o Tipo.")
+                st.warning("Por favor, preencha o Nome e o Tipo de Pagamento.")
             
 # --- 4. MENU LATERAL ---
 with st.sidebar:
@@ -389,6 +392,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
