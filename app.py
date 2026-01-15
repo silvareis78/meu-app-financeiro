@@ -186,6 +186,7 @@ def modal_lancamento_categoria(categoria_nome):
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
             # Busca os detalhes da forma de pagamento para aplicar a regra do cartão depois
             detalhes_pagto = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_selecionada), None)
+            st.success(f"✅ Despesa em '{cat}' cadastrada com sucesso!")
             
             novo_item = {
                 "Categoria": categoria_nome,
@@ -406,6 +407,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
