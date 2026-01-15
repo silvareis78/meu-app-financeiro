@@ -212,63 +212,99 @@ def modal_despesa():
     with st.form("form_desp", clear_on_submit=True):
         desc = st.text_input("Descrição")
         
-        # Valor pequeno (1) e Forma de Pagamento bem grande (4)
-        col_v, col_f = st.columns([1, 4]) 
+        # 1. Campo Tipo (Fixa/Variável) em destaque
+        tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
+        
+        # 2. Valor pequeno e Forma de Pagamento grande
+        col_v, col_f = st.columns([1, 3]) 
         valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=0.0)
         
         opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
         forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
+        # 3. Lógica de Cartão
         info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
         parcelas = 1
         if info_f and info_f['tipo'] == "Cartão de Crédito":
             parcelas = st.number_input("Número de Parcelas", 1, 12, 1)
         
+        # 4. Data formatada
         data_l = st.date_input("Data de Lançamento", format="DD/MM/YYYY")
         
         if st.form_submit_button("Salvar Despesa", use_container_width=True):
-            # ... (mantenha a mesma lógica de salvamento aqui)
-            st.session_state.despesas.append({"desc": desc, "valor": valor, "forma": forma_s, "data": data_l, "vencimento": data_l, "parcelas": parcelas})
+            # Lógica de vencimento (mesma que já tínhamos)
+            data_venc = data_l
+            if info_f and info_f['tipo'] == "Cartão de Crédito":
+                if data_l.day >= info_f['fechamento']:
+                    prox_mes = data_l.month % 12 + 1
+                    ano_v = data_l.year + (1 if data_l.month == 12 else 0)
+                    data_venc = datetime(ano_v, prox_mes, info_f['vencimento']).date()
+                else:
+                    data_venc = datetime(data_l.year, data_l.month, info_f['vencimento']).date()
+
+            # Salvando com o novo campo 'tipo_desp'
+            st.session_state.despesas.append({
+                "desc": desc, 
+                "tipo_desp": tipo_desp,
+                "valor": valor, 
+                "forma": forma_s, 
+                "data": data_l, 
+                "vencimento": data_venc, 
+                "parcelas": parcelas
+            })
             st.rerun()
 
 @st.dialog("💰 Inserir Nova Receita")
 def modal_receita():
     with st.form("form_rec", clear_on_submit=True):
-        desc_r = st.text_input("Descrição")
+        desc_r = st.text_input("Descrição da Receita")
         
-        # Mesma proporção: Valor (1) e Recebido via (4)
-        col_v, col_f = st.columns([1, 4])
+        # Ajustado para [2, 3] para o Valor não ficar espremido
+        col_v, col_f = st.columns([2, 3])
         valor_r = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=0.0)
         
         opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
         forma_r = col_f.selectbox("Recebido via", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
-        data_r = st.date_input("Data", format="DD/MM/YYYY")
+        data_r = st.date_input("Data do Recebimento", format="DD/MM/YYYY")
         
         if st.form_submit_button("Salvar Receita", use_container_width=True):
-            st.session_state.receitas.append({"desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r})
+            st.session_state.receitas.append({
+                "desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r
+            })
             st.rerun()
 
 @st.dialog("💳 Cadastrar Forma de Pagamento")
 def modal_pagamento():
     with st.form("form_pagto", clear_on_submit=True):
-        nome_f = st.text_input("Nome da Forma (ex: Cartão NuBank)")
+        # Nome da forma (ex: Cartão NuBank)
+        nome_f = st.text_input("Nome da Forma de Pagamento")
         
-        # Campo de tipo agora ocupa a largura total
-        tipo_f = st.selectbox("Tipo de Pagamento", ["Dinheiro/PIX", "Cartão de Crédito", "Débito Automático"])
+        # Campo de texto livre conforme você pediu, ocupando a largura total
+        tipo_f = st.text_input("Tipo de Pagamento (ex: Cartão, Débito, PIX, etc.)")
         
-        banco = ""
-        if tipo_f == "Débito Automático":
-            banco = st.text_input("Nome do Banco para Débito")
+        # Campo de banco opcional
+        banco = st.text_input("Nome do Banco (Opcional)")
         
-        st.write("Configuração de Vencimento:")
+        st.divider()
+        st.write("**Configuração de Vencimento (Para Cartões):**")
         c1, c2 = st.columns(2)
-        fechamento = c1.number_input("Dia do Fechamento", 1, 31, 1)
-        vencimento = c2.number_input("Dia do Vencimento", 1, 31, 10)
+        fechamento = c1.number_input("Dia do Fechamento", 1, 31, 1, step=0.0)
+        vencimento = c2.number_input("Dia do Vencimento", 1, 31, 10, step=0.0)
         
         if st.form_submit_button("Salvar Forma de Pagamento", use_container_width=True):
-            st.session_state.formas_pagamento.append({"nome": nome_f, "tipo": tipo_f, "banco": banco, "fechamento": fechamento, "vencimento": vencimento})
-            st.rerun()
+            if nome_f and tipo_f:
+                st.session_state.formas_pagamento.append({
+                    "nome": nome_f, 
+                    "tipo": tipo_f, 
+                    "banco": banco,
+                    "fechamento": fechamento, 
+                    "vencimento": vencimento
+                })
+                st.success(f"'{nome_f}' cadastrado!")
+                st.rerun()
+            else:
+                st.error("Por favor, preencha o Nome e o Tipo.")
             
 # --- 4. MENU LATERAL ---
 with st.sidebar:
@@ -353,6 +389,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
