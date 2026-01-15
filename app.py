@@ -44,19 +44,21 @@ st.markdown("""
     /* 4. ESTILO DOS CARDS VERTICAIS (EM FILA) */
     .card-vertical {
         /* --- AJUSTE DE COMPRIMENTO (ALTURA) --- */
-        height: 80px !important;                /* Define uma altura fixa para o card */
-        display: flex !important;               /* Necessário para alinhar texto verticalmente */
-        align-items: center !important;         /* Centraliza o texto na altura do card */
-        padding: 12px 25px !important;          /* Aumentando o 2º valor, você ganha respiro lateral */
+        display: flex !important;               /* Ativa o modo flexível */
+        flex-direction: column !important;      /* Empilha o nome e o valor um sob o outro */
+        justify-content: center !important;     /* Centraliza verticalmente (meio da altura) */
+        align-items: center !important;         /* Centraliza horizontalmente (meio da largura) */
+        text-align: center !important;          /* Garante que o texto de cada linha fique no centro */
 
-        /* --- AJUSTE DE LARGURA --- */
-        width: 250px !important;                /* Aumente este valor para o card ficar mais largo */
+        /* --- DIMENSÕES (Ajuste conforme sua preferência) --- */
+        width: 250px !important;                /* Largura do card */
+        height: 100px !important;               /* Altura fixa para dar espaço às duas linhas */
 
         /* --- ESTILO VISUAL --- */
         border-radius: 10px !important;         /* Bordas arredondadas */
         text-align: center !important;          /* Alinha o texto ao centro */
         margin-bottom: 12px !important;         /* Espaço entre um card e outro */
-        font-size: 18px !important;             /* Texto levemente maior */
+        font-size: 25px !important;             /* Texto levemente maior */
         font-weight: 900 !important;            /* Negrito máximo */
         color: #FFFFFF !important;              /* Texto branco */
         box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra */
@@ -190,6 +192,7 @@ st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 
 st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>INTER<br>R$ 320,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>OUTROS<br>R$ 150,00</b></div>', unsafe_allow_html=True)
+
 
 
 
