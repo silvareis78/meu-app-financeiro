@@ -64,7 +64,7 @@ st.markdown("""
 
     /* Largura da caixa aumentada para 170px para caber 'SETEMBRO' e 'FEVEREIRO' */
     div[data-testid="stSelectbox"] {
-        width: 170px !important; 
+        width: 150px !important; 
         margin-top: 5px !important;
     }
     
@@ -167,6 +167,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
