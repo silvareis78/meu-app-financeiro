@@ -179,15 +179,17 @@ with col_ava:
     """, unsafe_allow_html=True)
     st.progress(0.49)
 
-
-# --- 5. DETALHAMENTO DE DESPESAS (ABAIXO DA BARRA) ---
+# --- 5. DETALHAMENTO DE DESPESAS ---
 st.markdown('<p class="titulo-secao">Detalhamento de Despesas</p>', unsafe_allow_html=True)
 
-    st.markdown('<div class="card card-pagar">DESPESA A PAGAR<br>R$ 1.200,00</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card card-prevista">DESPESA PREVISTA<br>R$ 800,00</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card card-cartao">NUBANK<br>R$ 450,00</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card card-cartao">INTER<br>R$ 320,00</div>', unsafe_allow_html=True)
-    st.markdown('<div class="card card-cartao">OUTROS<br>R$ 150,00</div>', unsafe_allow_html=True)
+# Verifique se NÃO existe nenhum espaço antes de 'st.markdown' abaixo:
+st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR: R$ 1.200,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA: R$ 800,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-cartao"><b>NUBANK: R$ 450,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-cartao"><b>INTER: R$ 320,00</b></div>', unsafe_allow_html=True)
+st.markdown('<div class="card-vertical card-cartao"><b>OUTROS: R$ 150,00</b></div>', unsafe_allow_html=True)
+
+
 
 
 
