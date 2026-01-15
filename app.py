@@ -215,49 +215,46 @@ def modal_lancamento_categoria(categoria_nome):
             st.success(f"✅ Lançamento em '{categoria_nome}' cadastrado com sucesso!")
             st.rerun()
 
-# --- FUNÇÃO DO FORMULÁRIO DE RECEITA (TOPO DO SCRIPT) ---
 @st.dialog("💰 Nova Receita")
 def modal_receita_categoria(categoria_nome):
-    with st.form(key=f"form_receita_{categoria_nome}", clear_on_submit=True):
+    # --- CABEÇALHO COM EDIÇÃO ---
+    col_tit, col_edit = st.columns([0.8, 0.2])
+    with col_tit:
         st.subheader(f"Fonte: {categoria_nome}")
-        
-        desc = st.text_input("Descrição da Receita (Ex: Salário Mensal)")
-        
-        # Layout de colunas: [2, 4] conforme seu padrão
+    with col_edit:
+        with st.popover("✏️", help="Corrigir nome da fonte"):
+            novo_nome = st.text_input("Novo nome da fonte", value=categoria_nome)
+            if st.button("Salvar Alteração", key="btn_edit_rec"):
+                if novo_nome and novo_nome != categoria_nome:
+                    idx = st.session_state.categorias_receita.index(categoria_nome)
+                    st.session_state.categorias_receita[idx] = novo_nome
+                    st.success("Nome da fonte atualizado!")
+                    st.rerun()
+
+    # --- FORMULÁRIO ---
+    with st.form(key=f"form_receita_{categoria_nome}", clear_on_submit=True):
+        desc = st.text_input("Descrição da Receita")
         c1, c2 = st.columns([2, 4])
         with c1:
-            valor = st.number_input("Valor Recebido", min_value=0.0, step=1.0, format="%.2f", key=f"val_r_{categoria_nome}")
+            valor = st.number_input("Valor", min_value=0.0, format="%.2f", key=f"v_r_{categoria_nome}")
         with c2:
-            # Puxa as formas de pagamento cadastradas
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"], key=f"sel_r_{categoria_nome}")
+            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"], key=f"f_r_{categoria_nome}")
         
-        data_r = st.date_input("Data do Recebimento", format="DD/MM/YYYY", key=f"dat_r_{categoria_nome}")
+        data_r = st.date_input("Data", format="DD/MM/YYYY", key=f"d_r_{categoria_nome}")
         
-        st.markdown("---")
-        
-        # Botão Salvar
         if st.form_submit_button("Confirmar Receita", use_container_width=True):
             nova_rec = {
                 "Tipo": "Receita",
                 "Categoria": categoria_nome,
                 "Descrição": desc,
-                "Valor": valor, 
+                "Valor": valor,
                 "Pagamento": forma,
                 "Data": data_r.strftime("%d/%m/%Y")
             }
-            
-            # Garante que a lista de despesas/transações exista
-            if 'despesas' not in st.session_state:
-                st.session_state.despesas = []
-            
-            # Adiciona na lista geral
+            if 'despesas' not in st.session_state: st.session_state.despesas = []
             st.session_state.despesas.append(nova_rec)
-            
-            # Mensagem de sucesso com a variável correta
             st.success(f"✅ Receita de '{categoria_nome}' cadastrada com sucesso!")
-            
-            # Reinicia para fechar o diálogo e atualizar a tela
             st.rerun()
 
 # --- FUNÇÃO ATUALIZADA: GERENCIAR FORMAS DE PAGAMENTO (TOPO DO SCRIPT) ---
@@ -432,6 +429,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
