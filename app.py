@@ -4,131 +4,133 @@ import pandas as pd
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(page_title="Financeiro Pro", layout="wide", initial_sidebar_state="auto")
 
-# 2. CSS CUSTOMIZADO
+# 2. CSS 
 st.markdown("""
     <script>
     function fecharBotoes() {
+        // Seleciona botões de menu, botões de deploy e footer do Streamlit
         const botoes = document.querySelectorAll('button[title="Manage app"], .stActionButton, .stDeployButton, footer, #MainMenu, header');
+        // Remove cada elemento encontrado para limpar a tela
         botoes.forEach(el => el.remove());
     }
+    // Executa a função a cada 500 milissegundos para garantir que os botões não voltem
     setInterval(fecharBotoes, 500);
     </script>
 
     <style>
-    /* 1. CONFIGURAÇÃO GERAL */
-    .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
-    header, footer { visibility: hidden; display: none !important; }
+    /* 1. CONFIGURAÇÃO GERAL DA PÁGINA */
+    .block-container { padding-top: 1rem !important; margin-top: -20px !important; } /* Ajusta o respiro do topo */
+    header, footer { visibility: hidden; display: none !important; } /* Esconde o cabeçalho e rodapé padrão */
 
-    /* 2. CARDS (Conforme você ajustou: Grandes e Espaçados) */
+    /* 2. CARDS PRINCIPAIS (RECEITA, DESPESA, SALDO) */
     .card {
-        padding: 30px 45px !important; 
-        font-size: 20px !important;
-        border-radius: 5px;
-        color: white !important;
-        font-weight: bold;
-        text-align: center;
-        line-height: 1.1 !important;
+        padding: 30px 45px !important;        /* Tamanho interno do card (espaçamento) */
+        font-size: 20px !important;           /* Tamanho da fonte do texto principal */
+        border-radius: 5px;                    /* Arredondamento das bordas */
+        color: white !important;               /* Cor do texto (sempre branco) */
+        font-weight: bold;                     /* Texto em negrito */
+        text-align: center;                    /* Centraliza o texto horizontalmente */
+        line-height: 1.1 !important;           /* Espaçamento entre as linhas do texto */
     }
-    .receita { background-color: #008080; } 
-    .despesa { background-color: #B22222; } 
-    .saldo   { background-color: #DAA520; } 
+    .receita { background-color: #008080; }    /* Cor Verde Petróleo para Receita */
+    .despesa { background-color: #B22222; }    /* Cor Vermelha para Despesa */
+    .saldo   { background-color: #DAA520; }    /* Cor Dourada para Saldo */
 
-    /* Cores Fortes e Sólidas para tirar o esbranquiçado */
-    .card-pagar { background-color: #E65100 !important; } 
-    .card-prevista { background-color: #374151 !important; } 
-    .card-cartao { background-color: #0747A6 !important; } 
+    /* 3. CORES DOS CARDS VERTICAIS (DETALHAMENTO) */
+    .card-pagar { background-color: #E65100 !important; }    /* Laranja Sólido (A Pagar) */
+    .card-prevista { background-color: #374151 !important; } /* Grafite Sólido (Prevista) */
+    .card-cartao { background-color: #0747A6 !important; }   /* Azul Royal (Cartões) */
 
-    /* CORREÇÃO: Faltava a abertura de chave '{' após .card-vertical */
+    /* 4. ESTILO DOS CARDS VERTICAIS (EM FILA) */
     .card-vertical {
-        padding: 12px 20px !important;
-        border-radius: 10px !important;
-        text-align: left !important;
-        margin-bottom: 10px !important;
-        width: 350px !important;
-        font-size: 20px !important; 
-        font-weight: 900 !important; 
-        color: #FFFFFF !important;  
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important;
-        display: block !important;
+        /* --- AJUSTE DE COMPRIMENTO (ALTURA) --- */
+        height: 80px !important;                /* Define uma altura fixa para o card */
+        display: flex !important;               /* Necessário para alinhar texto verticalmente */
+        align-items: center !important;         /* Centraliza o texto na altura do card */
+        padding: 12px 25px !important;          /* Aumentando o 2º valor, você ganha respiro lateral */
+
+        /* --- AJUSTE DE LARGURA --- */
+        width: 200px !important;                /* Aumente este valor para o card ficar mais largo */
+
+        /* --- ESTILO VISUAL --- */
+        border-radius: 10px !important;         /* Bordas arredondadas */
+        text-align: left !important;            /* Alinha o texto à esquerda */
+        margin-bottom: 12px !important;         /* Espaço entre um card e outro */
+        font-size: 22px !important;             /* Texto levemente maior */
+        font-weight: 900 !important;            /* Negrito máximo */
+        color: #FFFFFF !important;              /* Texto branco */
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra */
     }
 
-    /* 3. AVATAR E FRASE (CORRIGIDO ERRO DE DIGITAÇÃO EM 'COLOR') */
+    /* 5. AVATAR E MENSAGEM DO TOPO */
     .avatar-container {
-        display: flex;
-        align-items: center;
-        gap: 6px;             
-        font-size: 10px;       
-        line-height: 1.1;
-        margin-top: 15px;
-        color: #1E293B !important; /* Estava 'olor' */
+        display: flex;                         /* Alinha imagem e texto lado a lado */
+        align-items: center;                   /* Centraliza verticalmente foto e texto */
+        gap: 6px;                              /* Espaço entre a foto e a frase */
+        font-size: 10px;                       /* Tamanho pequeno da fonte */
+        line-height: 1.1;                      /* Altura da linha do texto */
+        margin-top: 15px;                      /* Distância do topo */
+        color: #1E293B !important;             /* Cor cinza escuro para o texto */
     }
-
     .img-avatar {
-        width: 30px !important;  
-        height: 30px !important;
-        border-radius: 50% !important; 
-        object-fit: cover !important;
+        width: 30px !important;                /* Largura da imagem do avatar */
+        height: 30px !important;               /* Altura da imagem do avatar */
+        border-radius: 50% !important;         /* Faz a imagem ficar redonda */
+        object-fit: cover !important;          /* Não distorce a imagem ao redimensionar */
     }
 
-    /* 4. ESTILO DA BARRA GROSSA */
+    /* 6. BARRAS DIVISÓRIAS (PRETAS) */
     .barra-preta-grossa {
-        border-bottom: 6px solid #000000 !important;
-        margin-bottom: 20px !important;
-        margin-top: 10px !important;
-        display: block !important;
-        width: 100% !important;
+        border-bottom: 6px solid #000000 !important; /* Estilo da primeira barra */
+        margin-bottom: 20px !important;               /* Espaço abaixo da barra */
+        margin-top: 10px !important;                  /* Espaço acima da barra */
+        display: block !important;                    /* Garante visualização total */
+        width: 100% !important;                       /* Largura total da tela */
+    }
+    .barra-afastada {
+        border-bottom: 6px solid #000000 !important; /* Estilo da segunda barra */
+        width: 100% !important;                       /* Largura total da tela */
+        margin-top: 70px !important;                  /* Distância de 3cm do conteúdo acima */
+        margin-bottom: 20px !important;               /* Espaço abaixo da barra */
+        display: block !important;                    /* Garante visualização total */
     }
 
-    /* 5. SEGUNDA BARRA COM AFASTAMENTO */
-    .barra-afastada {
-        border-bottom: 6px solid #000000 !important; 
-        width: 100% !important;
-        margin-top: 70px !important; 
-        margin-bottom: 20px !important;
-        display: block !important;
-    }
-    
-    /* 6. ESPAÇO PARA DESCER OS CARDS */
+    /* 7. ESPAÇAMENTO COMPLEMENTAR */
     .espaco-cards {
-        margin-top: 55px !important; 
+        margin-top: 55px !important;                  /* Empurra os cards principais para baixo */
     }   
 
-    /* 7. CAIXA DE COMBINAÇÃO (SELECTBOX) */
+    /* 8. CAIXAS DE SELEÇÃO (MÊS E ANO) */
     [data-testid="stWidgetLabel"] p {
-        font-size: 18px !important; 
-        font-weight: bold !important;
-        color: #000000 !important;
-        margin-bottom: -5px !important;
+        font-size: 18px !important;                   /* Tamanho da palavra 'Mês' e 'Ano' */
+        font-weight: bold !important;                 /* Títulos em negrito */
+        color: #000000 !important;                    /* Cor preta sólida */
+        margin-bottom: -5px !important;               /* Aproxima o título da caixa */
     }
-
     div[data-testid="stSelectbox"] {
-        width: 150px !important; 
-        margin-top: 5px !important;
+        width: 150px !important;                      /* Largura da caixa de seleção */
+        margin-top: 5px !important;                   /* Ajuste de posição */
     }
-    
     div[data-baseweb="select"] > div {
-        text-align: center !important;
-        justify-content: center !important;
-        display: flex !important;
-        align-items: center !important;
-        padding-left: 1px !important; 
-        padding-right: 10px !important;
-        height: 35px !important;
-        min-height: 35px !important;
+        text-align: center !important;                /* Centraliza o texto do mês/ano */
+        justify-content: center !important;           /* Alinha ao centro */
+        display: flex !important;                     /* Ativa o modo flexível */
+        align-items: center !important;               /* Centralização vertical */
+        padding-left: 1px !important;                 /* Ajuste fino lateral */
+        padding-right: 10px !important;               /* Espaço para a seta */
+        height: 35px !important;                      /* Altura da caixa */
+        min-height: 35px !important;                  /* Altura mínima da caixa */
     }
-    
     div[data-baseweb="select"] [data-testid="stSelectbox"] div:last-child {
-        margin-right: -1px !important; 
+        margin-right: -1px !important;                /* Cola a seta no canto direito */
     }
-
     div[data-baseweb="select"] span {
-        white-space: nowrap !important;
-        overflow: visible !important;
-        font-size: 14px !important;
+        white-space: nowrap !important;               /* Impede quebra de linha no texto */
+        overflow: visible !important;                 /* Permite ver o texto todo */
+        font-size: 14px !important;                   /* Tamanho da fonte interna */
     }
-
     div[data-testid="stMarkdownContainer"] p {
-        color: #1E293B;
+        color: #1E293B;                               /* Cor padrão para parágrafos Markdown */
     }
     </style>
     """, unsafe_allow_html=True)
@@ -188,6 +190,7 @@ st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA: R$ 80
 st.markdown('<div class="card-vertical card-cartao"><b>NUBANK: R$ 450,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>INTER: R$ 320,00</b></div>', unsafe_allow_html=True)
 st.markdown('<div class="card-vertical card-cartao"><b>OUTROS: R$ 150,00</b></div>', unsafe_allow_html=True)
+
 
 
 
