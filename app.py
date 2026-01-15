@@ -248,31 +248,7 @@ if selecionado == "Painel Inicial":
     st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
     st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-elif selecionado == "Despesa":
-    st.markdown("## 💸 Gestão de Despesas") # Título da tela de despesas
-    st.info("Aqui você poderá cadastrar novas despesas.")
 
-elif selecionado == "Receita":
-    st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
-    st.success("Aqui você poderá cadastrar novas receitas.")
-
-elif selecionado == "Cadastros Iniciais":
-    st.markdown("## ⚙️ Gestão de Cadastros")
-
-    # Botões lado a lado
-    col_btn1, col_btn2, col_btn3 = st.columns(3)
-
-    if col_btn1.button("➕ Inserir Despesa", use_container_width=True):
-        modal_despesa()
-
-    if col_btn2.button("💰 Inserir Receita", use_container_width=True):
-        modal_receita()
-
-    if col_btn3.button("💳 Forma de Pagamento", use_container_width=True):
-        modal_pagamento()
-
-    st.divider()
-    st.write("### 📋 Lançamentos Recentes")
     
     # Exibição dos Cards embaixo (Mantendo seu estilo)
     for d in reversed(st.session_state.despesas):
