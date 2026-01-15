@@ -1,40 +1,10 @@
-import streamlit as st
-import pandas as pd
-from streamlit_option_menu import option_menu
+import streamlit as st # Importa a biblioteca principal do Streamlit
+from streamlit_option_menu import option_menu # Importa o componente do menu lateral
 
-# --- CONFIGURAÇÃO DO MENU LATERAL ---
-with st.sidebar:
-    # O componente option_menu cria as 3 barras e gerencia o clique
-    selecionado = option_menu(
-        menu_title="Menu Principal",  # Título do topo do menu
-        options=["Home", "Receitas", "Despesas", "Cartões", "Configurações"], # Nome das telas
-        icons=["house", "cash-stack", "receipt", "credit-card", "gear"], # Ícones (Bootstrap Icons)
-        menu_icon="cast", # Ícone do título do menu
-        default_index=0, # Tela que começa selecionada
-        styles={
-            "container": {"padding": "5px", "background-color": "#F8FAFC"},
-            "icon": {"color": "#1E293B", "font-size": "20px"}, 
-            "nav-link": {"font-size": "16px", "text-align": "left", "margin":"0px", "--hover-color": "#E2E8F0"},
-            "nav-link-selected": {"background-color": "#0747A6"}, # Cor quando selecionado
-        }
-    )
+# 1. CONFIGURAÇÃO DA PÁGINA (Sempre a primeira linha de código)
+st.set_page_config(layout="wide", page_title="App Financeiro")
 
-# --- LÓGICA DE TROCA DE TELAS ---
-if selecionado == "Home":
-    st.write("### Você está na Home")
-    # Aqui você coloca todo aquele código dos cards que fizemos
-    
-elif selecionado == "Receitas":
-    st.write("### Tela de Receitas")
-    # Código da tela de receitas aqui
-
-# E assim por diante para as outras telas...
-
-
-# 1. CONFIGURAÇÃO DA PÁGINA
-st.set_page_config(page_title="Financeiro Pro", layout="wide", initial_sidebar_state="auto")
-
-# 2. CSS 
+# 2. CSS CUSTOMIZADO
 st.markdown("""
     <script>
     function fecharBotoes() {
@@ -73,25 +43,16 @@ st.markdown("""
 
     /* 4. ESTILO DOS CARDS VERTICAIS (EM FILA) */
     .card-vertical {
-        /* --- AJUSTE DE COMPRIMENTO (ALTURA) --- */
-        display: flex !important;               /* Ativa o modo flexível */
-        flex-direction: column !important;      /* Empilha o nome e o valor um sob o outro */
-        justify-content: center !important;     /* Centraliza verticalmente (meio da altura) */
-        align-items: center !important;         /* Centraliza horizontalmente (meio da largura) */
-        text-align: center !important;          /* Garante que o texto de cada linha fique no centro */
-
-        /* --- DIMENSÕES (Ajuste conforme sua preferência) --- */
-        width: 200px !important;                /* Largura do card */
-        height: 90px !important;               /* Altura fixa para dar espaço às duas linhas */
-
-        /* --- ESTILO VISUAL --- */
-        border-radius: 10px !important;         /* Bordas arredondadas */
-        text-align: center !important;          /* Alinha o texto ao centro */
-        margin-bottom: 12px !important;         /* Espaço entre um card e outro */
-        font-size: 18px !important;             /* Texto levemente maior */
-        font-weight: 900 !important;            /* Negrito máximo */
-        color: #FFFFFF !important;              /* Texto branco */
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra */
+        padding: 12px 20px !important;         /* Espaçamento interno reduzido */
+        border-radius: 10px !important;        /* Bordas mais arredondadas */
+        text-align: left !important;           /* Alinha o texto à esquerda */
+        margin-bottom: 10px !important;        /* Espaço entre um card e outro */
+        width: 350px !important;               /* Largura fixa para os cards verticais */
+        font-size: 20px !important;            /* Texto grande para facilitar leitura */
+        font-weight: 900 !important;           /* Negrito extra forte */
+        color: #FFFFFF !important;             /* Texto branco para contraste */
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra para profundidade */
+        display: block !important;             /* Garante que ocupem a linha toda */
     }
 
     /* 5. AVATAR E MENSAGEM DO TOPO */
@@ -167,61 +128,54 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- CABEÇALHO ---
-t1, t2 = st.columns([5, 1])
-with t1: 
-    st.markdown("## 🏠 Painel Inicial")
-with t2: 
-    if st.button("Sair"):
-        st.session_state.logged_in = False
-        st.rerun()
+# 3. MENU LATERAL (Configuração conforme sua ordem)
+with st.sidebar:
+    selecionado = option_menu(
+        menu_title="Navegação", 
+        options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
+        icons=["house", "dash-circle", "plus-circle", "credit-card", "clipboard-plus", "gear"],
+        menu_icon="list", default_index=0,
+        styles={"nav-link-selected": {"background-color": "#0747A6"}}
+    )
 
-st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
+# 4. LÓGICA DAS TELAS
+if selecionado == "Painel Inicial":
+    st.markdown("## 🏠 Painel Inicial") # Título da tela
+    st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True) # Primeira barra
 
-# --- LINHA ÚNICA ---
-col_espaco, col_filtro, col_espaco, col_rec, col_espaco, col_desp, col_espaco, col_sal, col_espaco, col_ava, col_espaco = st.columns([0.3, 1, 0.3, 1.3, 0.3, 1.3, 0.3, 1.3, 0.3, 2, 0.3])
+    # Definição das colunas (Cards Principais e Avatar)
+    col_filtro, col_rec, col_desp, col_sal, col_vazio, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 2.5, 2.0])
 
-with col_filtro:
-    meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-             "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-    
-    # Certifique-se de que estas linhas abaixo tenham exatamente o mesmo alinhamento
-    st.selectbox("Mês:", meses, index=7, key="combo_mes")
-    st.selectbox("Ano:", ["2024", "2025", "2026"], index=0, key="combo_ano")
+    with col_filtro: # Coluna do Mês/Ano
+        st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0)
+        st.selectbox("Ano", ["2026", "2027", "2028"], index=0)
 
-st.markdown('<div class="barra-afastada"></div>', unsafe_allow_html=True)
+    with col_rec: # Card Receita
+        st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
 
-with col_rec:
-    st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True) # ADICIONE ISSO
-    st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
+    with col_desp: # Card Despesa
+        st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
 
-with col_desp:
-    st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True) # ADICIONE ISSO
-    st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+    with col_sal: # Card Saldo
+        st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True)
+        st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
 
-with col_sal:
-    st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True) # ADICIONE ISSO
-    st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
-    
-with col_ava:
-    # Avatar e frase 
-    st.markdown("""
-        <div class="avatar-container">
-            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="img-avatar">
-            <div>Opa! Você gastou <b>49%</b> do que recebeu!</div>
-        </div>
-    """, unsafe_allow_html=True)
-    st.progress(0.49)
+    with col_ava: # Avatar do Bonequinho
+        st.markdown('<div class="avatar-container"><img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="img-avatar"><div>Opa! Você gastou 49% do recebido!</div></div>', unsafe_allow_html=True)
+        st.progress(0.49) # Barra de progresso do avatar
 
-# --- 5. DETALHAMENTO DE DESPESAS ---
-st.markdown('<p class="titulo-secao">Detalhamento de Despesas</p>', unsafe_allow_html=True)
+    st.markdown('<div class="barra-afastada"></div>', unsafe_allow_html=True) # Segunda barra (3cm abaixo)
 
-# Verifique se NÃO existe nenhum espaço antes de 'st.markdown' abaixo:
-st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-cartao"><b>INTER<br>R$ 320,00</b></div>', unsafe_allow_html=True)
-st.markdown('<div class="card-vertical card-cartao"><b>OUTROS<br>R$ 150,00</b></div>', unsafe_allow_html=True)
+    # Detalhamento Vertical Centralizado
+    st.markdown("### Detalhamento de Despesas")
+    st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
+    st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+
+else:
+    st.write(f"### Bem-vindo à tela: {selecionado}") # Mensagem para as outras telas
 
 
 
