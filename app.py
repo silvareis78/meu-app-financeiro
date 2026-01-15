@@ -1,5 +1,16 @@
 import streamlit as st # Importa a biblioteca principal do Streamlit
+import streamlit as st
+import pandas as pd
+from datetime import datetime, timedelta
 
+# Inicializa as listas de dados se não existirem
+if 'formas_pagamento' not in st.session_state:
+    st.session_state.formas_pagamento = []
+if 'despesas' not in st.session_state:
+    st.session_state.despesas = []
+if 'receitas' not in st.session_state:
+    st.session_state.receitas = []
+    
 # 1. CONFIGURAÇÃO DA PÁGINA
 st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout largo e título da aba
 
@@ -242,6 +253,121 @@ elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
 
+if selecionado == "Cadastros Iniciais":
+    st.title("⚙️ Cadastros Iniciais")
+    
+    # --- SEÇÃO 1: FORMAS DE PAGAMENTO ---
+    with st.expander("💳 Cadastrar Formas de Pagamento", expanded=False):
+        with st.form("form_pagamento", clear_on_submit=True):
+            nome_forma = st.text_input("Nome da Forma de Pagamento (ex: Dinheiro, Cartão Visa)")
+            tipo_forma = st.selectbox("Tipo", ["Dinheiro/PIX", "Cartão de Crédito", "Débito"])
+            
+            # Campos específicos para Cartão de Crédito
+            col1, col2 = st.columns(2)
+            dia_fechamento = col1.number_input("Dia de Fechamento", min_value=1, max_value=31, value=1)
+            dia_vencimento = col2.number_input("Dia de Vencimento", min_value=1, max_value=31, value=10)
+            
+            if st.form_submit_button("Salvar Forma de Pagamento"):
+                nova_forma = {
+                    "nome": nome_forma,
+                    "tipo": tipo_forma,
+                    "fechamento": dia_fechamento,
+                    "vencimento": dia_vencimento
+                }
+                st.session_state.formas_pagamento.append(nova_forma)
+                st.success(f"'{nome_forma}' cadastrado com sucesso!")
+
+    st.divider()
+
+    # --- SEÇÃO 2: DESPESAS ---
+    col_desp, col_rec = st.columns(2)
+
+    with col_desp:
+        if st.button("➕ Inserir Despesa", use_container_width=True):
+            st.session_state.abrir_despesa = True
+
+        if st.session_state.get('abrir_despesa', False):
+            with st.form("form_despesa"):
+                desc = st.text_input("Descrição")
+                valor = st.number_input("Valor", min_value=0.0, format="%.2f")
+                
+                # Pega as formas de pagamento cadastradas para o Selectbox
+                opcoes_pagto = [f['nome'] for f in st.session_state.formas_pagamento]
+                forma_sel = st.selectbox("Forma de Pagamento", options=opcoes_pagto if opcoes_pagto else ["Cadastre uma forma primeiro"])
+                
+                # Campo de parcelas só aparece se for Cartão
+                info_forma = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_sel), None)
+                parcelas = 1
+                if info_forma and info_forma['tipo'] == "Cartão de Crédito":
+                    parcelas = st.number_input("Número de Parcelas", min_value=1, value=1)
+                
+                data_lan = st.date_input("Data de Lançamento")
+                
+                if st.form_submit_button("Salvar Despesa"):
+                    # LÓGICA DE VENCIMENTO DO CARTÃO
+                    data_vencimento_final = data_lan
+                    if info_forma and info_forma['tipo'] == "Cartão de Crédito":
+                        # Se o dia da compra for >= fechamento, vai para o mês seguinte
+                        if data_lan.day >= info_forma['fechamento']:
+                            # Vai para o próximo mês
+                            proximo_mes = data_lan.month % 12 + 1
+                            ano = data_lan.year + (1 if data_lan.month == 12 else 0)
+                            data_vencimento_final = datetime(ano, proximo_mes, info_forma['vencimento']).date()
+                        else:
+                            # Vence no mês atual
+                            data_vencimento_final = datetime(data_lan.year, data_lan.month, info_forma['vencimento']).date()
+
+                    st.session_state.despesas.append({
+                        "desc": desc, "valor": valor, "forma": forma_sel, 
+                        "data": data_lan, "vencimento": data_vencimento_final, "parcelas": parcelas
+                    })
+                    st.session_state.abrir_despesa = False
+                    st.rerun()
+
+    # --- SEÇÃO 3: RECEITAS ---
+    with col_rec:
+        if st.button("💰 Inserir Receita", use_container_width=True):
+            st.session_state.abrir_receita = True
+
+        if st.session_state.get('abrir_receita', False):
+            with st.form("form_receita"):
+                desc_r = st.text_input("Descrição da Receita")
+                valor_r = st.number_input("Valor", min_value=0.0, format="%.2f")
+                opcoes_pagto = [f['nome'] for f in st.session_state.formas_pagamento]
+                forma_r = st.selectbox("Recebido via", options=opcoes_pagto if opcoes_pagto else ["Cadastre uma forma primeiro"])
+                data_r = st.date_input("Data do Recebimento")
+                
+                if st.form_submit_button("Salvar Receita"):
+                    st.session_state.receitas.append({
+                        "desc": desc_r, "valor": valor_r, "forma": forma_r, "data": data_r
+                    })
+                    st.session_state.abrir_receita = False
+                    st.rerun()
+
+    # --- EXIBIÇÃO DOS CARDS (ABAIXO DOS BOTÕES) ---
+    st.subheader("📋 Últimos Lançamentos")
+    
+    # Listar Despesas
+    for desp in reversed(st.session_state.despesas):
+        st.markdown(f"""
+            <div class="card-vertical card-despesa" style="background-color: #B22222; margin-bottom: 10px; padding: 15px; border-radius: 10px;">
+                <span style="font-size: 14px;">📉 DESPESA</span><br>
+                <b>{desp['desc']}</b><br>
+                R$ {desp['valor']:.2f} | {desp['forma']}<br>
+                <small>Vencimento: {desp['vencimento'].strftime('%d/%m/%Y')}</small>
+            </div>
+        """, unsafe_allow_html=True)
+
+    # Listar Receitas
+    for rec in reversed(st.session_state.receitas):
+        st.markdown(f"""
+            <div class="card-vertical card-receita" style="background-color: #008080; margin-bottom: 10px; padding: 15px; border-radius: 10px;">
+                <span style="font-size: 14px;">📈 RECEITA</span><br>
+                <b>{rec['desc']}</b><br>
+                R$ {rec['valor']:.2f} | {rec['forma']}<br>
+                <small>Data: {rec['data'].strftime('%d/%m/%Y')}</small>
+            </div>
+        """, unsafe_allow_html=True)
 
 
 
