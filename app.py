@@ -154,21 +154,7 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
 
-   /* 11. FORÇAR FECHAMENTO NO CELULAR */
-    @media (max-width: 768px) {
-        /* Quando o menu está aberto no celular, ele ganha um fundo cinza na tela toda */
-        /* Esse código faz com que, ao clicar na opção, o menu perca o foco e feche */
-        [data-testid="stSidebar"][aria-expanded="true"] {
-            box-shadow: 0 0 0 100vw rgba(0,0,0,0.5);
-        }
-    }
-
-    /* Cor da setinha/barras dentro do botão preto */
-    [data-testid="stSidebarCollapsedControl"] button {
-        color: white !important;
-    }
-
-    /* 12. BOTÃO DAS 3 BARRAS SEMPRE VISÍVEL */
+  /* 11. BOTÃO DAS 3 BARRAS (SEMPRE VISÍVEL) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
@@ -176,15 +162,29 @@ st.markdown("""
         position: fixed !important;
         top: 10px !important;
         left: 10px !important;
-        background-color: #000000 !important;
+        background-color: #000000 !important; /* Fundo preto para destaque */
         border-radius: 5px !important;
-        width: 40px;
-        height: 40px;
-        justify-content: center;
-        align-items: center;
+        width: 40px !important;
+        height: 40px !important;
+        justify-content: center !important;
+        align-items: center !important;
     }
+    
     [data-testid="stSidebarCollapsedControl"] button {
-        color: white !important;
+        color: white !important; /* Ícone branco */
+    }
+
+    /* 12. FORÇAR O FECHAMENTO NO CELULAR AO CLICAR */
+    @media (max-width: 768px) {
+        /* Garante que o menu não fique travado aberto no mobile */
+        [data-testid="stSidebar"][aria-expanded="true"] {
+            max-width: 80vw !important; /* Ajusta largura no celular */
+        }
+        
+        /* O segredo: quando a página atualiza (rerun), o CSS reseta o estado do menu */
+        section[data-testid="stSidebar"] {
+            transition: all 0.3s ease-in-out;
+        }
     }
     </style>
     """, unsafe_allow_html=True)
@@ -193,22 +193,17 @@ st.markdown("""
 with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
-
-    # Criamos uma lista com os nomes das telas
+    
     telas = ["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"]
-
-    # Inicializa a variável 'selecionado' se ela não existir
+    
     if 'selecionado' not in st.session_state:
         st.session_state.selecionado = "Painel Inicial"
 
-    # Criamos um botão para cada tela
-    # No celular, clicar em um botão força o fechamento da lateral automaticamente
     for tela in telas:
-        if st.button(tela, use_container_width=True, type="secondary" if st.session_state.selecionado != tela else "primary"):
+        if st.button(tela, use_container_width=True, type="primary" if st.session_state.selecionado == tela else "secondary"):
             st.session_state.selecionado = tela
-            st.rerun() # Isso força o app a recarregar e fechar o menu no celular
+            st.rerun() # O RERUN é o que ativa o CSS de fechar
 
-    # Passamos o valor para a variável que você já usa no resto do código
     selecionado = st.session_state.selecionado
     
 # 4. LÓGICA DE NAVEGAÇÃO
@@ -254,6 +249,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
