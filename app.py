@@ -52,10 +52,9 @@ st.markdown("""
         width: 100% !important;
     }
 
-    /* 5. CAIXA DE COMBINAÇÃO (SELECTBOX) - Unificado aqui */
-    div[data-testid="stSelectbox"] { margin-top: -15px !important; }
-
-    /* Estilo do nome 'Mês' e 'Ano' que fica em cima */
+    /* 5. CAIXA DE COMBINAÇÃO (SELECTBOX) - CORRIGIDO */
+    
+    /* Estilo do nome 'Mês' e 'Ano' (Rótulo) */
     [data-testid="stWidgetLabel"] p {
         font-size: 18px !important; 
         font-weight: bold !important;
@@ -63,20 +62,32 @@ st.markdown("""
         margin-bottom: -5px !important;
     }
 
-    /* Ajusta o espaçamento geral do seletor */
+    /* Largura da caixa aumentada para 170px para caber 'SETEMBRO' e 'FEVEREIRO' */
     div[data-testid="stSelectbox"] {
-        width: 140px !important;  /* Diminui a largura */
-        margin-top: 0px !important;
+        width: 170px !important; 
+        margin-top: 5px !important;
     }
     
+    /* Centralização real do texto compensando a seta lateral */
     div[data-baseweb="select"] > div {
         text-align: center !important;
         justify-content: center !important;
         display: flex !important;
-        padding-right: 30px !important; 
+        align-items: center !important;
+        /* Adicionamos padding igual nos dois lados para o texto ficar no meio real */
+        padding-left: 30px !important; 
+        padding-right: 30px !important;
+        height: 35px !important;
+        min-height: 35px !important;
     }
 
-      /* Cor do texto nos parágrafos */
+    /* Garante que o texto não tente "pular" de linha ou se esconder */
+    div[data-baseweb="select"] span {
+        white-space: nowrap !important;
+        overflow: visible !important;
+    }
+
+    /* Cor do texto nos parágrafos gerais */
     div[data-testid="stMarkdownContainer"] p {
         color: #1E293B;
     }
@@ -145,6 +156,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
