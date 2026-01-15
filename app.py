@@ -257,62 +257,51 @@ def modal_receita_categoria(categoria_nome):
             st.success(f"✅ Receita de '{categoria_nome}' cadastrada com sucesso!")
             st.rerun()
 
-# --- FUNÇÃO ATUALIZADA: GERENCIAR FORMAS DE PAGAMENTO (TOPO DO SCRIPT) ---
 @st.dialog("💳 Gerenciar Formas de Pagamento")
 def modal_forma_pagamento():
+    # --- PARTE 1: CADASTRO NOVO ---
     with st.form(key="form_cadastro_pagamento", clear_on_submit=True):
         st.write("### Cadastrar Nova")
-        
-        # Inputs de texto livre conforme solicitado
         nova_f = st.text_input("Nome da Forma (Ex: Nubank)")
-        tipo_forma = st.text_input("Tipo da Forma (Ex: Cartão de Crédito, Débito, Pix)")
+        tipo_f = st.text_input("Tipo (Ex: Cartão de Crédito)")
         
-        st.info("Se for Cartão de Crédito, preencha os dias abaixo. Caso contrário, deixe em 0.")
-        
+        st.info("Para Cartão, preencha os dias. Para à vista, deixe 0.")
         col1, col2 = st.columns(2)
-        with col1:
-            fechamento = st.number_input("Dia Fechamento", min_value=0, max_value=31, value=0)
-        with col2:
-            vencimento = st.number_input("Dia Vencimento", min_value=0, max_value=31, value=0)
-        
-        st.markdown("---")
+        fech = col1.number_input("Dia Fechamento", 0, 31, 0)
+        venc = col2.number_input("Dia Vencimento", 0, 31, 0)
         
         if st.form_submit_button("Confirmar Cadastro", use_container_width=True):
             if nova_f:
-                if 'formas_pagamento' not in st.session_state:
-                    st.session_state.formas_pagamento = []
-                
-                # Salva os dados na memória
+                if 'formas_pagamento' not in st.session_state: st.session_state.formas_pagamento = []
                 st.session_state.formas_pagamento.append({
-                    "nome": nova_f,
-                    "tipo": tipo_forma,
-                    "fechamento": fechamento,
-                    "vencimento": vencimento
+                    "nome": nova_f, "tipo": tipo_f, "fechamento": fech, "vencimento": venc
                 })
-                
-                # Mensagem de sucesso ANTES do rerun
-                st.success(f"✅ Forma de Pagamento '{nova_f}' cadastrada com sucesso!")
+                st.success(f"✅ Forma '{nova_f}' cadastrada com sucesso!")
                 st.rerun()
-            else:
-                st.error("Por favor, insira o nome da forma de pagamento.")
 
-    # --- LISTA PARA CORREÇÃO E VISUALIZAÇÃO ---
+    # --- PARTE 2: LISTA E CORREÇÃO ---
     if 'formas_pagamento' in st.session_state and st.session_state.formas_pagamento:
         st.markdown("---")
-        st.write("### Formas Já Cadastradas")
+        st.write("### Formas Cadastradas (Clique para Editar)")
         for i, item in enumerate(st.session_state.formas_pagamento):
-            with st.expander(f"✅ {item['nome']} ({item['tipo']})"):
-                if item['fechamento'] > 0:
-                    st.write(f"📅 Fechamento: Dia {item['fechamento']}")
-                    st.write(f"💰 Vencimento: Dia {item['vencimento']}")
-                else:
-                    st.write("ℹ️ Forma de pagamento à vista.")
+            with st.expander(f"⚙️ Editar: {item['nome']}"):
+                # Campos de edição direta
+                edit_nome = st.text_input("Nome", value=item['nome'], key=f"edit_n_{i}")
+                edit_tipo = st.text_input("Tipo", value=item['tipo'], key=f"edit_t_{i}")
+                c1, c2 = st.columns(2)
+                edit_fech = c1.number_input("Fechamento", 0, 31, value=item['fechamento'], key=f"edit_f_{i}")
+                edit_venc = c2.number_input("Vencimento", 0, 31, value=item['vencimento'], key=f"edit_v_{i}")
                 
-                # Botão de remover com chave única
-                if st.button("Remover", key=f"del_f_{i}", use_container_width=True):
-                    nome_removido = st.session_state.formas_pagamento[i]['nome']
+                col_btn1, col_btn2 = st.columns(2)
+                if col_btn1.button("Salvar Alterações", key=f"save_{i}", use_container_width=True):
+                    st.session_state.formas_pagamento[i] = {
+                        "nome": edit_nome, "tipo": edit_tipo, "fechamento": edit_fech, "vencimento": edit_venc
+                    }
+                    st.success("Alterado com sucesso!")
+                    st.rerun()
+                
+                if col_btn2.button("Remover", key=f"del_{i}", use_container_width=True):
                     st.session_state.formas_pagamento.pop(i)
-                    st.warning(f"A forma '{nome_removido}' foi removida.")
                     st.rerun()
                     
 
@@ -429,6 +418,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
