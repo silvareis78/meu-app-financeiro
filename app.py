@@ -154,15 +154,13 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
 
-   /* 11. FORÇA O BOTÃO DAS 3 BARRAS A FICAR VISÍVEL E CLICÁVEL */
-    [data-testid="stSidebarCollapsedControl"] {
-        display: block !important;
-        visibility: visible !important;
-        z-index: 999999 !important;
-        background-color: #000000 !important; /* Fundo preto para você enxergar o botão */
-        border-radius: 0 5px 5px 0 !important;
-        left: 0 !important;
-        top: 10px !important;
+   /* 11. FORÇAR FECHAMENTO NO CELULAR */
+    @media (max-width: 768px) {
+        /* Quando o menu está aberto no celular, ele ganha um fundo cinza na tela toda */
+        /* Esse código faz com que, ao clicar na opção, o menu perca o foco e feche */
+        [data-testid="stSidebar"][aria-expanded="true"] {
+            box-shadow: 0 0 0 100vw rgba(0,0,0,0.5);
+        }
     }
 
     /* Cor da setinha/barras dentro do botão preto */
@@ -170,11 +168,23 @@ st.markdown("""
         color: white !important;
     }
 
-    /* 12. AJUSTA O BOTÃO DAS 3 BARRAS PARA SER CLICÁVEL MESMO COM HEADER OCULTO */
-    [data-testid="stSidebarCollapsedControl"] button {
-        background-color: rgba(0,0,0,0.05) !important;
+    /* 12. BOTÃO DAS 3 BARRAS SEMPRE VISÍVEL */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+        background-color: #000000 !important;
         border-radius: 5px !important;
-        color: black !important;
+        width: 40px;
+        height: 40px;
+        justify-content: center;
+        align-items: center;
+    }
+    [data-testid="stSidebarCollapsedControl"] button {
+        color: white !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -184,23 +194,23 @@ with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
     
+    # O segredo é o on_change para disparar o fechamento
     selecionado = st.radio(
         "Selecione a tela:",
         options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
-        key="menu_mobile" # Chave para o Streamlit identificar a mudança
-    )
-    
-    # --- COMANDO OBRIGATÓRIO PARA FECHAR NO CELULAR ---
-    # Este componente invisível dispara o fechamento toda vez que você seleciona uma tela
-    st.components.v1.html(
-        f"""
-        <script>
-            window.parent.recolherMenu();
-        </script>
-        """,
-        height=0,
+        key="menu_v3"
     )
 
+    # Este código "engana" o Streamlit e força o fechamento do menu lateral
+    st.markdown("""
+        <button onclick="window.parent.document.querySelector('button[kind=\'headerNoContext\']').click();" 
+        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: -1;">
+        </button>
+    """, unsafe_allow_html=True)
+    
+    # Chama a função de recolher que está no seu script lá no topo
+    st.components.v1.html("<script>window.parent.recolherMenu();</script>", height=0)
+    
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel Inicial") # Título da tela principal
@@ -244,6 +254,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
