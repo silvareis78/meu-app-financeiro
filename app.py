@@ -154,55 +154,56 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
 
-  /* 11. BOTÃO DAS 3 BARRAS (SEMPRE VISÍVEL) */
+ /* 11. BOTÃO DE ABRIR (AS 3 BARRAS) */
     [data-testid="stSidebarCollapsedControl"] {
         display: flex !important;
         visibility: visible !important;
-        z-index: 999999 !important;
+        z-index: 1000001 !important;
         position: fixed !important;
-        top: 10px !important;
-        left: 10px !important;
-        background-color: #000000 !important; /* Fundo preto para destaque */
-        border-radius: 5px !important;
-        width: 40px !important;
-        height: 40px !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-    
-    [data-testid="stSidebarCollapsedControl"] button {
-        color: white !important; /* Ícone branco */
+        top: 15px !important;
+        left: 15px !important;
+        background-color: #000000 !important;
+        border-radius: 8px !important;
+        width: 45px !important;
+        height: 45px !important;
     }
 
-    /* 12. FORÇAR O FECHAMENTO NO CELULAR AO CLICAR */
+    /* 12. AJUSTE PARA MOBILE (FORÇAR RECOLHIMENTO) */
     @media (max-width: 768px) {
-        /* Garante que o menu não fique travado aberto no mobile */
+        /* Se o menu estiver aberto e você clicar em algo, ele perde a prioridade */
         [data-testid="stSidebar"][aria-expanded="true"] {
-            max-width: 80vw !important; /* Ajusta largura no celular */
+            width: 85vw !important;
+            z-index: 1000000 !important;
         }
         
-        /* O segredo: quando a página atualiza (rerun), o CSS reseta o estado do menu */
-        section[data-testid="stSidebar"] {
-            transition: all 0.3s ease-in-out;
+        /* Remove o bloqueio de tela cinza que impede o clique de fechar */
+        [data-testid="stSidebarUserContent"] {
+            padding-top: 2rem !important;
         }
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. MENU LATERAL (VERSÃO COM FECHAMENTO AUTOMÁTICO GARANTIDO) ---
+# --- 3. MENU LATERAL (AÇÃO DIRETA) ---
 with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
-    
+
     telas = ["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"]
-    
+
     if 'selecionado' not in st.session_state:
         st.session_state.selecionado = "Painel Inicial"
 
     for tela in telas:
         if st.button(tela, use_container_width=True, type="primary" if st.session_state.selecionado == tela else "secondary"):
             st.session_state.selecionado = tela
-            st.rerun() # O RERUN é o que ativa o CSS de fechar
+            # O truque: Avisamos ao sistema que o menu deve ser recolhido
+            st.components.v1.html("""
+                <script>
+                window.parent.document.querySelector('button[kind="headerNoContext"]').click();
+                </script>
+            """, height=0)
+            st.rerun()
 
     selecionado = st.session_state.selecionado
     
@@ -249,6 +250,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
