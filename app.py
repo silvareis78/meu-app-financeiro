@@ -5,30 +5,28 @@ st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout l
 
 # 2. CSS CUSTOMIZADO
 st.markdown("""
-    <script>
-    // Função para limpar botões administrativos
+    </script> 
     function fecharBotoes() {
-        const botoes = document.querySelectorAll('button[title="Manage app"], .stActionButton, .stDeployButton, footer, #MainMenu, header');
-        botoes.forEach(el => el.remove());
-    }
-    
-    // FUNÇÃO NOVA: Fecha o menu lateral automaticamente
-    function recolherMenu() {
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
-        const botaoFechar = window.parent.document.querySelector('button[kind="headerNoContext"]');
-        if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
-            botaoFechar.click();
+        // Esconde o menu de 3 pontos e o "Manage App", mas mantém o botão de abrir a lateral
+        const itensParaEsconder = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu');
+        itensParaEsconder.forEach(el => el.style.display = 'none');
+        
+        // Remove o fundo cinza do header mas mantém o espaço para o botão do menu
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.backgroundColor = 'transparent';
+            header.style.border = 'none';
         }
     }
-
-    setInterval(fecharBotoes, 500);
     </script>
 
     <style>
-    /* 1. CONFIGURAÇÃO GERAL */
-    .block-container { padding-top: 1rem !important; margin-top: -20px !important; } /* Sobe o conteúdo */
-    header, footer { visibility: hidden; display: none !important; } /* Esconde cabeçalho e rodapé */
-
+    /* 1. CONFIGURAÇÃO GERAL - CORRIGIDA */
+    .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
+    footer { visibility: hidden; display: none !important; } 
+    
+    /* Importante: Não esconda o HEADER com display:none, use apenas para tirar a cor */
+    header { background-color: transparent !important; }
     /* 2. CARDS PRINCIPAIS (RECEITA, DESPESA, SALDO) */
     .card {
         padding: 30px 45px !important;        /* Tamanho interno do card (espaçamento) */
@@ -145,14 +143,20 @@ st.markdown("""
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
 
-    /* 11. FORÇA O CONTROLE DE ABRIR O MENU A FICAR SEMPRE NA FRENTE E VISÍVEL */
+   /* 11. FORÇA O BOTÃO DAS 3 BARRAS A FICAR VISÍVEL E CLICÁVEL */
     [data-testid="stSidebarCollapsedControl"] {
-        display: flex !important;
+        display: block !important;
         visibility: visible !important;
         z-index: 999999 !important;
-        position: fixed !important;
+        background-color: #000000 !important; /* Fundo preto para você enxergar o botão */
+        border-radius: 0 5px 5px 0 !important;
+        left: 0 !important;
         top: 10px !important;
-        left: 10px !important;
+    }
+
+    /* Cor da setinha/barras dentro do botão preto */
+    [data-testid="stSidebarCollapsedControl"] button {
+        color: white !important;
     }
 
     /* 12. AJUSTA O BOTÃO DAS 3 BARRAS PARA SER CLICÁVEL MESMO COM HEADER OCULTO */
@@ -220,6 +224,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
