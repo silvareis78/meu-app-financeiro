@@ -189,27 +189,27 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# 3. MENU LATERAL
+# --- 3. MENU LATERAL (VERSÃO COM FECHAMENTO AUTOMÁTICO GARANTIDO) ---
 with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
-    
-    # O segredo é o on_change para disparar o fechamento
-    selecionado = st.radio(
-        "Selecione a tela:",
-        options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
-        key="menu_v3"
-    )
 
-    # Este código "engana" o Streamlit e força o fechamento do menu lateral
-    st.markdown("""
-        <button onclick="window.parent.document.querySelector('button[kind=\'headerNoContext\']').click();" 
-        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; z-index: -1;">
-        </button>
-    """, unsafe_allow_html=True)
-    
-    # Chama a função de recolher que está no seu script lá no topo
-    st.components.v1.html("<script>window.parent.recolherMenu();</script>", height=0)
+    # Criamos uma lista com os nomes das telas
+    telas = ["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"]
+
+    # Inicializa a variável 'selecionado' se ela não existir
+    if 'selecionado' not in st.session_state:
+        st.session_state.selecionado = "Painel Inicial"
+
+    # Criamos um botão para cada tela
+    # No celular, clicar em um botão força o fechamento da lateral automaticamente
+    for tela in telas:
+        if st.button(tela, use_container_width=True, type="secondary" if st.session_state.selecionado != tela else "primary"):
+            st.session_state.selecionado = tela
+            st.rerun() # Isso força o app a recarregar e fechar o menu no celular
+
+    # Passamos o valor para a variável que você já usa no resto do código
+    selecionado = st.session_state.selecionado
     
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -254,6 +254,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
