@@ -155,58 +155,64 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO ATUALIZADA: FORMULÁRIO DE DESPESA (TOPO DO SCRIPT) ---
+# --- FUNÇÃO COM CORREÇÃO DE NOME (TOPO DO SCRIPT) ---
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
-    with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
+    # 1. CABEÇALHO COM OPÇÃO DE CORREÇÃO
+    col_tit, col_edit = st.columns([0.8, 0.2])
+    
+    with col_tit:
         st.subheader(f"Categoria: {categoria_nome}")
-        
+    
+    with col_edit:
+        # Popover para editar o nome da categoria se estiver errado
+        with st.popover("✏️", help="Corrigir nome da categoria"):
+            novo_nome_cat = st.text_input("Novo nome", value=categoria_nome)
+            if st.button("Salvar Alteração", use_container_width=True):
+                if novo_nome_cat and novo_nome_cat != categoria_nome:
+                    # Atualiza na lista oficial de categorias
+                    idx = st.session_state.categorias.index(categoria_nome)
+                    st.session_state.categorias[idx] = novo_nome_cat
+                    st.success("Nome alterado!")
+                    st.rerun() # Reinicia para carregar o novo nome no formulário
+
+    # 2. FORMULÁRIO DE LANÇAMENTO (O RESTANTE CONTINUA IGUAL)
+    with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
-        # --- LINHA 1: TIPO E PARCELAS ---
         col_tipo, col_parc = st.columns([2, 1])
         with col_tipo:
-            tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"], key=f"t_d_{categoria_nome}")
+            tipo_desp = st.selectbox("Tipo", ["Variável", "Fixa"], key=f"t_d_{categoria_nome}")
         with col_parc:
-            parcelas = st.number_input("Qtde Parcelas", min_value=1, max_value=48, value=1, key=f"p_d_{categoria_nome}")
+            parcelas = st.number_input("Parcelas", min_value=1, value=1, key=f"p_d_{categoria_nome}")
         
-        # --- LINHA 2: VALOR E FORMA ---
         c1, c2 = st.columns([2, 4])
         with c1:
-            valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f", key=f"v_d_{categoria_nome}")
+            valor = st.number_input("Valor", min_value=0.0, format="%.2f", key=f"v_d_{categoria_nome}")
         with c2:
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma_selecionada = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"], key=f"f_d_{categoria_nome}")
+            forma_sel = st.selectbox("Pagamento", options=opcoes if opcoes else ["Dinheiro"], key=f"f_d_{categoria_nome}")
         
-        data_l = st.date_input("Data da Compra", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
-        
-        st.markdown("---")
+        data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
         
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-            # 1. Busca os detalhes da forma de pagamento
-            detalhes_pagto = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_selecionada), None)
+            detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
             
-            # 2. Cria o dicionário com os dados
             novo_item = {
                 "Categoria": categoria_nome,
                 "Descrição": desc,
                 "Tipo": tipo_desp,
                 "Parcelas": parcelas,
                 "Valor": valor,
-                "Pagamento": forma_selecionada,
+                "Pagamento": forma_sel,
                 "Data": data_l.strftime("%d/%m/%Y"),
-                "Info_Pagto": detalhes_pagto 
+                "Info_Pagto": detalhes
             }
             
-            # 3. SALVA na memória (ou na planilha no futuro)
-            if 'despesas' not in st.session_state:
-                st.session_state.despesas = []
+            if 'despesas' not in st.session_state: st.session_state.despesas = []
             st.session_state.despesas.append(novo_item)
             
-            # 4. MOSTRA A MENSAGEM (Usando o nome correto da variável: categoria_nome)
             st.success(f"✅ Lançamento em '{categoria_nome}' cadastrado com sucesso!")
-            
-            # 5. REINICIA (Sempre por último)
             st.rerun()
 
 # --- FUNÇÃO DO FORMULÁRIO DE RECEITA (TOPO DO SCRIPT) ---
@@ -426,6 +432,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
