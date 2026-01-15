@@ -54,16 +54,27 @@ st.markdown("""
         margin-top: 10px !important;
         display: block !important;
         width: 100% !important;
+
+    }    
         
-    /* --- COLOQUE O CÓDIGO ABAIXO AQUI --- */
+    /* ESTILIZAÇÃO DA CAIXA DE COMBINAÇÃO (SELECTBOX) */
     div[data-baseweb="select"] {
-        border: 1px solid #CBD5E1 !important;
-        border-radius: 8px !important;
+        border: 1px solid #CBD5E1 !important; /* Borda suave */
+        border-radius: 8px !important;       /* Cantos arredondados */
         background-color: white !important;
+        font-size: 14px !important;
     }
+
+    /* Ajusta a altura da caixa para não ficar "gorda" */
     div[data-baseweb="select"] > div {
         height: 35px !important;
         min-height: 35px !important;
+        padding: 0 5px !important;
+    }
+
+    /* Cor do texto dentro da caixa */
+    div[data-testid="stMarkdownContainer"] p {
+        color: #1E293B;
         
     }
     </style>
@@ -131,6 +142,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
