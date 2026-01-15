@@ -145,7 +145,7 @@ def modal_despesa():
         
         # AJUSTE DE LARGURA: [2, 4] significa que a Forma de Pagamento é 4x maior que o Valor.
         # Se o nome "Forma de Pagamento" ainda quebrar, mude o 4 para 5 ou 6.
-        col_v, col_f = st.columns([1, 4]) 
+        col_v, col_f = st.columns([2, 3]) 
         
         with col_v:
             # O 'step=1.0' faz o CSS identificar que deve esconder os botões +/-
@@ -183,7 +183,7 @@ def modal_receita():
         
         # --- AJUSTE DE LAYOUT (COLUNAS) ---
         # [1, 3] define que a segunda coluna é 3x maior que a primeira
-        col_v, col_d = st.columns([1, 3]) 
+        col_v, col_d = st.columns([2, 2]) 
         
         with col_v:
             # AQUI O SEGREDO: O 'step=1.0' faz o CSS esconder o sinal de -/+
@@ -328,6 +328,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
