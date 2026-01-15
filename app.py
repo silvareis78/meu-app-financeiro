@@ -248,32 +248,28 @@ def modal_lancamento_categoria(categoria_nome):
         data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
         
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-    detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
-    
-    # Lista para guardar as parcelas
-    lista_para_salvar = []
-    
-    for p in range(parcelas):
-        # Calcula a data de vencimento de cada parcela
-        data_base = data_l + pd.DateOffset(months=p)
-        vencimento_calculado = calcular_vencimento_real(data_base.date(), detalhes)
-        
-        item_planilha = {
-            "Data Compra": data_l.strftime("%d/%m/%Y"),
-            "Vencimento": vencimento_calculado.strftime("%d/%m/%Y"),
-            "Categoria": categoria_nome,
-            "Descrição": f"{desc} ({p+1}/{parcelas})",
-            "Tipo": tipo_desp,
-            "Valor": valor / parcelas, # Divide o valor total pelas parcelas
-            "Pagamento": forma_sel
-        }
-        lista_para_salvar.append(item_planilha)
-    
-    # Salva fisicamente no Excel
-    salvar_no_excel(lista_para_salvar)
-    
-    st.success(f"✅ {parcelas} parcela(s) salvas no Excel!")
-    st.rerun()
+            detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
+            
+            lista_para_excel = []
+            for p in range(parcelas):
+                # Calcula a data de vencimento mês a mês
+                data_parcela = data_l + pd.DateOffset(months=p)
+                vencimento = calcular_vencimento_real(data_parcela.date(), detalhes)
+                
+                lista_para_excel.append({
+                    "Data Compra": data_l.strftime("%d/%m/%Y"),
+                    "Vencimento": vencimento.strftime("%d/%m/%Y"),
+                    "Categoria": categoria_nome,
+                    "Descrição": f"{desc} ({p+1}/{parcelas})",
+                    "Tipo": tipo_desp,
+                    "Valor": valor / parcelas,
+                    "Pagamento": forma_sel
+                })
+            
+            # Chama a função de salvar no arquivo Excel
+            salvar_no_excel(lista_para_excel)
+            st.success(f"✅ {parcelas} parcela(s) salvas no Excel com sucesso!")
+            st.rerun()
 
 @st.dialog("💰 Nova Receita")
 def modal_receita_categoria(categoria_nome):
