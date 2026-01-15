@@ -59,10 +59,16 @@ st.markdown("""
         margin-top: 115px !important; /* Isso equivale a +- 3 centímetros */
         margin-bottom: 20px !important;
         display: block !important;
-       
-    }
 
-    /* 6. CAIXA DE COMBINAÇÃO (SELECTBOX) - CORRIGIDO */
+    }
+    
+    /* 6. ESPAÇO PARA DESCER OS CARDS */
+    .espaco-cards {
+        margin-top: 55px !important; /* Empurra os cards para baixo */
+    }   
+    
+
+    /* 7. CAIXA DE COMBINAÇÃO (SELECTBOX) - CORRIGIDO */
     
     /* Estilo do nome 'Mês' e 'Ano' (Rótulo) */
     [data-testid="stWidgetLabel"] p {
@@ -140,17 +146,17 @@ with col_filtro:
 st.markdown('<div class="barra-afastada"></div>', unsafe_allow_html=True)
 
 with col_rec:
-    # Card de Receita (Verde Água)
+    st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True) # ADICIONE ISSO
     st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
 
 with col_desp:
-    # Card de Despesa (Vermelho)
+    st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True) # ADICIONE ISSO
     st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
 
 with col_sal:
-    # Card de Saldo (Amarelo/Ouro)
+    st.markdown('<div class="espaco-cards"></div>', unsafe_allow_html=True) # ADICIONE ISSO
     st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
-
+    
 with col_ava:
     # Avatar e frase lateral colados nos cards
     st.markdown("""
@@ -179,6 +185,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
