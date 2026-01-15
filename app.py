@@ -215,31 +215,34 @@ st.markdown("""
 @st.dialog("➕ Inserir Nova Despesa")
 def modal_despesa():
     with st.form("form_desp", clear_on_submit=True):
+        # 1. Descrição e Tipo (Largura total)
         desc = st.text_input("Descrição")
-        
-        # 1. Campo Tipo (Fixa/Variável) em destaque
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
-        # 2. Valor pequeno e Forma de Pagamento grande
-        col_v, col_espaco, col_f = st.columns([1.5, 0.3, 3.5]) 
-        valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=0.0)
+        # 2. Valor em uma linha única para ter espaço
+        valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
         
+        # 3. Forma de Pagamento em uma linha única (Combobox Gigante)
         opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        forma_s = st.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
-        # 3. Lógica de Cartão
+        st.markdown("---")
+        
+        # 4. Parcelas e Data lado a lado embaixo
+        col_parc, col_data = st.columns(2)
         info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
+        
         parcelas = 1
-        if info_f and info_f['tipo'] == "Cartão de Crédito":
-            parcelas = st.number_input("Número de Parcelas", 1, 12, 1)
+        if info_f and info_f.get('tipo') == "Cartão de Crédito":
+            parcelas = col_parc.number_input("Parcelas", 1, 12, 1, step=1)
         
-        # 4. Data formatada
-        data_l = st.date_input("Data de Lançamento", format="DD/MM/YYYY")
+        data_l = col_data.date_input("Data de Lançamento", format="DD/MM/YYYY")
         
+        # Botão de Salvar
         if st.form_submit_button("Salvar Despesa", use_container_width=True):
-            # Lógica de vencimento (mesma que já tínhamos)
+            # Lógica de cálculo de vencimento
             data_venc = data_l
-            if info_f and info_f['tipo'] == "Cartão de Crédito":
+            if info_f and info_f.get('tipo') == "Cartão de Crédito":
                 if data_l.day >= info_f['fechamento']:
                     prox_mes = data_l.month % 12 + 1
                     ano_v = data_l.year + (1 if data_l.month == 12 else 0)
@@ -247,15 +250,9 @@ def modal_despesa():
                 else:
                     data_venc = datetime(data_l.year, data_l.month, info_f['vencimento']).date()
 
-            # Salvando com o novo campo 'tipo_desp'
             st.session_state.despesas.append({
-                "desc": desc, 
-                "tipo_desp": tipo_desp,
-                "valor": valor, 
-                "forma": forma_s, 
-                "data": data_l, 
-                "vencimento": data_venc, 
-                "parcelas": parcelas
+                "desc": desc, "tipo_desp": tipo_desp, "valor": valor, 
+                "forma": forma_s, "data": data_l, "vencimento": data_venc, "parcelas": parcelas
             })
             st.rerun()
 
@@ -399,6 +396,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
