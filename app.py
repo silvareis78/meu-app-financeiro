@@ -189,6 +189,74 @@ def modal_lancamento_categoria(categoria_nome):
             st.success(f"Lançamento em {categoria_nome} realizado!")
             st.rerun()
 
+# --- FUNÇÃO DO FORMULÁRIO DE RECEITA (TOPO DO SCRIPT) ---
+@st.dialog("💰 Nova Receita")
+def modal_receita_categoria(categoria_nome):
+    with st.form(key=f"form_receita_{categoria_nome}", clear_on_submit=True):
+        st.subheader(f"Fonte: {categoria_nome}")
+        
+        desc = st.text_input("Descrição da Receita (Ex: Salário Mensal)")
+        
+        # Layout de colunas: [1, 3] -> Valor e Forma de Recebimento
+        c1, c2 = st.columns([1, 3])
+        with c1:
+            valor = st.number_input("Valor Recebido", min_value=0.0, step=1.0, format="%.2f")
+        with c2:
+            # Puxa as mesmas formas de pagamento/recebimento
+            opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
+            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"])
+        
+        data_r = st.date_input("Data do Recebimento", format="DD/MM/YYYY")
+        
+        st.markdown("---")
+        
+        # Botão Salvar (Herda a cor verde do seu CSS)
+        if st.form_submit_button("Confirmar Receita", use_container_width=True):
+            nova_rec = {
+                "Tipo": "Receita",
+                "Categoria": categoria_nome,
+                "Descrição": desc,
+                "Valor": valor, # Valor positivo
+                "Pagamento": forma,
+                "Data": data_r.strftime("%d/%m/%Y")
+            }
+            # Adiciona na lista geral de transações
+            st.session_state.despesas.append(nova_rec)
+            st.success(f"Receita de {categoria_nome} registada!")
+            st.rerun()
+
+# --- FUNÇÃO DO FORMULÁRIO DE FORMA DE PAGAMENTO (TOPO DO SCRIPT) ---
+@st.dialog("💳 Gerenciar Formas de Pagamento")
+def modal_forma_pagamento():
+    with st.form(key="form_cadastro_pagamento", clear_on_submit=True):
+        st.write("### Cadastrar Nova")
+        nova_f = st.text_input("Nome da Forma (Ex: Cartão Nubank)")
+        
+        # Botão Salvar (Verde conforme Item 13 do seu CSS)
+        if st.form_submit_button("Confirmar Cadastro", use_container_width=True):
+            if nova_f:
+                if 'formas_pagamento' not in st.session_state:
+                    st.session_state.formas_pagamento = []
+                # Salva como dicionário para facilitar expansões futuras
+                st.session_state.formas_pagamento.append({"nome": nova_f})
+                st.success(f"'{nova_f}' cadastrada!")
+                st.rerun()
+
+    # --- ÁREA DE CORREÇÃO/VISUALIZAÇÃO ---
+    if st.session_state.formas_pagamento:
+        st.markdown("---")
+        st.write("### Formas Já Cadastradas")
+        for i, item in enumerate(st.session_state.formas_pagamento):
+            col_nome, col_lixo = st.columns([4, 1])
+            with col_nome:
+                st.info(item['nome'])
+            with col_lixo:
+                # Botão para excluir caso tenha digitado errado
+                if st.button("🗑️", key=f"del_f_{i}"):
+                    st.session_state.formas_pagamento.pop(i)
+                    st.rerun()
+                    
+
 # --- 1. NAVEGAÇÃO POR BOTÕES (SIDEBAR) ---
 st.sidebar.title("MENU PRINCIPAL") # Título do menu
 
@@ -250,66 +318,53 @@ if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
 
-    # 1. BOTÃO DE CRIAR CATEGORIA
-    # [1, 2] -> Ajuste o primeiro número se quiser o botão de inserir mais largo
-    col_btn, col_vazia = st.columns([1, 2])
+    # 1. BOTÕES DE CRIAÇÃO NO TOPO
+    col_cat_desp, col_cat_rec, col_forma = st.columns([1, 1, 1])
     
-    with col_btn:
-        with st.popover("➕ Inserir Nova Categoria", use_container_width=True):
-            nova_cat = st.text_input("Nome da Categoria", key="input_nova_cat_tela")
-            if st.button("Confirmar", use_container_width=True):
-                if nova_cat and nova_cat not in st.session_state.categorias:
-                    st.session_state.categorias.append(nova_cat)
+    with col_cat_desp:
+        with st.popover("➕ Categoria Despesa", use_container_width=True):
+            n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
+            if st.button("Salvar", key="btn_save_desp"):
+                if n_cat and n_cat not in st.session_state.categorias:
+                    st.session_state.categorias.append(n_cat)
                     st.rerun()
 
-    st.write("") # Espaço entre o botão de inserir e a lista de categorias
+    with col_cat_rec:
+        with st.popover("💰 Fonte de Receita", use_container_width=True):
+            n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
+            if st.button("Salvar", key="btn_save_rec"):
+                if 'categorias_receita' not in st.session_state:
+                    st.session_state.categorias_receita = []
+                if n_rec and n_rec not in st.session_state.categorias_receita:
+                    st.session_state.categorias_receita.append(n_rec)
+                    st.rerun()
 
-    # 2. LISTA DE CATEGORIAS (BOTÕES QUE ABREM O FORMULÁRIO)
-    # Criamos a grade com 3 colunas. Mude o número 3 se quiser mais botões por linha.
-    cols = st.columns(3) 
+    with col_forma:
+        # AGORA ESTE BOTÃO CHAMA O MODAL SUSPENSO DIRETAMENTE
+        if st.button("💳 Forma Pagto/Receb", use_container_width=True):
+            modal_forma_pagamento()
+
+    st.write("")
     
+    # --- SEÇÃO DE DESPESAS ---
+    st.markdown("### 🔴 Lançar Despesas")
+    cols_d = st.columns(3)
     for i, cat in enumerate(st.session_state.categorias):
-        # O cálculo 'i % 3' organiza os botões automaticamente nas colunas
-        with cols[i % 3]:
-            # Este botão abre o formulário suspenso (Dialog)
-            if st.button(f"📁 {cat.upper()}", use_container_width=True, key=f"btn_cat_{cat}"):
+        with cols_d[i % 3]:
+            if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
                 modal_lancamento_categoria(cat)
 
-# --- 3. FORMULÁRIO SUSPENSO (FORA DO IF DE NAVEGAÇÃO) ---
-# Mantenha esta função isolada para que o Streamlit a encontre corretamente
-@st.dialog("🚀 Novo Lançamento")
-def modal_lancamento_categoria(categoria_nome):
-    with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
-        st.subheader(f"Categoria: {categoria_nome}")
-        
-        desc = st.text_input("Descrição da Despesa")
-        
-        # Colunas internas: [1, 3] -> O 3 controla o tamanho da caixa de Forma de Pagamento
-        c1, c2 = st.columns([1, 3])
-        with c1:
-            # step=1.0 respeita o CSS que remove o +/-
-            valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f")
-        with c2:
-            opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma = st.selectbox("Forma de Pagamento", options=opcoes if opcoes else ["Dinheiro"])
-        
-        data_l = st.date_input("Data", format="DD/MM/YYYY")
-        
-        st.markdown("---")
-        
-        # Botão Salvar: Herda a cor definida no Item 13 do seu CSS
-        if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-            novo_item = {
-                "Categoria": categoria_nome,
-                "Descrição": desc,
-                "Valor": valor,
-                "Pagamento": forma,
-                "Data": data_l.strftime("%d/%m/%Y")
-            }
-            # Por enquanto salvando na memória; próximo passo: PLANILHA
-            st.session_state.despesas.append(novo_item)
-            st.success(f"Lançamento em {categoria_nome} realizado!")
-            st.rerun()
+    st.write("")
+    
+    # --- SEÇÃO DE RECEITAS ---
+    st.markdown("### 🟢 Lançar Receitas")
+    if 'categorias_receita' in st.session_state:
+        cols_r = st.columns(3)
+        for i, cat_r in enumerate(st.session_state.categorias_receita):
+            with cols_r[i % 3]:
+                if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
+                    modal_receita_categoria(cat_r)
+
 
 
 
