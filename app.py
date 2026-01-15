@@ -218,14 +218,16 @@ def modal_despesa():
         desc = st.text_input("Descrição")
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
-        # Criando as colunas: 1 parte para o valor e 4 partes para a forma
-        col_v, col_f = st.columns([1, 4]) 
+        # AQUI O AJUSTE FINAL: 1 para o Valor e 5 para a Forma de Pagamento
+        # Isso força o navegador a dar quase todo o espaço para a combobox
+        col_v, col_f = st.columns([1, 5]) 
         
-        # Note que o 'valor' e a 'forma_s' estão exatamente embaixo um do outro
-        valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
-        
-        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        with col_v:
+            valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
+            
+        with col_f:
+            opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
+            forma_s = st.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
         st.markdown("---")
         
@@ -240,13 +242,8 @@ def modal_despesa():
         
         if st.form_submit_button("Salvar Despesa", use_container_width=True):
             st.session_state.despesas.append({
-                "desc": desc, 
-                "tipo_desp": tipo_desp, 
-                "valor": valor, 
-                "forma": forma_s, 
-                "data": data_l, 
-                "vencimento": data_l, 
-                "parcelas": parcelas
+                "desc": desc, "tipo_desp": tipo_desp, "valor": valor, 
+                "forma": forma_s, "data": data_l, "vencimento": data_l, "parcelas": parcelas
             })
             st.rerun()
             
@@ -390,6 +387,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
