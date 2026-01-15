@@ -75,7 +75,7 @@ st.markdown("""
         display: flex !important;
         align-items: center !important;
         /* Adicionamos padding igual nos dois lados para o texto ficar no meio real */
-        padding-left: 25px !important; 
+        padding-left: 10px !important; 
         padding-right: 10px !important;
         height: 35px !important;
         min-height: 35px !important;
@@ -167,6 +167,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
