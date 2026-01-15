@@ -205,7 +205,6 @@ st.markdown("""
     /* Força o título a ficar em uma linha só */
     label[data-testid="stWidgetLabel"] p {
         white-space: nowrap !important;
-        overflow: visible !important;
         width: auto !important;
     }
     </style>
@@ -220,14 +219,13 @@ def modal_despesa():
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
         # Proporção balanceada para alinhar e dar espaço
-        col_v, col_f = st.columns([1, 3]) 
+        col_v, col_f = st.columns([1, 4]) 
         
         # Valor - O CSS acima vai tirar o +/-
         valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
         
         # Forma de Pagamento - Agora com espaço lateral maior
-        opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
+       forma_s = col_f.selectbox("Forma de Pagamento", options=["Dinheiro", "Cartão", "Pix"])
         
         st.markdown("---")
         col_parc, col_data = st.columns(2)
@@ -386,6 +384,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
