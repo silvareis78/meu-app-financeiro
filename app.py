@@ -41,14 +41,16 @@ st.markdown("""
         font-size: 10px;       /* Texto menor */
         line-height: 1.1;
         margin-top: 15px;
+        olor: #1E293B !important;
     }
 
-    /* Comando para garantir que a imagem do avatar fique pequena */
-    .avatar-container img {
-        width: 45px !important;  /* Diminuído de 35px para 28px */
-        height: 45px !important;
-        border-radius: 50%;
-    } 
+    /* Ajuste da Imagem do Boneco */
+    .img-avatar {
+        width: 30px !important;  /* Tamanho reduzido */
+        height: 30px !important;
+        border-radius: 50% !important; /* Deixa redondo */
+        object-fit: cover !important;
+    }
 
     /* 4. ESTILO DA BARRA GROSSA (Corrigida a posição) */
     .barra-preta-grossa {
@@ -165,10 +167,10 @@ with col_sal:
     st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
     
 with col_ava:
-    # Avatar e frase lateral colados nos cards
+    # Avatar e frase 
     st.markdown("""
         <div class="avatar-container">
-            <img src="https://share.google/sFJ2VSk96PbQnzvmm" width="35" style="border-radius: 50%;">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="img-avatar">
             <div>Opa! Você gastou <b>49%</b> do que recebeu!</div>
         </div>
     """, unsafe_allow_html=True)
@@ -192,6 +194,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
