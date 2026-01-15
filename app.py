@@ -140,7 +140,7 @@ with t2:
 st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 
 # --- LINHA ÚNICA ---
-col_filtro, col_rec, col_desp, col_sal, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 4, 6])
+col_filtro, col_rec, col_desp, col_sal, col_espaco, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 4, 6])
 
 with col_filtro:
     meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
@@ -192,6 +192,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
