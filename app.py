@@ -33,77 +33,67 @@ st.markdown("""
     .despesa { background-color: #B22222; } 
     .saldo   { background-color: #DAA520; } 
 
-     /* Cores Fortes e Sólidas para tirar o esbranquiçado */
-    .card-pagar { background-color: #E65100 !important; } /* Laranja Escuro */
-    .card-prevista { background-color: #374151 !important; } /* Grafite */
-    .card-cartao { background-color: #0747A6 !important; } /* Azul Royal */
+    /* Cores Fortes e Sólidas para tirar o esbranquiçado */
+    .card-pagar { background-color: #E65100 !important; } 
+    .card-prevista { background-color: #374151 !important; } 
+    .card-cartao { background-color: #0747A6 !important; } 
 
-    /* Estilo do Card Vertical com Texto Grande e Negrito */
-    .card-vertical 
+    /* CORREÇÃO: Faltava a abertura de chave '{' após .card-vertical */
+    .card-vertical {
         padding: 12px 20px !important;
         border-radius: 10px !important;
         text-align: left !important;
         margin-bottom: 10px !important;
-        width: 350px !important; /* Aumentei um pouco a largura para o texto grande caber */
-        
-        /* AQUI ESTÁ O QUE VOCÊ PEDIU: Texto Grande e Negrito */
+        width: 350px !important;
         font-size: 20px !important; 
-        font-weight: 900 !important; /* Negrito extra forte */
-        color: #FFFFFF !important;  /* Texto sempre branco para contraste */
-        
+        font-weight: 900 !important; 
+        color: #FFFFFF !important;  
         box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important;
         display: block !important;
     }
-    /* Espaçamento para descer cards principais */
-    .espaco-cards { margin-top: 55px !important; }
-    
-    /* 3. AVATAR E FRASE (REDUZIDOS) */
+
+    /* 3. AVATAR E FRASE (CORRIGIDO ERRO DE DIGITAÇÃO EM 'COLOR') */
     .avatar-container {
         display: flex;
         align-items: center;
-        gap: 6px;             /* Diminuído o espaço entre foto e texto */
-        font-size: 10px;       /* Texto menor */
+        gap: 6px;             
+        font-size: 10px;       
         line-height: 1.1;
         margin-top: 15px;
-        olor: #1E293B !important;
+        color: #1E293B !important; /* Estava 'olor' */
     }
 
-    /* Ajuste da Imagem do Boneco */
     .img-avatar {
-        width: 30px !important;  /* Tamanho reduzido */
+        width: 30px !important;  
         height: 30px !important;
-        border-radius: 50% !important; /* Deixa redondo */
+        border-radius: 50% !important; 
         object-fit: cover !important;
     }
 
-    /* 4. ESTILO DA BARRA GROSSA (Corrigida a posição) */
+    /* 4. ESTILO DA BARRA GROSSA */
     .barra-preta-grossa {
         border-bottom: 6px solid #000000 !important;
         margin-bottom: 20px !important;
         margin-top: 10px !important;
         display: block !important;
         width: 100% !important;
-
     }
-   /* 5. SEGUNDA BARRA COM AFASTAMENTO DE 3CM */
+
+    /* 5. SEGUNDA BARRA COM AFASTAMENTO */
     .barra-afastada {
-        border-bottom: 6px solid #000000 !important; /* Mesma espessura da primeira */
+        border-bottom: 6px solid #000000 !important; 
         width: 100% !important;
-        margin-top: 70px !important; /* Isso equivale a +- 3 centímetros */
+        margin-top: 70px !important; 
         margin-bottom: 20px !important;
         display: block !important;
-
     }
     
     /* 6. ESPAÇO PARA DESCER OS CARDS */
     .espaco-cards {
-        margin-top: 55px !important; /* Empurra os cards para baixo */
+        margin-top: 55px !important; 
     }   
-    
 
-    /* 7. CAIXA DE COMBINAÇÃO (SELECTBOX) - CORRIGIDO */
-    
-    /* Estilo do nome 'Mês' e 'Ano' (Rótulo) */
+    /* 7. CAIXA DE COMBINAÇÃO (SELECTBOX) */
     [data-testid="stWidgetLabel"] p {
         font-size: 18px !important; 
         font-weight: bold !important;
@@ -111,43 +101,32 @@ st.markdown("""
         margin-bottom: -5px !important;
     }
 
-    /* Largura da caixa aumentada para 170px para caber 'SETEMBRO' e 'FEVEREIRO' */
     div[data-testid="stSelectbox"] {
         width: 150px !important; 
         margin-top: 5px !important;
     }
     
-    /* Centralização real do texto compensando a seta lateral */
     div[data-baseweb="select"] > div {
         text-align: center !important;
         justify-content: center !important;
         display: flex !important;
         align-items: center !important;
-        /* Adicionamos padding igual nos dois lados para o texto ficar no meio real */
         padding-left: 1px !important; 
         padding-right: 10px !important;
         height: 35px !important;
         min-height: 35px !important;
     }
     
-    /* COMANDO ESPECÍFICO PARA MOVER A SETA */
     div[data-baseweb="select"] [data-testid="stSelectbox"] div:last-child {
-        margin-right: -1px !important; /* Puxa a seta para a extrema direita */
+        margin-right: -1px !important; 
     }
-    /* AJUSTE PARA O TEXTO NÃO CORTAR */
+
     div[data-baseweb="select"] span {
         white-space: nowrap !important;
         overflow: visible !important;
         font-size: 14px !important;
     }
-    
-    /* Garante que o texto não tente "pular" de linha ou se esconder */
-    div[data-baseweb="select"] span {
-        white-space: nowrap !important;
-        overflow: visible !important;
-    }
 
-    /* Cor do texto nos parágrafos gerais */
     div[data-testid="stMarkdownContainer"] p {
         color: #1E293B;
     }
@@ -209,6 +188,7 @@ st.markdown('<p class="titulo-secao">Detalhamento de Despesas</p>', unsafe_allow
     st.markdown('<div class="card card-cartao">NUBANK<br>R$ 450,00</div>', unsafe_allow_html=True)
     st.markdown('<div class="card card-cartao">INTER<br>R$ 320,00</div>', unsafe_allow_html=True)
     st.markdown('<div class="card card-cartao">OUTROS<br>R$ 150,00</div>', unsafe_allow_html=True)
+
 
 
 
