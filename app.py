@@ -28,6 +28,7 @@ st.markdown("""
     /* 1. CONFIGURAÇÃO GERAL */
     .block-container { padding-top: 1rem !important; margin-top: -20px !important; } /* Sobe o conteúdo */
     header, footer { visibility: hidden; display: none !important; } /* Esconde cabeçalho e rodapé */
+
     /* 2. CARDS PRINCIPAIS (RECEITA, DESPESA, SALDO) */
     .card {
         padding: 30px 45px !important;        /* Tamanho interno do card (espaçamento) */
@@ -55,7 +56,7 @@ st.markdown("""
         margin-bottom: 10px !important;        /* Espaço entre um card e outro */
         width: 350px !important;               /* Largura fixa para os cards verticais */
         font-size: 20px !important;            /* Texto grande para facilitar leitura */
-        font-weight: 900 !important;           /* Negrito extra forte */
+        font-weight: 900 !important;            /* Negrito extra forte */
         color: #FFFFFF !important;             /* Texto branco para contraste */
         box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra para profundidade */
         display: block !important;             /* Garante que ocupem a linha toda */
@@ -139,9 +140,27 @@ st.markdown("""
         color: black !important;
         background-color: transparent !important;
     } 
+
     /* 10. MENU LATERAL (Ajuste de fonte) */
     [data-testid="stSidebar"] { background-color: #F8FAFC !important; } /* Cor de fundo do menu */
     .stRadio > div { gap: 10px !important; } /* Espaçamento entre itens do menu */
+
+    /* 11. FORÇA O CONTROLE DE ABRIR O MENU A FICAR SEMPRE NA FRENTE E VISÍVEL */
+    [data-testid="stSidebarCollapsedControl"] {
+        display: flex !important;
+        visibility: visible !important;
+        z-index: 999999 !important;
+        position: fixed !important;
+        top: 10px !important;
+        left: 10px !important;
+    }
+
+    /* 12. AJUSTA O BOTÃO DAS 3 BARRAS PARA SER CLICÁVEL MESMO COM HEADER OCULTO */
+    [data-testid="stSidebarCollapsedControl"] button {
+        background-color: rgba(0,0,0,0.05) !important;
+        border-radius: 5px !important;
+        color: black !important;
+    }
     </style>
     """, unsafe_allow_html=True)
 
@@ -201,6 +220,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
