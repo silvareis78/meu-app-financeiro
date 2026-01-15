@@ -193,23 +193,20 @@ st.markdown("""
         .block-container {
             padding-top: 3.5rem !important; /* Dá espaço para o botão preto não cobrir o texto */
 
-   /* Remove botões +/- de todos os campos numéricos */
+   /* Remove botões +/- e ajusta o preenchimento */
     div[data-testid="stNumberInputStepDown"], 
-    div[data-testid="stNumberInputStepUp"],
-    button.step-down, button.step-up {
+    div[data-testid="stNumberInputStepUp"] {
         display: none !important;
     }
-    
-    /* Remove o espaço que sobrava onde ficavam os botões */
     div[data-testid="stNumberInputContainer"] input {
-        padding-right: 10px !important;
+        padding-right: 1rem !important;
     }
 
-    /* Impede que o título "Forma de Pagamento" quebre em 2 linhas */
+    /* Força o título a ficar em uma linha só */
     label[data-testid="stWidgetLabel"] p {
         white-space: nowrap !important;
-        display: block !important;
-        width: 100% !important;
+        overflow: visible !important;
+        width: auto !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -223,7 +220,7 @@ def modal_despesa():
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
         # Proporção balanceada para alinhar e dar espaço
-        col_v, col_f = st.columns([1.2, 3.8]) 
+        col_v, col_f = st.columns([1, 3]) 
         
         # Valor - O CSS acima vai tirar o +/-
         valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
@@ -389,6 +386,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
