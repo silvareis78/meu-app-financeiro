@@ -21,7 +21,7 @@ st.markdown("""
 
     /* 2. CARDS (Conforme você ajustou: Grandes e Espaçados) */
     .card {
-        padding: 30px 35px !important; 
+        padding: 30px 45px !important; 
         font-size: 20px !important;
         border-radius: 5px;
         color: white !important;
@@ -40,13 +40,13 @@ st.markdown("""
         gap: 6px;             /* Diminuído o espaço entre foto e texto */
         font-size: 10px;       /* Texto menor */
         line-height: 1.1;
-        margin-top: 5px;
+        margin-top: 10px;
     }
 
     /* Comando para garantir que a imagem do avatar fique pequena */
     .avatar-container img {
-        width: 35px !important;  /* Diminuído de 35px para 28px */
-        height: 35px !important;
+        width: 45px !important;  /* Diminuído de 35px para 28px */
+        height: 45px !important;
         border-radius: 50%;
     } 
 
@@ -63,7 +63,7 @@ st.markdown("""
     .barra-afastada {
         border-bottom: 6px solid #000000 !important; /* Mesma espessura da primeira */
         width: 100% !important;
-        margin-top: 90px !important; /* Isso equivale a +- 3 centímetros */
+        margin-top: 85px !important; /* Isso equivale a +- 3 centímetros */
         margin-bottom: 20px !important;
         display: block !important;
 
@@ -192,6 +192,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
