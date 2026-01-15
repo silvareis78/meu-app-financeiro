@@ -64,7 +64,7 @@ st.markdown("""
 
     /* Largura da caixa aumentada para 170px para caber 'SETEMBRO' e 'FEVEREIRO' */
     div[data-testid="stSelectbox"] {
-        width: 200px !important; 
+        width: 170px !important; 
         margin-top: 5px !important;
     }
     
@@ -75,12 +75,23 @@ st.markdown("""
         display: flex !important;
         align-items: center !important;
         /* Adicionamos padding igual nos dois lados para o texto ficar no meio real */
-        padding-left: 30px !important; 
-        padding-right: 30px !important;
+        padding-left: 25px !important; 
+        padding-right: 10px !important;
         height: 35px !important;
         min-height: 35px !important;
     }
-
+    
+    /* COMANDO ESPECÍFICO PARA MOVER A SETA */
+    div[data-baseweb="select"] [data-testid="stSelectbox"] div:last-child {
+        margin-right: -5px !important; /* Puxa a seta para a extrema direita */
+    }
+    /* AJUSTE PARA O TEXTO NÃO CORTAR */
+    div[data-baseweb="select"] span {
+        white-space: nowrap !important;
+        overflow: visible !important;
+        font-size: 14px !important;
+    }
+    
     /* Garante que o texto não tente "pular" de linha ou se esconder */
     div[data-baseweb="select"] span {
         white-space: nowrap !important;
@@ -156,6 +167,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
