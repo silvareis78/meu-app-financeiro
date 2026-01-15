@@ -179,7 +179,7 @@ with col_ava:
 
 # --- SEÇÃO DE DESPESAS (PARTE DE BAIXO) ---
 st.markdown('<div class="espacamento-secao"></div>', unsafe_allow_html=True)
-st.markdown("<h3 style='font-size: 18px;'>DESPESA</h3>", unsafe_allow_html=True)
+st.markdown("<h3 style='font-size: 30px;'>DESPESA</h3>", unsafe_allow_html=True)
 st.markdown('<div class="barra-preta-fina"></div>', unsafe_allow_html=True)
 
 # Layout de duas colunas para as contas e o gráfico
@@ -194,6 +194,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
