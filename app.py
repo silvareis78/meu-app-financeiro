@@ -19,22 +19,21 @@ st.markdown("""
     .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
     header, footer { visibility: hidden; display: none !important; }
 
-    /* 2. CARDS IGUAIS À FOTO (Texto e Valor bem próximos) */
+    /* 2. CARDS IGUAIS À FOTO */
     .card {
         padding: 5px 10px !important; 
-        font-size: 13px !important;   /* Letra menor para caber tudo na linha */
+        font-size: 13px !important;
         border-radius: 5px;
         color: white !important;
         font-weight: bold;
         text-align: center;
-        line-height: 1.1 !important;  /* COLA o nome no valor */
+        line-height: 1.1 !important;
     }
-    /* CORES DA FOTO */
     .receita { background-color: #008080; } 
     .despesa { background-color: #B22222; } 
     .saldo   { background-color: #DAA520; } 
 
-    /* 3. DIMINUI O TAMANHO DOS SELETORES (Mês/Ano) */
+    /* 3. SELETORES (Mês/Ano) */
     div[data-testid="stSelectbox"] { margin-top: -15px !important; }
     div[data-baseweb="select"] { height: 35px !important; min-height: 35px !important; }
 
@@ -46,12 +45,15 @@ st.markdown("""
         font-size: 11px;
         line-height: 1.2;
         margin-top: -5px;
+    } /* AQUI ESTAVA FALTANDO ESSA CHAVE PARA FECHAR */
 
-        /* Estilo da barra grossa */
+    /* 5. ESTILO DA BARRA GROSSA */
     .barra-preta-grossa {
-        border-bottom: 6px solid #000000; /* 6px é a espessura. Aumente se quiser mais grossa */
-        margin-bottom: 20px;              /* Espaço entre a linha e o que vem abaixo */
-        margin-top: 10px;                 /* Espaço entre o título e a linha */
+        border-bottom: 6px solid #000000 !important; /* !important garante que apareça */
+        margin-bottom: 20px !important;
+        margin-top: 10px !important;
+        display: block !important;
+        width: 100% !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -117,6 +119,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
