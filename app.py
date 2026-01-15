@@ -168,7 +168,7 @@ with col_ava:
     # Avatar e frase lateral colados nos cards
     st.markdown("""
         <div class="avatar-container">
-            <img src="https://www.w3schools.com/howto/img_avatar.png" width="35" style="border-radius: 50%;">
+            <img src="https://share.google/sFJ2VSk96PbQnzvmm" width="35" style="border-radius: 50%;">
             <div>Opa! Você gastou <b>49%</b> do que recebeu!</div>
         </div>
     """, unsafe_allow_html=True)
@@ -192,6 +192,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
