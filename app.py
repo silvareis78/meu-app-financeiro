@@ -6,7 +6,6 @@ st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout l
 # 2. CSS CUSTOMIZADO
 st.markdown("""
     <script>
-    // Função para limpar botões administrativos
     function fecharBotoes() {
         const itensParaEsconder = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu');
         itensParaEsconder.forEach(el => el.style.display = 'none');
@@ -18,9 +17,12 @@ st.markdown("""
         }
     }
     
+    // ESTA FUNÇÃO PRECISA ESTAR EXATAMENTE ASSIM:
     function recolherMenu() {
-        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
         const botaoFechar = window.parent.document.querySelector('button[kind="headerNoContext"]');
+        const sidebar = window.parent.document.querySelector('[data-testid="stSidebar"]');
+        
+        // Se o menu estiver aberto (expanded=true), ele clica no botão de fechar
         if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
             botaoFechar.click();
         }
@@ -236,6 +238,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
