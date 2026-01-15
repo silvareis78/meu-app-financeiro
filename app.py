@@ -248,6 +248,7 @@ def modal_lancamento_categoria(categoria_nome):
         data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
         
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
+            # TUDO DAQUI PARA BAIXO PRECISA DE RECUO (INDENTAÇÃO)
             detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
             
             lista_para_excel = []
@@ -476,6 +477,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Aqui você já visualiza o que está no JSON
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
