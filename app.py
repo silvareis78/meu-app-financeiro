@@ -75,7 +75,7 @@ st.markdown("""
         display: flex !important;
         align-items: center !important;
         /* Adicionamos padding igual nos dois lados para o texto ficar no meio real */
-        padding-left: 10px !important; 
+        padding-left: 5px !important; 
         padding-right: 10px !important;
         height: 35px !important;
         min-height: 35px !important;
@@ -83,7 +83,7 @@ st.markdown("""
     
     /* COMANDO ESPECÍFICO PARA MOVER A SETA */
     div[data-baseweb="select"] [data-testid="stSelectbox"] div:last-child {
-        margin-right: -5px !important; /* Puxa a seta para a extrema direita */
+        margin-right: -10px !important; /* Puxa a seta para a extrema direita */
     }
     /* AJUSTE PARA O TEXTO NÃO CORTAR */
     div[data-baseweb="select"] span {
@@ -167,6 +167,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
