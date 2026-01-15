@@ -54,6 +54,17 @@ st.markdown("""
         margin-top: 10px !important;
         display: block !important;
         width: 100% !important;
+        
+    /* --- COLOQUE O CÓDIGO ABAIXO AQUI --- */
+    div[data-baseweb="select"] {
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 8px !important;
+        background-color: white !important;
+    }
+    div[data-baseweb="select"] > div {
+        height: 35px !important;
+        min-height: 35px !important;
+        
     }
     </style>
     """, unsafe_allow_html=True)
@@ -119,6 +130,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
