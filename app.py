@@ -191,24 +191,12 @@ with st.sidebar:
     st.markdown("## ☰ Navegação")
     st.divider()
 
+    # Voltamos ao seu rádio original, sem scripts de fechamento
     selecionado = st.radio(
         "Selecione a tela:",
         options=["Painel Inicial", "Despesa", "Receita", "Cartões", "Cadastros Iniciais", "Configurações"],
-        key="menu_radio"
+        key="menu_principal"
     )
-
-    st.markdown("---")
-    # Botão grande para facilitar no celular
-    if st.button("✅ Aplicar e Fechar Menu", use_container_width=True):
-        # Esse comando de JavaScript é o mais potente para forçar o fechamento
-        st.components.v1.html("""
-            <script>
-            var container = window.parent.document;
-            var botao = container.querySelector('button[kind="headerNoContext"]');
-            if (botao) { botao.click(); }
-            </script>
-        """, height=0)
-        st.rerun()
     
 # 4. LÓGICA DE NAVEGAÇÃO
 if selecionado == "Painel Inicial":
@@ -253,6 +241,7 @@ elif selecionado == "Despesa":
 elif selecionado == "Receita":
     st.markdown("## 💰 Gestão de Receitas") # Título da tela de receitas
     st.success("Aqui você poderá cadastrar novas receitas.")
+
 
 
 
