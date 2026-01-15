@@ -318,52 +318,58 @@ if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
 
-    # 1. BOTÕES DE CRIAÇÃO NO TOPO
-    col_cat_desp, col_cat_rec, col_forma = st.columns([1, 1, 1])
-    
-    with col_cat_desp:
-        with st.popover("➕ Categoria Despesa", use_container_width=True):
+    # Criamos 3 colunas principais para organizar tudo verticalmente
+    col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
+
+    # --- COLUNA 1: DESPESAS ---
+    with col_desp:
+        st.markdown("### 🔴 Categoria Despesa")
+        # Botão de Inserir no topo da coluna
+        with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            if st.button("Salvar", key="btn_save_desp"):
+            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     st.rerun()
+        
+        st.write("") # Pequeno espaço
+        # BOTÕES DAS CATEGORIAS CRIADAS (Aparecem logo abaixo)
+        for cat in st.session_state.categorias:
+            if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
+                modal_lancamento_categoria(cat)
 
-    with col_cat_rec:
-        with st.popover("💰 Fonte de Receita", use_container_width=True):
+    # --- COLUNA 2: RECEITAS ---
+    with col_rec:
+        st.markdown("### 🟢 Fonte de Receita")
+        # Botão de Inserir no topo da coluna
+        with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            if st.button("Salvar", key="btn_save_rec"):
+            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     st.rerun()
-
-    with col_forma:
-        # AGORA ESTE BOTÃO CHAMA O MODAL SUSPENSO DIRETAMENTE
-        if st.button("💳 Forma Pagto/Receb", use_container_width=True):
-            modal_forma_pagamento()
-
-    st.write("")
-    
-    # --- SEÇÃO DE DESPESAS ---
-    st.markdown("### 🔴 Lançar Despesas")
-    cols_d = st.columns(3)
-    for i, cat in enumerate(st.session_state.categorias):
-        with cols_d[i % 3]:
-            if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
-                modal_lancamento_categoria(cat)
-
-    st.write("")
-    
-    # --- SEÇÃO DE RECEITAS ---
-    st.markdown("### 🟢 Lançar Receitas")
-    if 'categorias_receita' in st.session_state:
-        cols_r = st.columns(3)
-        for i, cat_r in enumerate(st.session_state.categorias_receita):
-            with cols_r[i % 3]:
+        
+        st.write("") # Pequeno espaço
+        # BOTÕES DAS FONTES CRIADAS (Aparecem logo abaixo)
+        if 'categorias_receita' in st.session_state:
+            for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
                     modal_receita_categoria(cat_r)
+
+    # --- COLUNA 3: FORMAS DE PAGAMENTO ---
+    with col_pgto:
+        st.markdown("### 💳 Forma Pagto/Receb")
+        # Botão de Gerenciar no topo (abre o formulário suspenso que já tem a lista)
+        if st.button("⚙️ Gerenciar Formas", use_container_width=True):
+            modal_forma_pagamento()
+        
+        st.write("") # Pequeno espaço
+        # LISTA SIMPLES APENAS PARA VISUALIZAR (Sem ação de botão, já que a forma é usada no formulário)
+        if 'formas_pagamento' in st.session_state:
+            for f in st.session_state.formas_pagamento:
+                st.caption(f"✅ {f['nome']}")
 
 
 
