@@ -225,51 +225,57 @@ def modal_receita_categoria(categoria_nome):
             st.success(f"Receita de {categoria_nome} registada!")
             st.rerun()
 
-# --- FUNÇÃO DO FORMULÁRIO DE FORMA DE PAGAMENTO (TOPO DO SCRIPT) ---
+# --- FUNÇÃO ATUALIZADA: GERENCIAR FORMAS DE PAGAMENTO (TOPO DO SCRIPT) ---
 @st.dialog("💳 Gerenciar Formas de Pagamento")
 def modal_forma_pagamento():
     with st.form(key="form_cadastro_pagamento", clear_on_submit=True):
         st.write("### Cadastrar Nova")
+        
+        # Agora o nome e o tipo são campos de texto livre
         nova_f = st.text_input("Nome da Forma (Ex: Nubank)")
+        tipo_forma = st.text_input("Tipo da Forma (Ex: Cartão de Crédito, Débito, Pix)")
         
-        # Pergunta se é cartão para abrir as opções de data
-        tipo_forma = st.selectbox("Tipo", ["Dinheiro/Débito", "Cartão de Crédito"])
+        st.info("Se for Cartão de Crédito, preencha os dias abaixo. Caso contrário, deixe em 0.")
         
-        fechamento = 0
-        vencimento = 0
+        col1, col2 = st.columns(2)
+        with col1:
+            # Mantive como número para facilitar o cálculo matemático depois
+            fechamento = st.number_input("Dia Fechamento", min_value=0, max_value=31, value=0, help="Dia que a fatura fecha")
+        with col2:
+            vencimento = st.number_input("Dia Vencimento", min_value=0, max_value=31, value=0, help="Dia que você paga a fatura")
         
-        if tipo_forma == "Cartão de Crédito":
-            col1, col2 = st.columns(2)
-            with col1:
-                fechamento = st.number_input("Dia Fechamento", min_value=1, max_value=31, value=1)
-            with col2:
-                vencimento = st.number_input("Dia Vencimento", min_value=1, max_value=31, value=6)
+        st.markdown("---")
         
         if st.form_submit_button("Confirmar Cadastro", use_container_width=True):
             if nova_f:
                 if 'formas_pagamento' not in st.session_state:
                     st.session_state.formas_pagamento = []
                 
-                # Agora salvamos também os dias de fechamento e vencimento
+                # Salvando os dados conforme você preencheu
                 st.session_state.formas_pagamento.append({
                     "nome": nova_f,
                     "tipo": tipo_forma,
                     "fechamento": fechamento,
                     "vencimento": vencimento
                 })
-                st.success(f"'{nova_f}' cadastrada!")
+                st.success(f"'{nova_f}' cadastrada com sucesso!")
                 st.rerun()
 
-    # --- LISTA PARA CORREÇÃO ---
+    # --- LISTA PARA CORREÇÃO E VISUALIZAÇÃO ---
     if st.session_state.formas_pagamento:
         st.markdown("---")
         st.write("### Formas Já Cadastradas")
         for i, item in enumerate(st.session_state.formas_pagamento):
-            with st.expander(f"✅ {item['nome']}"):
-                st.write(f"Tipo: {item['tipo']}")
-                if item['tipo'] == "Cartão de Crédito":
-                    st.write(f"Fechamento: Dia {item['fechamento']} | Vencimento: Dia {item['vencimento']}")
-                if st.button("Remover", key=f"del_f_{i}"):
+            # Usando expander para não ocupar muito espaço na tela do celular
+            with st.expander(f"✅ {item['nome']} ({item['tipo']})"):
+                if item['fechamento'] > 0:
+                    st.write(f"📅 Fechamento: Dia {item['fechamento']}")
+                    st.write(f"💰 Vencimento: Dia {item['vencimento']}")
+                else:
+                    st.write("ℹ️ Forma de pagamento à vista.")
+                
+                # Botão para excluir se precisar corrigir
+                if st.button("Remover", key=f"del_f_{i}", use_container_width=True):
                     st.session_state.formas_pagamento.pop(i)
                     st.rerun()
                     
@@ -387,6 +393,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
