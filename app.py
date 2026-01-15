@@ -33,14 +33,21 @@ st.markdown("""
     .despesa { background-color: #B22222; } 
     .saldo   { background-color: #DAA520; } 
 
-    /* 3. AVATAR E FRASE */
+    /* 3. AVATAR E FRASE (REDUZIDOS) */
     .avatar-container {
         display: flex;
         align-items: center;
-        gap: 8px;
-        font-size: 11px;
-        line-height: 1.2;
+        gap: 6px;             /* Diminuído o espaço entre foto e texto */
+        font-size: 10px;       /* Texto menor */
+        line-height: 1.1;
         margin-top: -5px;
+    }
+
+    /* Comando para garantir que a imagem do avatar fique pequena */
+    .avatar-container img {
+        width: 28px !important;  /* Diminuído de 35px para 28px */
+        height: 28px !important;
+        border-radius: 50%;
     } 
 
     /* 4. ESTILO DA BARRA GROSSA (Corrigida a posição) */
@@ -133,7 +140,7 @@ with t2:
 st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 
 # --- LINHA ÚNICA ---
-col_filtro, col_rec, col_desp, col_sal, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 4])
+col_filtro, col_rec, col_desp, col_sal, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 4, 6])
 
 with col_filtro:
     meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
@@ -185,6 +192,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
