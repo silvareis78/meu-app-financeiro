@@ -172,7 +172,7 @@ def modal_lancamento_categoria(categoria_nome):
             parcelas = st.number_input("Qtde Parcelas", min_value=1, max_value=48, value=1, key=f"p_d_{categoria_nome}")
         
         # --- LINHA 2: VALOR E FORMA ---
-        c1, c2 = st.columns([1, 3])
+        c1, c2 = st.columns([2, 4])
         with c1:
             valor = st.number_input("Valor", min_value=0.0, step=1.0, format="%.2f", key=f"v_d_{categoria_nome}")
         with c2:
@@ -211,7 +211,7 @@ def modal_receita_categoria(categoria_nome):
         desc = st.text_input("Descrição da Receita (Ex: Salário Mensal)")
         
         # Layout de colunas: [1, 3] -> Valor e Forma de Recebimento
-        c1, c2 = st.columns([1, 3])
+        c1, c2 = st.columns([1, 4])
         with c1:
             valor = st.number_input("Valor Recebido", min_value=0.0, step=1.0, format="%.2f")
         with c2:
@@ -406,6 +406,7 @@ if selecionado == "Cadastros Iniciais":
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
