@@ -19,7 +19,7 @@ st.markdown("""
     .block-container { padding-top: 1rem !important; margin-top: -20px !important; }
     header, footer { visibility: hidden; display: none !important; }
 
-    /* 2. CARDS IGUAIS À FOTO */
+    /* 2. CARDS (Conforme você ajustou: Grandes e Espaçados) */
     .card {
         padding: 20px 25px !important; 
         font-size: 20px !important;
@@ -33,11 +33,7 @@ st.markdown("""
     .despesa { background-color: #B22222; } 
     .saldo   { background-color: #DAA520; } 
 
-    /* 3. SELETORES (Mês/Ano) */
-    div[data-testid="stSelectbox"] { margin-top: -15px !important; }
-    div[data-baseweb="select"] { height: 35px !important; min-height: 35px !important; }
-
-    /* 4. AVATAR E FRASE LATERAL */
+    /* 3. AVATAR E FRASE */
     .avatar-container {
         display: flex;
         align-items: center;
@@ -47,35 +43,50 @@ st.markdown("""
         margin-top: -5px;
     } 
 
-    /* 5. ESTILO DA BARRA GROSSA */
+    /* 4. ESTILO DA BARRA GROSSA (Corrigida a posição) */
     .barra-preta-grossa {
-        border-bottom: 6px solid #000000 !important; /* !important garante que apareça */
+        border-bottom: 6px solid #000000 !important;
         margin-bottom: 20px !important;
         margin-top: 10px !important;
         display: block !important;
         width: 100% !important;
+    }
 
-    }    
-        
-    /* ESTILIZAÇÃO DA CAIXA DE COMBINAÇÃO (SELECTBOX) */
+    /* 5. CAIXA DE COMBINAÇÃO (SELECTBOX) - Unificado aqui */
+    div[data-testid="stSelectbox"] { margin-top: -15px !important; }
+
+    /* Estilo do nome 'Mês' e 'Ano' que fica em cima */
+    [data-testid="stWidgetLabel"] p {
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: #000000 !important;
+        margin-bottom: -10px !important; /* Aproxima o nome da caixa */
+    }
+
+    /* Ajusta o espaçamento geral do seletor */
+    div[data-testid="stSelectbox"] {
+        margin-top: 5px !important;
+        margin-bottom: 5px !important;
+    }
+    
     div[data-baseweb="select"] {
-        border: 1px solid #CBD5E1 !important; /* Borda suave */
-        border-radius: 8px !important;       /* Cantos arredondados */
+        border: 1px solid #CBD5E1 !important;
+        border-radius: 8px !important;
         background-color: white !important;
         font-size: 14px !important;
-    }
-
-    /* Ajusta a altura da caixa para não ficar "gorda" */
-    div[data-baseweb="select"] > div {
         height: 35px !important;
         min-height: 35px !important;
-        padding: 0 5px !important;
     }
 
-    /* Cor do texto dentro da caixa */
+    /* Ajuste fino do texto dentro da caixa */
+    div[data-baseweb="select"] > div {
+        padding: 0 5px !important;
+        line-height: 35px !important;
+    }
+
+    /* Cor do texto nos parágrafos */
     div[data-testid="stMarkdownContainer"] p {
         color: #1E293B;
-        
     }
     </style>
     """, unsafe_allow_html=True)
@@ -95,12 +106,11 @@ st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True)
 col_filtro, col_rec, col_desp, col_sal, col_ava = st.columns([1.2, 1.2, 1.2, 1.2, 2.5])
 
 with col_filtro:
-    # --- COLOQUE O CÓDIGO ABAIXO AQUI (Substituindo o antigo) ---
-    meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+       meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
              "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
     
-    st.selectbox("", meses, index=0, key="combo_mes", label_visibility="collapsed")
-    st.selectbox("", ["2025", "2026", "2027"], index=0, key="combo_ano", label_visibility="collapsed")
+    st.selectbox("Mês", meses, index=7, key="combo_mes")
+    st.selectbox("Ano", ["2024", "2025", "2026"], index=0, key="combo_ano")
    
 with col_rec:
     # Card de Receita (Verde Água)
@@ -142,6 +152,7 @@ with col_gastos:
 with col_graf:
     chart_data = pd.DataFrame({'Cat': ['Aluguel', 'Lazer', 'Comida'], 'Val': [1200, 300, 950]})
     st.bar_chart(chart_data.set_index('Cat'), height=200, color="#000000")
+
 
 
 
