@@ -216,7 +216,7 @@ def modal_despesa():
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
         # 2. Valor pequeno e Forma de Pagamento grande
-        col_v, col_espaco, col_f = st.columns([1.3, 0.3, 6]) 
+        col_v, col_espaco, col_f = st.columns([1.5, 0.3, 3.5]) 
         valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=0.0)
         
         opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
@@ -394,6 +394,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
