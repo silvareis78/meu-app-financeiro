@@ -193,19 +193,23 @@ st.markdown("""
         .block-container {
             padding-top: 3.5rem !important; /* Dá espaço para o botão preto não cobrir o texto */
 
-   /* Remove os botões + e - dos campos de número */
-    button[step="1.0"], button[step="0.01"] { display: none !important; }
-    div[data-testid="stNumberInputStepDown"], div[data-testid="stNumberInputStepUp"] { display: none !important; }
-
-    /* Garante que o campo de seleção (selectbox) use todo o espaço e não corte o texto */
-    div[data-testid="stSelectbox"] > div { width: 100% !important; }
-    .stSelectbox div[data-baseweb="select"] > div { white-space: normal !important; }         
-
-    /* Impede que o título dos campos (labels) quebrem em duas linhas */
-    div[data-testid="stWidgetLabel"] p {
-        white-space: nowrap !important;
-        word-break: keep-all !important;
+   /* Remove botões +/- de todos os campos numéricos */
+    div[data-testid="stNumberInputStepDown"], 
+    div[data-testid="stNumberInputStepUp"],
+    button.step-down, button.step-up {
+        display: none !important;
+    }
     
+    /* Remove o espaço que sobrava onde ficavam os botões */
+    div[data-testid="stNumberInputContainer"] input {
+        padding-right: 10px !important;
+    }
+
+    /* Impede que o título "Forma de Pagamento" quebre em 2 linhas */
+    label[data-testid="stWidgetLabel"] p {
+        white-space: nowrap !important;
+        display: block !important;
+        width: 100% !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -215,20 +219,20 @@ st.markdown("""
 @st.dialog("➕ Inserir Nova Despesa")
 def modal_despesa():
     with st.form("form_desp", clear_on_submit=True):
-        # 1. Descrição e Tipo (Largura total)
         desc = st.text_input("Descrição")
         tipo_desp = st.selectbox("Tipo de Despesa", ["Variável", "Fixa"])
         
-        # 2. Valor em uma linha única para ter espaço
-        valor = st.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
+        # Proporção balanceada para alinhar e dar espaço
+        col_v, col_f = st.columns([1.2, 3.8]) 
         
-        # 3. Forma de Pagamento em uma linha única (Combobox Gigante)
+        # Valor - O CSS acima vai tirar o +/-
+        valor = col_v.number_input("Valor", min_value=0.0, format="%.2f", step=1.0)
+        
+        # Forma de Pagamento - Agora com espaço lateral maior
         opcoes_f = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_s = st.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
+        forma_s = col_f.selectbox("Forma de Pagamento", options=opcoes_f if opcoes_f else ["Dinheiro"])
         
         st.markdown("---")
-        
-        # 4. Parcelas e Data lado a lado embaixo
         col_parc, col_data = st.columns(2)
         info_f = next((f for f in st.session_state.formas_pagamento if f['nome'] == forma_s), None)
         
@@ -238,21 +242,10 @@ def modal_despesa():
         
         data_l = col_data.date_input("Data de Lançamento", format="DD/MM/YYYY")
         
-        # Botão de Salvar
         if st.form_submit_button("Salvar Despesa", use_container_width=True):
-            # Lógica de cálculo de vencimento
-            data_venc = data_l
-            if info_f and info_f.get('tipo') == "Cartão de Crédito":
-                if data_l.day >= info_f['fechamento']:
-                    prox_mes = data_l.month % 12 + 1
-                    ano_v = data_l.year + (1 if data_l.month == 12 else 0)
-                    data_venc = datetime(ano_v, prox_mes, info_f['vencimento']).date()
-                else:
-                    data_venc = datetime(data_l.year, data_l.month, info_f['vencimento']).date()
-
             st.session_state.despesas.append({
                 "desc": desc, "tipo_desp": tipo_desp, "valor": valor, 
-                "forma": forma_s, "data": data_l, "vencimento": data_venc, "parcelas": parcelas
+                "forma": forma_s, "data": data_l, "vencimento": data_l, "parcelas": parcelas
             })
             st.rerun()
 
@@ -396,6 +389,7 @@ elif selecionado == "Cadastros Iniciais":
                 <small>Venc: {d['vencimento'].strftime('%d/%m/%Y')}</small>
             </div>
         """, unsafe_allow_html=True)
+
 
 
 
