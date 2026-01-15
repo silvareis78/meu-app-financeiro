@@ -1,23 +1,75 @@
-import streamlit as st # Importa a biblioteca principal do Streamlit
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta
+import json
+import os
+from datetime import datetime, date
 
-# Verificação inicial: se não existir a lista de categorias na memória, ele cria uma vazia
+# --- 1. CONFIGURAÇÕES DE ARQUIVOS ---
+NOME_ARQUIVO = "financeiro_controle.xlsx"
+ARQUIVO_CONFIG = "config_gerais.json"
+
+# --- 2. FUNÇÕES DE MEMÓRIA (CONFIGURAÇÕES) ---
+def salvar_configuracoes():
+    """Salva categorias e formas de pagamento em um arquivo JSON para não perder ao reiniciar"""
+    dados = {
+        "categorias_despesa": st.session_state.categorias,
+        "categorias_receita": st.session_state.get("categorias_receita", []),
+        "formas_pagamento": st.session_state.formas_pagamento
+    }
+    with open(ARQUIVO_CONFIG, "w", encoding="utf-8") as f:
+        json.dump(dados, f, indent=4, ensure_ascii=False)
+
+def carregar_configuracoes():
+    """Carrega as configurações salvas no JSON para o Streamlit"""
+    if os.path.exists(ARQUIVO_CONFIG):
+        with open(ARQUIVO_CONFIG, "r", encoding="utf-8") as f:
+            dados = json.load(f)
+            st.session_state.categorias = dados.get("categorias_despesa", [])
+            st.session_state.categorias_receita = dados.get("categorias_receita", [])
+            st.session_state.formas_pagamento = dados.get("formas_pagamento", [])
+
+# --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
+def calcular_vencimento_real(data_compra, detalhes_pagto):
+    """Aplica a regra: Compra após o fechamento -> Vence no próximo mês"""
+    if not detalhes_pagto or detalhes_pagto.get('fechamento', 0) == 0:
+        return data_compra 
+    
+    dia_c = data_compra.day
+    mes_v = data_compra.month
+    ano_v = data_compra.year
+    
+    # Se comprou no dia do fechamento ou depois, a fatura vira
+    if dia_c >= detalhes_pagto['fechamento']:
+        mes_v += 1
+        if mes_v > 12:
+            mes_v = 1
+            ano_v += 1
+            
+    return date(ano_v, mes_v, detalhes_pagto['vencimento'])
+
+def salvar_no_excel(dados_lista):
+    """Lê o Excel atual e adiciona os novos dados"""
+    df_novo = pd.DataFrame(dados_lista)
+    if os.path.exists(NOME_ARQUIVO):
+        df_antigo = pd.read_excel(NOME_ARQUIVO)
+        df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
+    else:
+        df_final = df_novo
+    df_final.to_excel(NOME_ARQUIVO, index=False)
+
+# --- 4. INICIALIZAÇÃO DO SISTEMA (SÓ RODA 1 VEZ) ---
 if 'categorias' not in st.session_state:
-    st.session_state.categorias = [] # Lista que armazenará os nomes das suas categorias
+    # Tenta carregar tudo o que foi salvo anteriormente
+    carregar_configuracoes()
+    
+    # Garante que as variáveis existam mesmo se o arquivo JSON for novo
+    if 'categorias' not in st.session_state: st.session_state.categorias = []
+    if 'categorias_receita' not in st.session_state: st.session_state.categorias_receita = []
+    if 'formas_pagamento' not in st.session_state: st.session_state.formas_pagamento = []
+    if 'despesas' not in st.session_state: st.session_state.despesas = []
+    if 'pagina' not in st.session_state: st.session_state.pagina = "Painel Inicial"
 
-# Inicializa as listas de dados se não existirem
-if 'formas_pagamento' not in st.session_state:
-    st.session_state.formas_pagamento = []
-if 'despesas' not in st.session_state:
-    st.session_state.despesas = []
-if 'receitas' not in st.session_state:
-    st.session_state.receitas = []
-if 'categorias' not in st.session_state: 
-    st.session_state.categorias = [] 
-
-# 1. CONFIGURAÇÃO DA PÁGINA
+# 1. CONFIGURAÇÃO DA PÁGINA (CSS)
 st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout largo e título da aba
 
 st.markdown("""
@@ -196,24 +248,32 @@ def modal_lancamento_categoria(categoria_nome):
         data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
         
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-            detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
-            
-            novo_item = {
-                "Categoria": categoria_nome,
-                "Descrição": desc,
-                "Tipo": tipo_desp,
-                "Parcelas": parcelas,
-                "Valor": valor,
-                "Pagamento": forma_sel,
-                "Data": data_l.strftime("%d/%m/%Y"),
-                "Info_Pagto": detalhes
-            }
-            
-            if 'despesas' not in st.session_state: st.session_state.despesas = []
-            st.session_state.despesas.append(novo_item)
-            
-            st.success(f"✅ Lançamento em '{categoria_nome}' cadastrado com sucesso!")
-            st.rerun()
+    detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
+    
+    # Lista para guardar as parcelas
+    lista_para_salvar = []
+    
+    for p in range(parcelas):
+        # Calcula a data de vencimento de cada parcela
+        data_base = data_l + pd.DateOffset(months=p)
+        vencimento_calculado = calcular_vencimento_real(data_base.date(), detalhes)
+        
+        item_planilha = {
+            "Data Compra": data_l.strftime("%d/%m/%Y"),
+            "Vencimento": vencimento_calculado.strftime("%d/%m/%Y"),
+            "Categoria": categoria_nome,
+            "Descrição": f"{desc} ({p+1}/{parcelas})",
+            "Tipo": tipo_desp,
+            "Valor": valor / parcelas, # Divide o valor total pelas parcelas
+            "Pagamento": forma_sel
+        }
+        lista_para_salvar.append(item_planilha)
+    
+    # Salva fisicamente no Excel
+    salvar_no_excel(lista_para_salvar)
+    
+    st.success(f"✅ {parcelas} parcela(s) salvas no Excel!")
+    st.rerun()
 
 @st.dialog("💰 Nova Receita")
 def modal_receita_categoria(categoria_nome):
@@ -243,19 +303,20 @@ def modal_receita_categoria(categoria_nome):
         
         data_r = st.date_input("Data", format="DD/MM/YYYY", key=f"d_r_{categoria_nome}")
         
-        if st.form_submit_button("Confirmar Receita", use_container_width=True):
-            nova_rec = {
-                "Tipo": "Receita",
-                "Categoria": categoria_nome,
-                "Descrição": desc,
-                "Valor": valor,
-                "Pagamento": forma,
-                "Data": data_r.strftime("%d/%m/%Y")
-            }
-            if 'despesas' not in st.session_state: st.session_state.despesas = []
-            st.session_state.despesas.append(nova_rec)
-            st.success(f"✅ Receita de '{categoria_nome}' cadastrada com sucesso!")
-            st.rerun()
+       if st.form_submit_button("Confirmar Receita", use_container_width=True):
+    nova_rec = [{
+        "Data Compra": data_r.strftime("%d/%m/%Y"),
+        "Vencimento": data_r.strftime("%d/%m/%Y"),
+        "Categoria": categoria_nome,
+        "Descrição": desc,
+        "Tipo": "RECEITA",
+        "Valor": valor,
+        "Pagamento": forma
+    }]
+    
+    salvar_no_excel(nova_rec)
+    st.success(f"✅ Receita de {valor} salva no Excel!")
+    st.rerun()
 
 @st.dialog("💳 Gerenciar Formas de Pagamento")
 def modal_forma_pagamento():
@@ -372,16 +433,17 @@ if selecionado == "Cadastros Iniciais":
     # --- COLUNA 1: DESPESAS ---
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
-        # Botão de Inserir no topo da coluna
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             if st.button("Salvar", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
+                    # --- SALVAMENTO E MENSAGEM ---
+                    salvar_configuracoes() 
+                    st.success(f"✅ Categoria '{n_cat}' cadastrada com sucesso!")
                     st.rerun()
         
-        st.write("") # Pequeno espaço
-        # BOTÕES DAS CATEGORIAS CRIADAS (Aparecem logo abaixo)
+        st.write("") 
         for cat in st.session_state.categorias:
             if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
                 modal_lancamento_categoria(cat)
@@ -389,7 +451,6 @@ if selecionado == "Cadastros Iniciais":
     # --- COLUNA 2: RECEITAS ---
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
-        # Botão de Inserir no topo da coluna
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             if st.button("Salvar", key="btn_save_rec", use_container_width=True):
@@ -397,10 +458,12 @@ if selecionado == "Cadastros Iniciais":
                     st.session_state.categorias_receita = []
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
+                    # --- SALVAMENTO E MENSAGEM ---
+                    salvar_configuracoes()
+                    st.success(f"✅ Fonte '{n_rec}' cadastrada com sucesso!")
                     st.rerun()
         
-        st.write("") # Pequeno espaço
-        # BOTÕES DAS FONTES CRIADAS (Aparecem logo abaixo)
+        st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
@@ -409,15 +472,15 @@ if selecionado == "Cadastros Iniciais":
     # --- COLUNA 3: FORMAS DE PAGAMENTO ---
     with col_pgto:
         st.markdown("### 💳 Forma Pagto/Receb")
-        # Botão de Gerenciar no topo (abre o formulário suspenso que já tem a lista)
         if st.button("⚙️ Gerenciar Formas", use_container_width=True):
             modal_forma_pagamento()
         
-        st.write("") # Pequeno espaço
-        # LISTA SIMPLES APENAS PARA VISUALIZAR (Sem ação de botão, já que a forma é usada no formulário)
+        st.write("") 
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
+                # Aqui você já visualiza o que está no JSON
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
