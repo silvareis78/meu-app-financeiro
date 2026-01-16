@@ -4,30 +4,45 @@ import json
 import os
 from datetime import datetime, date
 
-# --- 1. CONFIGURAÇÕES DE ARQUIVOS ---
+# --- 1. NOMES DOS ARQUIVOS ---
 NOME_ARQUIVO = "financeiro_controle.xlsx"
 ARQUIVO_CONFIG = "config_gerais.json"
 
-# --- 2. FUNÇÕES DE MEMÓRIA (CONFIGURAÇÕES) ---
+# --- 2. AS FUNÇÕES DE SALVAMENTO (COLOQUE AQUI) ---
+def salvar_no_excel(dados_lista):
+    try:
+        df_novo = pd.DataFrame(dados_lista)
+        if os.path.exists(NOME_ARQUIVO):
+            df_antigo = pd.read_excel(NOME_ARQUIVO, engine='openpyxl')
+            df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
+        else:
+            df_final = df_novo
+        df_final.to_excel(NOME_ARQUIVO, index=False, engine='openpyxl')
+        return True
+    except Exception as e:
+        st.error(f"Erro ao salvar Excel: {e}")
+        return False
+
 def salvar_configuracoes():
-    """Salva categorias e formas de pagamento em um arquivo JSON para não perder ao reiniciar"""
-    dados = {
-        "categorias_despesa": st.session_state.categorias,
-        "categorias_receita": st.session_state.get("categorias_receita", []),
-        "formas_pagamento": st.session_state.formas_pagamento
-    }
-    with open(ARQUIVO_CONFIG, "w", encoding="utf-8") as f:
-        json.dump(dados, f, indent=4, ensure_ascii=False)
+    try:
+        dados = {
+            "categorias_despesa": st.session_state.get("categorias", []),
+            "categorias_receita": st.session_state.get("categorias_receita", []),
+            "formas_pagamento": st.session_state.get("formas_pagamento", [])
+        }
+        with open(ARQUIVO_CONFIG, "w", encoding="utf-8") as f:
+            json.dump(dados, f, indent=4, ensure_ascii=False)
+    except Exception as e:
+        st.error(f"Erro ao salvar configurações: {e}")
 
 def carregar_configuracoes():
-    """Carrega as configurações salvas no JSON para o Streamlit"""
     if os.path.exists(ARQUIVO_CONFIG):
         with open(ARQUIVO_CONFIG, "r", encoding="utf-8") as f:
             dados = json.load(f)
             st.session_state.categorias = dados.get("categorias_despesa", [])
             st.session_state.categorias_receita = dados.get("categorias_receita", [])
             st.session_state.formas_pagamento = dados.get("formas_pagamento", [])
-
+            
 # --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
 def calcular_vencimento_real(data_compra, detalhes_pagto):
     """Aplica a regra: Compra após o fechamento -> Vence no próximo mês"""
@@ -479,6 +494,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Aqui você já visualiza o que está no JSON
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
