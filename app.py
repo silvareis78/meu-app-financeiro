@@ -2,12 +2,14 @@ import streamlit as st
 import pandas as pd
 import json
 import os
-from datetime import datetime, date
 from streamlit_gsheets import GSheetsConnection
 
+# 1. Cria a conexão com o Google ANTES de tentar ler
 conn = st.connection("gsheets", type=GSheetsConnection)
-df_teste = conn.read(worksheet="Config")
-st.write(df_teste) # Isso vai mostrar na tela o que o app está vendo na planilha
+
+# 2. Agora sim você pode testar a leitura (Remova essa linha após o teste)
+# df_teste = conn.read(worksheet="Config")
+# st.write(df_teste)
 
 # --- 2. FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
 
@@ -543,6 +545,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
