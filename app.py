@@ -13,50 +13,55 @@ try:
 except Exception as e:
     st.error(f"Erro ao conectar ao Google: {e}")
 
-# --- FUNÇÕES DE CARREGAMENTO E SALVAMENTO ---
+# --- FUNÇÕES DE SALVAMENTO ---
 
-def carregar_configuracoes_nuvem():
-    """Busca categorias e cartões na aba 'Config'"""
+def salvar_no_google(dados_lista, aba="Dados"):
+    """Salva os lançamentos de despesas/receitas na aba Dados"""
     try:
-        # ttl=0 força o app a buscar dados novos sempre
-        df_config = conn.read(worksheet="Config", ttl=0)
+        # 1. Lê o que já existe na planilha para não apagar o histórico
+        try:
+            df_antigo = conn.read(worksheet=aba, ttl=0)
+        except:
+            df_antigo = pd.DataFrame()
+
+        # 2. Prepara os novos dados
+        df_novo = pd.DataFrame(dados_lista)
         
-        if df_config is not None and not df_config.empty:
-            if "Categorias_Despesa" in df_config.columns:
-                st.session_state.categorias = df_config["Categorias_Despesa"].dropna().replace("", pd.NA).dropna().tolist()
-            
-            if "Categorias_Receita" in df_config.columns:
-                st.session_state.categorias_receita = df_config["Categorias_Receita"].dropna().replace("", pd.NA).dropna().tolist()
-                
-            if "Detalhes_Pagamento" in df_config.columns:
-                formas_json = df_config["Detalhes_Pagamento"].dropna().replace("", pd.NA).dropna().tolist()
-                st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
+        # 3. Junta o antigo com o novo
+        df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
+        
+        # 4. Envia de volta para o Google
+        conn.update(worksheet=aba, data=df_final)
+        st.cache_data.clear() 
+        st.success(f"☁️ Lançamento registrado com sucesso na aba {aba}!")
+        return True
     except Exception as e:
-        # Se a aba estiver vazia, apenas ignora
-        pass
+        st.error(f"Erro ao salvar lançamento: {e}")
+        return False
 
 def salvar_configuracoes_nuvem():
     """Salva Categorias e Cartões na aba Config"""
     try:
-        # Prepara os dados
+        # Coleta os dados do estado do app
         cat_desp = st.session_state.get("categorias", [])
         cat_rec = st.session_state.get("categorias_receita", [])
         cartoes = [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
         
-        # Alinha tamanhos
+        # Garante que as colunas fiquem alinhadas na planilha
         max_len = max(len(cat_desp), len(cat_rec), len(cartoes), 1)
+        
         df_config = pd.DataFrame({
             "Categorias_Despesa": list(cat_desp) + [""] * (max_len - len(cat_desp)),
             "Categorias_Receita": list(cat_rec) + [""] * (max_len - len(cat_rec)),
             "Detalhes_Pagamento": list(cartoes) + [""] * (max_len - len(cartoes))
         })
         
-        # Envia para o Google
+        # Atualiza a aba Config
         conn.update(worksheet="Config", data=df_config)
         st.cache_data.clear()
-        st.success("✅ Salvo no Google Sheets!")
+        st.success("✅ Configurações (Categorias/Cartões) sincronizadas!")
     except Exception as e:
-        st.error(f"Erro ao salvar: {e}")
+        st.error(f"Erro ao salvar configurações: {e}")
 
 # --- INICIALIZAÇÃO DO ESTADO ---
 if 'categorias' not in st.session_state:
@@ -540,6 +545,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
