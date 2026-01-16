@@ -5,9 +5,22 @@ import os
 from streamlit_gsheets import GSheetsConnection
 
 conn = st.connection("gsheets", type=GSheetsConnection)
-st.write("Conectado à planilha:", conn.read(worksheet="Config").columns.tolist())
 
-from streamlit_gsheets import GSheetsConnection
+def carregar_configuracoes_nuvem():
+    try:
+        # Tenta ler a aba Config. O ttl=0 evita cache de erro.
+        df_config = conn.read(worksheet="Config", ttl=0)
+        
+        if df_config is not None and not df_config.empty:
+            # Aqui ele só tenta carregar se a aba existir e tiver dados
+            if "Categorias_Despesa" in df_config.columns:
+                st.session_state.categorias = df_config["Categorias_Despesa"].dropna().tolist()
+            if "Detalhes_Pagamento" in df_config.columns:
+                formas_json = df_config["Detalhes_Pagamento"].dropna().tolist()
+                st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
+    except Exception as e:
+        # Se der erro HTTP, o app não trava, ele apenas começa vazio
+        st.warning("⚠️ Planilha 'Config' não encontrada ou vazia. Verifique os nomes das abas.")
 
 # --- 2. AS FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
 
@@ -542,6 +555,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
