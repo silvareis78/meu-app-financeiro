@@ -1,18 +1,11 @@
 import streamlit as st
 import pandas as pd
 import json
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta # Importação essencial
 from streamlit_gsheets import GSheetsConnection
 
-# 1. CONFIGURAÇÃO DA PÁGINA (Deve ser a primeira coisa)
-st.set_page_config(page_title="Controle Financeiro", layout="wide")
-
-# 2. CONEXÃO COM GOOGLE SHEETS
-# Criamos a conexão aqui fora para ser usada em todo o app
-try:
-    conn = st.connection("gsheets", type=GSheetsConnection)
-except Exception as e:
-    st.error(f"Erro ao conectar ao Google: {e}")
+# Inicia a conexão
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 # --- FUNÇÕES DE SALVAMENTO ---
 
@@ -40,36 +33,24 @@ def salvar_no_google(dados_lista, aba="Dados"):
         st.error(f"Erro ao salvar lançamento: {e}")
         return False
 
-def salvar_configuracoes_nuvem():
-    """Salva Categorias e Cartões na aba Config"""
+def carregar_configuracoes_nuvem():
+    """Busca na aba 'Config' com proteção total"""
     try:
-        # Coleta os dados do estado do app
-        cat_desp = st.session_state.get("categorias", [])
-        cat_rec = st.session_state.get("categorias_receita", [])
-        cartoes = [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
-        
-        # Garante que as colunas fiquem alinhadas na planilha
-        max_len = max(len(cat_desp), len(cat_rec), len(cartoes), 1)
-        
-        df_config = pd.DataFrame({
-            "Categorias_Despesa": list(cat_desp) + [""] * (max_len - len(cat_desp)),
-            "Categorias_Receita": list(cat_rec) + [""] * (max_len - len(cat_rec)),
-            "Detalhes_Pagamento": list(cartoes) + [""] * (max_len - len(cartoes))
-        })
-        
-        # Atualiza a aba Config
-        conn.update(worksheet="Config", data=df_config)
-        st.cache_data.clear()
-        st.success("✅ Configurações (Categorias/Cartões) sincronizadas!")
+        df_config = conn.read(worksheet="Config", ttl=0)
+        if df_config is not None and not df_config.empty:
+            if "Categorias_Despesa" in df_config.columns:
+                st.session_state.categorias = df_config["Categorias_Despesa"].dropna().tolist()
+            if "Detalhes_Pagamento" in df_config.columns:
+                formas_json = df_config["Detalhes_Pagamento"].dropna().tolist()
+                st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
     except Exception as e:
-        st.error(f"Erro ao salvar configurações: {e}")
+        print(f"Aviso: Planilha vazia ou erro: {e}")
 
-# --- INICIALIZAÇÃO DO ESTADO ---
+# Inicialização do Estado
 if 'categorias' not in st.session_state:
     st.session_state.categorias = []
-    st.session_state.categorias_receita = []
     st.session_state.formas_pagamento = []
-    # Carrega do Google na primeira vez que abre
+    # AGORA SIM você chama ela, porque ela já foi definida acima
     carregar_configuracoes_nuvem()
 
 # --- TESTE DE CONEXÃO (FORA DE FORMS) ---
@@ -566,6 +547,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
