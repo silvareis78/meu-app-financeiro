@@ -346,11 +346,7 @@ st.markdown("""
 
 # --- 6. MODAL DE LANÇAMENTO (JANELA FLUTUANTE) ---
 
-@st.dialog("🚀 Novo Lançamento")
-def modal_lancamento_categoria(categoria_nome):
-    """Cria o formulário para despesas com opção de manter janela aberta e botão fechar"""
-    
-    # 1. CABEÇALHO E EDIÇÃO
+# 1. CABEÇALHO E EDIÇÃO
     col_tit, col_edit = st.columns([0.8, 0.2])
     with col_tit:
         st.subheader(f"Categoria: {categoria_nome}")
@@ -365,7 +361,23 @@ def modal_lancamento_categoria(categoria_nome):
                     salvar_configuracoes_nuvem()
                     st.rerun() 
 
-    # 2. FORMULÁRIO DE ENTRADA
+    # 2. CONTROLE DE ESTADO DO MODAL (Para saber se acabou de salvar)
+    if 'salvou_agora' not in st.session_state:
+        st.session_state.salvou_agora = False
+
+    # 3. MENSAGEM SUSPENSA (Pergunta se quer continuar)
+    if st.session_state.salvou_agora:
+        st.info("✅ Lançamento realizado! Deseja adicionar outra despesa nesta categoria?")
+        col_sim, col_nao = st.columns(2)
+        if col_sim.button("👍 SIM (Continuar)", use_container_width=True):
+            st.session_state.salvou_agora = False
+            st.rerun()
+        if col_nao.button("👎 NÃO (Fechar)", use_container_width=True):
+            st.session_state.salvou_agora = False
+            st.rerun() # O rerun sem o 'salvou_agora' ativo fechará o modal
+        st.stop() # Interrompe o código aqui para o usuário escolher
+
+    # 4. FORMULÁRIO DE ENTRADA
     with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -384,15 +396,12 @@ def modal_lancamento_categoria(categoria_nome):
         
         data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
 
-        # --- NOVA OPÇÃO: LANÇAR VÁRIOS ---
-        # Se marcado, o st.rerun() não fechará o modal após salvar
-        manter_aberto = st.checkbox("Manter janela aberta para novo lançamento", value=False)
+        # --- A CHECKBOX QUE ATIVA A PERGUNTA ---
+        perguntar_ao_final = st.checkbox("Me perguntar se quero lançar mais um ao terminar", value=False)
         
         # --- BOTÕES DE AÇÃO ---
         col_btn_save, col_btn_cancel = st.columns(2)
-        
         btn_salvar = col_btn_save.form_submit_button("Confirmar e Salvar", use_container_width=True)
-        # O botão de cancelar apenas recarrega a página, fechando o modal automaticamente
         btn_cancelar = col_btn_cancel.form_submit_button("Cancelar / Sair", use_container_width=True)
 
         if btn_salvar:
@@ -419,12 +428,18 @@ def modal_lancamento_categoria(categoria_nome):
                     })
                 
                 salvar_no_google(lista_para_enviar, aba="Dados")
-                st.success(f"✅ Salvo!")
                 
-                # Se a checkbox NÃO estiver marcada, fecha o modal (st.rerun)
-                # Se estiver marcada, o formulário limpa e continua aberto
-                if not manter_aberto:
-                    st.rerun()
+                # LÓGICA DE FECHAMENTO:
+                if perguntar_ao_final:
+                    st.session_state.salvou_agora = True
+                    st.rerun() # Abre a caixa de pergunta
+                else:
+                    st.success("✅ Salvo!")
+                    st.rerun() # Fecha o modal direto
+
+        if btn_cancelar:
+            st.session_state.salvou_agora = False
+            st.rerun()
 
         if btn_cancelar:
             st.rerun() # Simplesmente reinicia a tela, fechando o modal.
@@ -731,6 +746,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
