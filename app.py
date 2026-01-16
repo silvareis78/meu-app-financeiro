@@ -350,8 +350,8 @@ st.markdown("""
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas com contador.
-    SOLUÇÃO DEFINITIVA: Checkbox fora do formulário para manter o estado vivo.
+    PARA QUE SERVE: Cadastro de despesas com controle manual de fechamento.
+    POR QUE FUNCIONA: Ao não usar st.form, temos controle granular sobre o rerun.
     """
     
     # 1. INICIALIZAÇÃO DO CONTADOR
@@ -362,68 +362,70 @@ def modal_lancamento_categoria(categoria_nome):
     st.subheader(f"Categoria: {categoria_nome}")
     st.info(f"🔢 Lançamentos realizados agora: **{st.session_state.cont_lanc}**")
     
-    # --- MUDANÇA CRUCIAL: CHECKBOX FORA DO FORMULÁRIO ---
-    # Colocamos aqui em cima para o Streamlit não "esquecer" o valor dela ao salvar
-    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_persist_externo")
+    # 3. CAMPOS DE ENTRADA (SOLTOS - SEM FORMULÁRIO)
+    # Usamos chaves (keys) para podermos limpar os campos manualmente depois
+    desc = st.text_input("Descrição da Despesa", key="input_desc")
+    
+    c_tipo, c_parc = st.columns([2, 1])
+    tipo_desp = c_tipo.selectbox("Tipo", ["Variável", "Fixa"], key="input_tipo")
+    parcelas = c_parc.number_input("Parcelas", min_value=1, value=1, key="input_parc")
+    
+    c_val, c_pag = st.columns([2, 4])
+    valor = c_val.number_input("Valor Total", min_value=0.0, format="%.2f", key="input_valor")
+    
+    opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
+    forma_sel = c_pag.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key="input_pag")
+    
+    data_l = st.date_input("Data", format="DD/MM/YYYY", key="input_data")
 
-    # 3. FORMULÁRIO DE ENTRADA (Apenas campos e botões)
-    with st.form(key=f"form_d_{categoria_nome}", clear_on_submit=True):
-        desc = st.text_input("Descrição da Despesa")
-        
-        c_tipo, c_parc = st.columns([2, 1])
-        tipo_desp = c_tipo.selectbox("Tipo", ["Variável", "Fixa"])
-        parcelas = c_parc.number_input("Parcelas", min_value=1, value=1)
-        
-        c_val, c_pag = st.columns([2, 4])
-        valor = c_val.number_input("Valor Total", min_value=0.0, format="%.2f")
-        
-        opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_sel = c_pag.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"])
-        
-        data_l = st.date_input("Data", format="DD/MM/YYYY")
-        
-        # Botões do Formulário
-        col_btn1, col_btn2 = st.columns(2)
-        btn_salvar = col_btn1.form_submit_button("✅ Salvar Lançamento", use_container_width=True)
-        btn_cancelar = col_btn2.form_submit_button("❌ Sair / Concluir", use_container_width=True)
+    st.write("---")
+    # A CHECKBOX QUE VOCÊ VAI MARCAR
+    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False)
 
-        if btn_salvar:
-            if not desc or valor <= 0:
-                st.error("Preencha descrição e valor!")
+    # 4. BOTÕES DE AÇÃO
+    col_btn1, col_btn2 = st.columns(2)
+    
+    # Botão de Salvar
+    if col_btn1.button("✅ Salvar Lançamento", use_container_width=True):
+        if not desc or valor <= 0:
+            st.error("Preencha a descrição e o valor!")
+        else:
+            # Lógica de cálculo de parcelas e envio ao Google
+            detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
+            lista_itens = []
+            
+            for p in range(int(parcelas)):
+                data_parc = data_l + pd.DateOffset(months=p)
+                venc = calcular_vencimento_real(data_parc.date(), detalhes)
+                txt_parc = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
+                
+                lista_itens.append({
+                    "Data Compra": data_l.strftime("%d/%m/%Y"),
+                    "Vencimento": venc.strftime("%d/%m/%Y"),
+                    "Categoria": categoria_nome,
+                    "Descrição": desc,
+                    "Parcela": txt_parc,
+                    "Tipo": tipo_desp,
+                    "Valor": valor / parcelas,
+                    "Pagamento": forma_sel
+                })
+            
+            salvar_no_google(lista_itens, aba="Dados")
+            st.session_state.cont_lanc += 1
+            
+            if manter_aberto:
+                st.toast(f"✅ {desc} salvo!")
+                # Em vez de st.rerun (que fecharia o dialog), apenas limpamos os campos
+                # Como não usamos form, o Streamlit manterá o modal aberto
+                st.rerun() 
             else:
-                detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
-                lista_itens = []
-                
-                for p in range(int(parcelas)):
-                    data_parc = data_l + pd.DateOffset(months=p)
-                    venc = calcular_vencimento_real(data_parc.date(), detalhes)
-                    txt_parc = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
-                    
-                    lista_itens.append({
-                        "Data Compra": data_l.strftime("%d/%m/%Y"),
-                        "Vencimento": venc.strftime("%d/%m/%Y"),
-                        "Categoria": categoria_nome,
-                        "Descrição": desc,
-                        "Parcela": txt_parc,
-                        "Tipo": tipo_desp,
-                        "Valor": valor / parcelas,
-                        "Pagamento": forma_sel
-                    })
-                
-                salvar_no_google(lista_itens, aba="Dados")
-                st.session_state.cont_lanc += 1
-                
-                # LEITURA DA CHECKBOX (Que está fora do formulário)
-                if st.session_state.check_persist_externo:
-                    st.toast(f"✅ {desc} salvo!")
-                    st.rerun() # Mantém aberto porque a checkbox externa ainda é True
-                else:
-                    st.session_state.cont_lanc = 0
-                    st.rerun() # Fecha porque a checkbox externa é False
+                st.session_state.cont_lanc = 0
+                st.rerun() # Aqui ele fecha porque o estado de 'manter_aberto' será lido como falso no próximo ciclo
 
-        if btn_cancelar:
-            st.session_state.cont_lanc = 0
-            st.rerun()
+    # Botão de Sair
+    if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
+        st.session_state.cont_lanc = 0
+        st.rerun()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
 
@@ -728,6 +730,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
