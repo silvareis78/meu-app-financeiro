@@ -4,6 +4,9 @@ import json
 import os
 from streamlit_gsheets import GSheetsConnection
 
+conn = st.connection("gsheets", type=GSheetsConnection)
+st.write("Conectado à planilha:", conn.read(worksheet="Config").columns.tolist())
+
 # 1. Cria a conexão com o Google ANTES de tentar ler
 conn = st.connection("gsheets", type=GSheetsConnection)
 
@@ -542,6 +545,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
