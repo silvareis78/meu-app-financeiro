@@ -279,41 +279,43 @@ def modal_receita_categoria(categoria_nome):
     with col_tit:
         st.subheader(f"Fonte: {categoria_nome}")
     with col_edit:
-        with st.popover("✏️", help="Corrigir nome da fonte"):
-            novo_nome = st.text_input("Novo nome da fonte", value=categoria_nome)
-            if st.button("Salvar Alteração", key="btn_edit_rec"):
+        with st.popover("✏️"):
+            novo_nome = st.text_input("Novo nome", value=categoria_nome)
+            if st.button("Salvar Alteração"):
                 if novo_nome and novo_nome != categoria_nome:
                     idx = st.session_state.categorias_receita.index(categoria_nome)
                     st.session_state.categorias_receita[idx] = novo_nome
-                    st.success("Nome da fonte atualizado!")
+                    salvar_configuracoes()
                     st.rerun()
 
-    # --- FORMULÁRIO ---
+    # --- FORMULÁRIO (CUIDADO COM O ALINHAMENTO ABAIXO) ---
     with st.form(key=f"form_receita_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Receita")
         c1, c2 = st.columns([2, 4])
         with c1:
-            valor = st.number_input("Valor", min_value=0.0, format="%.2f", key=f"v_r_{categoria_nome}")
+            valor = st.number_input("Valor", min_value=0.0, format="%.2f")
         with c2:
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"], key=f"f_r_{categoria_nome}")
+            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"])
         
-        data_r = st.date_input("Data", format="DD/MM/YYYY", key=f"d_r_{categoria_nome}")
+        data_r = st.date_input("Data", format="DD/MM/YYYY")
         
-       if st.form_submit_button("Confirmar Receita", use_container_width=True):
-    nova_rec = [{
-        "Data Compra": data_r.strftime("%d/%m/%Y"),
-        "Vencimento": data_r.strftime("%d/%m/%Y"),
-        "Categoria": categoria_nome,
-        "Descrição": desc,
-        "Tipo": "RECEITA",
-        "Valor": valor,
-        "Pagamento": forma
-    }]
-    
-    salvar_no_excel(nova_rec)
-    st.success(f"✅ Receita de {valor} salva no Excel!")
-    st.rerun()
+        # O botão e o que acontece depois dele:
+        if st.form_submit_button("Confirmar Receita", use_container_width=True):
+            nova_rec = [{
+                "Data Compra": data_r.strftime("%d/%m/%Y"),
+                "Vencimento": data_r.strftime("%d/%m/%Y"),
+                "Categoria": categoria_nome,
+                "Descrição": desc,
+                "Tipo": "RECEITA",
+                "Valor": valor,
+                "Pagamento": forma
+            }]
+            
+            # SALVAMENTO NO EXCEL
+            salvar_no_excel(nova_rec)
+            st.success(f"✅ Receita de '{categoria_nome}' cadastrada com sucesso!")
+            st.rerun()
 
 @st.dialog("💳 Gerenciar Formas de Pagamento")
 def modal_forma_pagamento():
@@ -477,6 +479,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Aqui você já visualiza o que está no JSON
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
