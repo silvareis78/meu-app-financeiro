@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import json
+from datetime import date, datetime, timedelta
 from streamlit_gsheets import GSheetsConnection
 
 # 1. CONFIGURAÇÃO DA PÁGINA (Deve ser a primeira coisa)
@@ -82,9 +83,12 @@ if st.sidebar.button("Testar Conexão Agora"):
     except Exception as e:
         st.sidebar.error(f"❌ ERRO: {e}")
             
-# --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
+# --- 3. FUNÇÕES DE LOGÍSTICA E NUVEM ---
+
 def calcular_vencimento_real(data_compra, detalhes_pagto):
     """Aplica a regra: Compra após o fechamento -> Vence no próximo mês"""
+    import datetime # Garante que o date funcione aqui dentro
+    
     if not detalhes_pagto or detalhes_pagto.get('fechamento', 0) == 0:
         return data_compra 
     
@@ -99,19 +103,36 @@ def calcular_vencimento_real(data_compra, detalhes_pagto):
             mes_v = 1
             ano_v += 1
             
-    return date(ano_v, mes_v, detalhes_pagto['vencimento'])
+    # Retorna usando a biblioteca datetime corrigida
+    return datetime.date(ano_v, mes_v, detalhes_pagto['vencimento'])
 
-def salvar_no_excel(dados_lista):
-    """Lê o Excel atual e adiciona os novos dados"""
-    df_novo = pd.DataFrame(dados_lista)
-    if os.path.exists(NOME_ARQUIVO):
-        df_antigo = pd.read_excel(NOME_ARQUIVO)
+def salvar_no_google(dados_lista, aba="Dados"):
+    """Grava direto na nuvem para não perder dados"""
+    try:
+        # Tenta ler o que já tem na planilha para manter o histórico
+        try:
+            df_antigo = conn.read(worksheet=aba, ttl=0)
+        except:
+            df_antigo = pd.DataFrame()
+
+        df_novo = pd.DataFrame(dados_lista)
+        
+        # Garante que as datas sejam enviadas como texto para o Google não bugar
+        for col in df_novo.columns:
+            if 'Data' in col or 'Vencimento' in col:
+                df_novo[col] = df_novo[col].astype(str)
+
         df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
-    else:
-        df_final = df_novo
-    df_final.to_excel(NOME_ARQUIVO, index=False)
+        
+        # Envia para o Google Sheets
+        conn.update(worksheet=aba, data=df_final)
+        st.cache_data.clear()
+        return True
+    except Exception as e:
+        st.error(f"Erro ao salvar no Google Sheets: {e}")
+        return False
 
-# --- 3. INICIALIZAÇÃO DO APP ---
+# --- 4. INICIALIZAÇÃO DO APP ---
 
 # Inicializa as listas no session_state para não dar erro de "não definido"
 if 'categorias' not in st.session_state:
@@ -125,7 +146,7 @@ if 'categorias' not in st.session_state:
 if 'pagina' not in st.session_state:
     st.session_state.pagina = "Painel Inicial"
         
-# 1. CONFIGURAÇÃO DA PÁGINA (CSS)
+# 5. CONFIGURAÇÃO DA PÁGINA (CSS)
 st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout largo e título da aba
 
 st.markdown("""
@@ -545,6 +566,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
