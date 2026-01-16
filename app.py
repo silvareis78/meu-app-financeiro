@@ -4,6 +4,17 @@ import json
 import os
 from streamlit_gsheets import GSheetsConnection
 
+# TESTE DE EMERGÊNCIA - Coloque logo após os imports
+conn = st.connection("gsheets", type=GSheetsConnection)
+
+if st.button("BOTÃO DE TESTE: SALVAR AGORA"):
+    df_teste = pd.DataFrame({"Teste": ["Funcionou!", "Conectado!"]})
+    try:
+        conn.update(worksheet="Config", data=df_teste)
+        st.success("O Google aceitou o comando! Olhe sua planilha agora.")
+    except Exception as e:
+        st.error(f"O Google RECUSOU o comando. Erro: {e}")
+
 # 1. Cria a conexão global
 conn = st.connection("gsheets", type=GSheetsConnection)
 
@@ -540,6 +551,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
