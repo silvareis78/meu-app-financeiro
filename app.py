@@ -56,32 +56,28 @@ def salvar_configuracoes_nuvem():
         st.error(f"Erro ao salvar Config: {e}")
 
 def carregar_configuracoes_nuvem():
-    """Busca na aba 'Config' tudo o que foi cadastrado antes"""
+    """Busca na aba 'Config' com proteção contra erro 400"""
     try:
         conn = st.connection("gsheets", type=GSheetsConnection)
-        # Tenta ler a aba Config
-        df_config = conn.read(worksheet="Config")
+        # O ttl=0 garante que ele busque dados novos e não use cache antigo
+        df_config = conn.read(worksheet="Config", ttl=0)
         
-        # Se a planilha estiver vazia, o pandas pode retornar erro ou DF vazio
-        if df_config.empty:
-            return
-
-        # Carrega Categorias Despesa
-        if "Categorias_Despesa" in df_config.columns:
-            st.session_state.categorias = df_config["Categorias_Despesa"].replace("", pd.NA).dropna().tolist()
-        
-        # Carrega Categorias Receita
-        if "Categorias_Receita" in df_config.columns:
-            st.session_state.categorias_receita = df_config["Categorias_Receita"].replace("", pd.NA).dropna().tolist()
+        if df_config is not None and not df_config.empty:
+            # Carrega Categorias Despesa
+            if "Categorias_Despesa" in df_config.columns:
+                st.session_state.categorias = df_config["Categorias_Despesa"].dropna().replace("", pd.NA).dropna().tolist()
             
-        # Carrega Detalhes dos Cartões
-        if "Detalhes_Pagamento" in df_config.columns:
-            formas_json = df_config["Detalhes_Pagamento"].replace("", pd.NA).dropna().tolist()
-            st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
-            
+            # Carrega Categorias Receita
+            if "Categorias_Receita" in df_config.columns:
+                st.session_state.categorias_receita = df_config["Categorias_Receita"].dropna().replace("", pd.NA).dropna().tolist()
+                
+            # Carrega Detalhes dos Cartões
+            if "Detalhes_Pagamento" in df_config.columns:
+                formas_json = df_config["Detalhes_Pagamento"].dropna().replace("", pd.NA).dropna().tolist()
+                st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
     except Exception as e:
-        # Silencia o erro se a planilha estiver apenas vazia
-        pass
+        # Se a aba estiver vazia ou não existir, ele ignora o erro e deixa as listas vazias
+        print(f"Aviso: Planilha ainda sem dados ou erro de conexão: {e}")
             
 # --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
 def calcular_vencimento_real(data_compra, detalhes_pagto):
@@ -546,6 +542,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
