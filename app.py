@@ -48,25 +48,30 @@ def salvar_configuracoes_nuvem():
     try:
         conn = st.connection("gsheets", type=GSheetsConnection)
         
-        # Preparamos os dados (convertendo cartões para texto JSON)
-        configs = {
-            "Categorias_Despesa": st.session_state.get("categorias", []),
-            "Categorias_Receita": st.session_state.get("categorias_receita", []),
-            "Detalhes_Pagamento": [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
-        }
+        # Coleta o que está no cache do app (Session State)
+        categorias_desp = st.session_state.get("categorias", [])
+        categorias_rec = st.session_state.get("categorias_receita", [])
+        # Transforma os dicionários dos cartões em texto para salvar na planilha
+        formas_pag = [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
         
-        # Alinhamos o tamanho das listas para o DataFrame não dar erro
-        max_len = max([len(v) for v in configs.values()]) if any(configs.values()) else 0
-        for k in configs:
-            configs[k] = list(configs[k]) + [""] * (max_len - len(configs[k]))
-            
-        df_config = pd.DataFrame(configs)
+        # Descobre qual lista é maior para preencher as outras com vazio (evita erro de tamanho)
+        max_len = max(len(categorias_desp), len(categorias_rec), len(formas_pag), 1)
         
-        # Atualiza a planilha
+        def ajustar_lista(lista, tamanho):
+            return list(lista) + [""] * (tamanho - len(lista))
+
+        df_config = pd.DataFrame({
+            "Categorias_Despesa": ajustar_lista(categorias_desp, max_len),
+            "Categorias_Receita": ajustar_lista(categorias_rec, max_len),
+            "Detalhes_Pagamento": ajustar_lista(formas_pag, max_len)
+        })
+        
+        # O segredo: usamos o comando update e limpamos o cache para forçar a gravação
         conn.update(worksheet="Config", data=df_config)
-        st.success("✅ Configurações salvas na nuvem!")
+        st.cache_data.clear() # <--- ISSO força o app a ler o dado novo no próximo F5
+        st.success("✅ Sincronizado com o Google Sheets!")
     except Exception as e:
-        st.error(f"Erro ao salvar Config: {e}")
+        st.error(f"Erro ao salvar: {e}")
 
 def carregar_configuracoes_nuvem():
     """Busca na aba 'Config' com proteção contra erro 400"""
@@ -555,6 +560,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
