@@ -72,18 +72,19 @@ def salvar_no_excel(dados_lista):
         df_final = df_novo
     df_final.to_excel(NOME_ARQUIVO, index=False)
 
-# --- 4. INICIALIZAÇÃO DO SISTEMA (SÓ RODA 1 VEZ) ---
+# --- 3. INICIALIZAÇÃO (LOGO ABAIXO DAS FUNÇÕES) ---
 if 'categorias' not in st.session_state:
-    # Tenta carregar tudo o que foi salvo anteriormente
+    # 1. Tenta buscar o que está salvo no arquivo JSON
     carregar_configuracoes()
     
-    # Garante que as variáveis existam mesmo se o arquivo JSON for novo
+    # 2. Se o arquivo não existir ou estiver vazio, cria as listas em branco na memória
     if 'categorias' not in st.session_state: st.session_state.categorias = []
     if 'categorias_receita' not in st.session_state: st.session_state.categorias_receita = []
     if 'formas_pagamento' not in st.session_state: st.session_state.formas_pagamento = []
-    if 'despesas' not in st.session_state: st.session_state.despesas = []
+    
+    # 3. Define a página inicial do sistema para o menu funcionar
     if 'pagina' not in st.session_state: st.session_state.pagina = "Painel Inicial"
-
+        
 # 1. CONFIGURAÇÃO DA PÁGINA (CSS)
 st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout largo e título da aba
 
@@ -494,6 +495,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Aqui você já visualiza o que está no JSON
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
