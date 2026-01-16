@@ -350,20 +350,23 @@ st.markdown("""
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas com contador e fluxo contínuo.
-    SOLUÇÃO: Uso de KEY fixa na checkbox para evitar que ela resete ao salvar.
+    PARA QUE SERVE: Cadastro de despesas com contador.
+    SOLUÇÃO DEFINITIVA: Checkbox fora do formulário para manter o estado vivo.
     """
     
     # 1. INICIALIZAÇÃO DO CONTADOR
     if 'cont_lanc' not in st.session_state:
         st.session_state.cont_lanc = 0
 
-    # 2. CABEÇALHO
+    # 2. CABEÇALHO E CONTADOR
     st.subheader(f"Categoria: {categoria_nome}")
-    # Exibe o contador de quantos itens você já salvou nesta abertura do modal
-    st.info(f"🔢 Lançamentos realizados nesta categoria: **{st.session_state.cont_lanc}**")
+    st.info(f"🔢 Lançamentos realizados agora: **{st.session_state.cont_lanc}**")
     
-    # 3. FORMULÁRIO DE ENTRADA
+    # --- MUDANÇA CRUCIAL: CHECKBOX FORA DO FORMULÁRIO ---
+    # Colocamos aqui em cima para o Streamlit não "esquecer" o valor dela ao salvar
+    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_persist_externo")
+
+    # 3. FORMULÁRIO DE ENTRADA (Apenas campos e botões)
     with st.form(key=f"form_d_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -378,11 +381,8 @@ def modal_lancamento_categoria(categoria_nome):
         forma_sel = c_pag.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"])
         
         data_l = st.date_input("Data", format="DD/MM/YYYY")
-
-        # --- O SEGREDO ESTÁ NA KEY ABAIXO ---
-        # Ao colocar uma key, o valor da checkbox fica guardado na memória 'global' do app
-        manter_aberto = st.checkbox("Marque aqui para lançar várias despesas", key=f"check_persistente_{categoria_nome}")
         
+        # Botões do Formulário
         col_btn1, col_btn2 = st.columns(2)
         btn_salvar = col_btn1.form_submit_button("✅ Salvar Lançamento", use_container_width=True)
         btn_cancelar = col_btn2.form_submit_button("❌ Sair / Concluir", use_container_width=True)
@@ -410,19 +410,16 @@ def modal_lancamento_categoria(categoria_nome):
                         "Pagamento": forma_sel
                     })
                 
-                # Envia para a planilha
                 salvar_no_google(lista_itens, aba="Dados")
-                
-                # Incrementa o contador
                 st.session_state.cont_lanc += 1
                 
-                # Verifica a checkbox usando a KEY
-                if st.session_state[f"check_persistente_{categoria_nome}"]:
-                    st.toast(f"✅ {desc} salvo!") 
-                    st.rerun() # Reinicia o modal, mas ele não fecha porque detecta que deve continuar
+                # LEITURA DA CHECKBOX (Que está fora do formulário)
+                if st.session_state.check_persist_externo:
+                    st.toast(f"✅ {desc} salvo!")
+                    st.rerun() # Mantém aberto porque a checkbox externa ainda é True
                 else:
                     st.session_state.cont_lanc = 0
-                    st.rerun() # Fecha o modal
+                    st.rerun() # Fecha porque a checkbox externa é False
 
         if btn_cancelar:
             st.session_state.cont_lanc = 0
@@ -731,6 +728,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
