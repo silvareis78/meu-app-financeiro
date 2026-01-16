@@ -348,40 +348,53 @@ st.markdown("""
 
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
-    """Cria o formulário com lógica de pergunta suspensa após salvar"""
+    """
+    PARA QUE SERVE: Abre o formulário de cadastro de despesas.
+    FUNCIONALIDADES:
+    - Salva parcelas em linhas separadas.
+    - Coluna 'Parcela' dedicada (vazia se for 1x).
+    - Opção de perguntar se deseja continuar na mesma categoria.
+    - Botão de fechar/cancelar.
+    """
     
-    # 1. CABEÇALHO E EDIÇÃO
+    # 1. CONTROLE DE FLUXO (Estado para a pergunta de continuação)
+    if 'salvou_agora' not in st.session_state:
+        st.session_state.salvou_agora = False
+
+    # 2. INTERFACE DE PERGUNTA PÓS-SALVAMENTO
+    # Se o usuário marcou a checkbox e clicou em salvar, o código entra aqui primeiro
+    if st.session_state.salvou_agora:
+        st.info(f"✅ Lançamento em '{categoria_nome}' realizado! Deseja adicionar outro?")
+        c_sim, c_nao = st.columns(2)
+        
+        if c_sim.button("👍 SIM (Continuar)", use_container_width=True):
+            st.session_state.salvou_agora = False
+            st.rerun() # Recarrega o modal mostrando o formulário novamente
+            
+        if c_nao.button("👎 NÃO (Sair)", use_container_width=True):
+            st.session_state.salvou_agora = False
+            st.rerun() # Recarrega a página principal (fecha o modal)
+        
+        st.stop() # Trava a execução aqui até o usuário clicar em SIM ou NÃO
+
+    # 3. CABEÇALHO COM TÍTULO E EDIÇÃO DE CATEGORIA
     col_tit, col_edit = st.columns([0.8, 0.2])
     with col_tit:
         st.subheader(f"Categoria: {categoria_nome}")
     
     with col_edit:
-        with st.popover("✏️"):
+        with st.popover("✏️", help="Corrigir nome da categoria"):
             novo_nome_cat = st.text_input("Novo nome", value=categoria_nome)
             if st.button("Salvar Alteração", use_container_width=True):
                 if novo_nome_cat and novo_nome_cat != categoria_nome:
                     idx = st.session_state.categorias.index(categoria_nome)
                     st.session_state.categorias[idx] = novo_nome_cat
                     salvar_configuracoes_nuvem()
+                    st.success("Nome alterado!")
                     st.rerun() 
 
-    # 2. CONTROLE DE ESTADO DO MODAL (Para saber se acabou de salvar)
-    if 'salvou_agora' not in st.session_state:
-        st.session_state.salvou_agora = False
-
-    # 3. MENSAGEM SUSPENSA (Pergunta se quer continuar)
-    if st.session_state.salvou_agora:
-        st.info("✅ Lançamento realizado! Deseja adicionar outra despesa nesta categoria?")
-        col_sim, col_nao = st.columns(2)
-        if col_sim.button("👍 SIM (Continuar)", use_container_width=True):
-            st.session_state.salvou_agora = False
-            st.rerun()
-        if col_nao.button("👎 NÃO (Fechar)", use_container_width=True):
-            st.session_state.salvou_agora = False
-            st.rerun() # O rerun sem o 'salvou_agora' ativo fechará o modal
-        st.stop() # Interrompe o código aqui para o usuário escolher
-
-    # 4. FORMULÁRIO DE ENTRADA
+    # 4. FORMULÁRIO DE ENTRADA DE DADOS
+    # 'clear_on_submit=True' limpa os campos após o envio com sucesso
     with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -393,56 +406,62 @@ def modal_lancamento_categoria(categoria_nome):
         
         c1, c2 = st.columns([2, 4])
         with c1:
-            valor = st.number_input("Valor", min_value=0.0, format="%.2f", key=f"v_d_{categoria_nome}")
+            valor = st.number_input("Valor Total", min_value=0.0, format="%.2f", key=f"v_d_{categoria_nome}")
         with c2:
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
             forma_sel = st.selectbox("Pagamento", options=opcoes if opcoes else ["Dinheiro"], key=f"f_d_{categoria_nome}")
         
-        data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
+        data_l = st.date_input("Data da Compra", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
 
-        # --- A CHECKBOX QUE ATIVA A PERGUNTA ---
-        perguntar_ao_final = st.checkbox("Me perguntar se quero lançar mais um ao terminar", value=False)
+        # CHECKBOX DE CONTROLE: Decide se deve perguntar ao final ou fechar direto
+        perguntar_ao_final = st.checkbox("Me perguntar se quero lançar mais um", value=False)
         
-        # --- BOTÕES DE AÇÃO ---
+        # BOTÕES DE AÇÃO DO FORMULÁRIO
         col_btn_save, col_btn_cancel = st.columns(2)
-        btn_salvar = col_btn_save.form_submit_button("Confirmar e Salvar", use_container_width=True)
-        btn_cancelar = col_btn_cancel.form_submit_button("Cancelar / Sair", use_container_width=True)
+        btn_salvar = col_btn_save.form_submit_button("✅ Confirmar e Salvar", use_container_width=True)
+        btn_cancelar = col_btn_cancel.form_submit_button("❌ Cancelar / Sair", use_container_width=True)
 
+        # 5. LÓGICA DE PROCESSAMENTO DOS DADOS
         if btn_salvar:
             if not desc or valor <= 0:
-                st.warning("Preencha a descrição e o valor!")
+                st.warning("Atenção: Preencha a descrição e o valor!")
             else:
+                # Busca as regras de vencimento do cartão selecionado
                 detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
                 lista_para_enviar = []
                 
-                for p in range(parcelas):
+                # Loop para gerar as parcelas (ex: se for 3x, gera 3 linhas)
+                for p in range(int(parcelas)):
                     data_mes_parcela = data_l + pd.DateOffset(months=p)
                     vencimento = calcular_vencimento_real(data_mes_parcela.date(), detalhes)
-                    texto_parcela = f"{p+1}/{parcelas}" if parcelas > 1 else ""
+                    
+                    # Se for apenas 1 parcela, a coluna 'Parcela' fica vazia. Senão, fica '1/3', '2/3', etc.
+                    texto_parcela = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
                     
                     lista_para_enviar.append({
                         "Data Compra": data_l.strftime("%d/%m/%Y"),
                         "Vencimento": vencimento.strftime("%d/%m/%Y"),
                         "Categoria": categoria_nome,
-                        "Descrição": desc,
-                        "Parcela": texto_parcela,
+                        "Descrição": desc,              # Descrição limpa, sem o (1/1)
+                        "Parcela": texto_parcela,        # Nova coluna separada
                         "Tipo": tipo_desp,
-                        "Valor": valor / parcelas,
+                        "Valor": valor / parcelas,       # Valor dividido
                         "Pagamento": forma_sel
                     })
                 
+                # Envia o pacote de dados para o Google Sheets
                 salvar_no_google(lista_para_enviar, aba="Dados")
                 
-                # LÓGICA DE FECHAMENTO:
+                # Decisão de fechar ou perguntar
                 if perguntar_ao_final:
                     st.session_state.salvou_agora = True
-                    st.rerun() # Abre a caixa de pergunta
+                    st.rerun() # Sobe para a parte 2 do código
                 else:
-                    st.success("✅ Salvo!")
-                    st.rerun() # Fecha o modal direto
+                    st.success("✅ Lançamento sincronizado!")
+                    st.rerun() # Fecha o modal
 
+        # Lógica do botão cancelar: apenas fecha a janela
         if btn_cancelar:
-            st.session_state.salvou_agora = False
             st.rerun()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
@@ -748,6 +767,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
