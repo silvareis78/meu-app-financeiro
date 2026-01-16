@@ -4,80 +4,15 @@ import json
 import os
 from streamlit_gsheets import GSheetsConnection
 
+# 1. Cria a conexão global
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-def carregar_configuracoes_nuvem():
-    try:
-        # Tenta ler a aba Config. O ttl=0 evita cache de erro.
-        df_config = conn.read(worksheet="Config", ttl=0)
-        
-        if df_config is not None and not df_config.empty:
-            # Aqui ele só tenta carregar se a aba existir e tiver dados
-            if "Categorias_Despesa" in df_config.columns:
-                st.session_state.categorias = df_config["Categorias_Despesa"].dropna().tolist()
-            if "Detalhes_Pagamento" in df_config.columns:
-                formas_json = df_config["Detalhes_Pagamento"].dropna().tolist()
-                st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
-    except Exception as e:
-        # Se der erro HTTP, o app não trava, ele apenas começa vazio
-        st.warning("⚠️ Planilha 'Config' não encontrada ou vazia. Verifique os nomes das abas.")
-
-# --- 2. AS FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
-
-def salvar_no_google(dados_lista, aba="Dados"):
-    """Salva lançamentos na aba Dados"""
-    try:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        try:
-            df_antigo = conn.read(worksheet=aba)
-        except:
-            df_antigo = pd.DataFrame()
-
-        df_novo = pd.DataFrame(dados_lista)
-        df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
-        
-        conn.update(worksheet=aba, data=df_final)
-        st.success(f"☁️ Sincronizado com a aba {aba}!")
-        return True
-    except Exception as e:
-        st.error(f"Erro ao salvar na aba {aba}: {e}")
-        return False
-
-def salvar_configuracoes_nuvem():
-    """Salva Categorias e Cartões na aba Config"""
-    try:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        
-        # Coleta o que está no cache do app (Session State)
-        categorias_desp = st.session_state.get("categorias", [])
-        categorias_rec = st.session_state.get("categorias_receita", [])
-        # Transforma os dicionários dos cartões em texto para salvar na planilha
-        formas_pag = [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
-        
-        # Descobre qual lista é maior para preencher as outras com vazio (evita erro de tamanho)
-        max_len = max(len(categorias_desp), len(categorias_rec), len(formas_pag), 1)
-        
-        def ajustar_lista(lista, tamanho):
-            return list(lista) + [""] * (tamanho - len(lista))
-
-        df_config = pd.DataFrame({
-            "Categorias_Despesa": ajustar_lista(categorias_desp, max_len),
-            "Categorias_Receita": ajustar_lista(categorias_rec, max_len),
-            "Detalhes_Pagamento": ajustar_lista(formas_pag, max_len)
-        })
-        
-        # O segredo: usamos o comando update e limpamos o cache para forçar a gravação
-        conn.update(worksheet="Config", data=df_config)
-        st.cache_data.clear() # <--- ISSO força o app a ler o dado novo no próximo F5
-        st.success("✅ Sincronizado com o Google Sheets!")
-    except Exception as e:
-        st.error(f"Erro ao salvar: {e}")
+# --- FUNÇÕES DE CARREGAMENTO ---
 
 def carregar_configuracoes_nuvem():
-    """Busca na aba 'Config' com proteção contra erro 400"""
+    """Busca na aba 'Config' com proteção total"""
     try:
-        conn = st.connection("gsheets", type=GSheetsConnection)
-        # O ttl=0 garante que ele busque dados novos e não use cache antigo
+        # Lê a aba Config sem usar cache antigo (ttl=0)
         df_config = conn.read(worksheet="Config", ttl=0)
         
         if df_config is not None and not df_config.empty:
@@ -94,8 +29,53 @@ def carregar_configuracoes_nuvem():
                 formas_json = df_config["Detalhes_Pagamento"].dropna().replace("", pd.NA).dropna().tolist()
                 st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
     except Exception as e:
-        # Se a aba estiver vazia ou não existir, ele ignora o erro e deixa as listas vazias
-        print(f"Aviso: Planilha ainda sem dados ou erro de conexão: {e}")
+        print(f"Aviso: Planilha vazia ou erro de conexão: {e}")
+
+# --- FUNÇÕES DE SALVAMENTO ---
+
+def salvar_no_google(dados_lista, aba="Dados"):
+    """Salva lançamentos na aba Dados"""
+    try:
+        try:
+            df_antigo = conn.read(worksheet=aba, ttl=0)
+        except:
+            df_antigo = pd.DataFrame()
+
+        df_novo = pd.DataFrame(dados_lista)
+        df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
+        
+        conn.update(worksheet=aba, data=df_final)
+        st.cache_data.clear() # Limpa o cache para atualizar visualização
+        st.success(f"☁️ Sincronizado com a aba {aba}!")
+        return True
+    except Exception as e:
+        st.error(f"Erro ao salvar na aba {aba}: {e}")
+        return False
+
+def salvar_configuracoes_nuvem():
+    """Salva Categorias e Cartões na aba Config"""
+    try:
+        categorias_desp = st.session_state.get("categorias", [])
+        categorias_rec = st.session_state.get("categorias_receita", [])
+        formas_pag = [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
+        
+        # Garante que o DataFrame tenha pelo menos uma linha para não bugar
+        max_len = max(len(categorias_desp), len(categorias_rec), len(formas_pag), 1)
+        
+        def ajustar_lista(lista, tamanho):
+            return list(lista) + [""] * (tamanho - len(lista))
+
+        df_config = pd.DataFrame({
+            "Categorias_Despesa": ajustar_lista(categorias_desp, max_len),
+            "Categorias_Receita": ajustar_lista(categorias_rec, max_len),
+            "Detalhes_Pagamento": ajustar_lista(formas_pag, max_len)
+        })
+        
+        conn.update(worksheet="Config", data=df_config)
+        st.cache_data.clear() 
+        st.success("✅ Configurações salvas no Google Sheets!")
+    except Exception as e:
+        st.error(f"Erro ao salvar Config: {e}")
             
 # --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
 def calcular_vencimento_real(data_compra, detalhes_pagto):
@@ -560,6 +540,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
