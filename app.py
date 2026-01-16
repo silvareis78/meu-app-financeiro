@@ -346,93 +346,88 @@ st.markdown("""
 
 # --- 6. MODAL DE LANÇAMENTO (JANELA FLUTUANTE) ---
 
-@st.dialog("🚀 Novo Lançamento") # Define que esta função abrirá uma janela pop-up
+@st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
-    """Cria o formulário para adicionar despesas dentro de cada categoria"""
+    """Cria o formulário para despesas com opção de manter janela aberta e botão fechar"""
     
-    # 1. CABEÇALHO COM OPÇÃO DE CORREÇÃO
-    # Divide o topo em duas colunas: uma para o título e outra para o botão de editar
+    # 1. CABEÇALHO E EDIÇÃO
     col_tit, col_edit = st.columns([0.8, 0.2])
-    
     with col_tit:
-        st.subheader(f"Categoria: {categoria_nome}") # Título da janela
+        st.subheader(f"Categoria: {categoria_nome}")
     
     with col_edit:
-        # Popover é um botão que abre uma pequena caixa ao clicar
-        with st.popover("✏️", help="Corrigir nome da categoria"):
+        with st.popover("✏️"):
             novo_nome_cat = st.text_input("Novo nome", value=categoria_nome)
             if st.button("Salvar Alteração", use_container_width=True):
                 if novo_nome_cat and novo_nome_cat != categoria_nome:
-                    # LOCALIZA E ALTERA: Procura o nome antigo na lista e substitui pelo novo
                     idx = st.session_state.categorias.index(categoria_nome)
                     st.session_state.categorias[idx] = novo_nome_cat
-                    
-                    # SINCRONIZA: Salva a lista de categorias atualizada no Google (aba Config)
                     salvar_configuracoes_nuvem()
-                    
-                    st.success("Nome alterado!")
-                    st.rerun() # Reinicia para aplicar o novo nome em tudo
+                    st.rerun() 
 
-    # 2. FORMULÁRIO DE LANÇAMENTO
-    # O formulário agrupa os campos e só envia os dados quando clicar no botão final
+    # 2. FORMULÁRIO DE ENTRADA
     with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
-        
-        # Campo de texto para o que foi comprado
         desc = st.text_input("Descrição da Despesa")
         
-        # Colunas para Tipo (Fixa/Variável) e quantidade de parcelas
         col_tipo, col_parc = st.columns([2, 1])
         with col_tipo:
             tipo_desp = st.selectbox("Tipo", ["Variável", "Fixa"], key=f"t_d_{categoria_nome}")
         with col_parc:
-            # PARA ALTERAR: Mude 'min_value=1' se quiser permitir parcelas zero (não recomendado)
             parcelas = st.number_input("Parcelas", min_value=1, value=1, key=f"p_d_{categoria_nome}")
         
-        # Colunas para Valor e Forma de Pagamento
         c1, c2 = st.columns([2, 4])
         with c1:
-            # 'format="%.2f"' garante que sempre apareçam dois números após a vírgula (centavos)
             valor = st.number_input("Valor", min_value=0.0, format="%.2f", key=f"v_d_{categoria_nome}")
         with c2:
-            # Busca os nomes dos cartões cadastrados. Se não houver nenhum, usa "Dinheiro"
             opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
             forma_sel = st.selectbox("Pagamento", options=opcoes if opcoes else ["Dinheiro"], key=f"f_d_{categoria_nome}")
         
-        # Calendário para escolher a data da compra
         data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
-        
-        # BOTÃO FINAL DE CONFIRMAÇÃO
-        if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-            # Procura os detalhes técnicos (fechamento/vencimento) do cartão escolhido
-            detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
-            
-            lista_para_enviar = []
-            
-            # LOOP DE PARCELAMENTO: Se for 10 parcelas, ele repetirá o código abaixo 10 vezes
-            for p in range(parcelas):
-                # Calcula o mês da parcela: Parcela 1 (mês atual), Parcela 2 (mês + 1), etc.
-                data_mes_parcela = data_l + pd.DateOffset(months=p)
-                
-                # CHAMA A FUNÇÃO LOGÍSTICA: Decide o dia exato do vencimento baseada no cartão
-                vencimento = calcular_vencimento_real(data_mes_parcela.date(), detalhes)
-                
-                # Monta a "linha" que será escrita na planilha
-                lista_para_enviar.append({
-                    "Data Compra": data_l.strftime("%d/%m/%Y"), # Mantém a data original da compra
-                    "Vencimento": vencimento.strftime("%d/%m/%Y"), # Data calculada para pagar
-                    "Categoria": categoria_nome,
-                    "Descrição": f"{desc} ({p+1}/{parcelas})", # Ex: Sapato (1/3)
-                    "Tipo": tipo_desp,
-                    "Valor": valor / parcelas, # Divide o valor total pelo número de parcelas
-                    "Pagamento": forma_sel
-                })
-            
-            # ENVIO PARA NUVEM: Grava tudo de uma vez na aba "Dados" do seu Google Sheets
-            salvar_no_google(lista_para_enviar, aba="Dados")
-            
-            st.success(f"✅ {parcelas} parcela(s) enviadas para a nuvem!")
-            st.rerun() # Limpa o formulário e fecha o modal
 
+        # --- NOVA OPÇÃO: LANÇAR VÁRIOS ---
+        # Se marcado, o st.rerun() não fechará o modal após salvar
+        manter_aberto = st.checkbox("Manter janela aberta para novo lançamento", value=False)
+        
+        # --- BOTÕES DE AÇÃO ---
+        col_btn_save, col_btn_cancel = st.columns(2)
+        
+        btn_salvar = col_btn_save.form_submit_button("Confirmar e Salvar", use_container_width=True)
+        # O botão de cancelar apenas recarrega a página, fechando o modal automaticamente
+        btn_cancelar = col_btn_cancel.form_submit_button("Cancelar / Sair", use_container_width=True)
+
+        if btn_salvar:
+            if not desc or valor <= 0:
+                st.warning("Preencha a descrição e o valor!")
+            else:
+                detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
+                lista_para_enviar = []
+                
+                for p in range(parcelas):
+                    data_mes_parcela = data_l + pd.DateOffset(months=p)
+                    vencimento = calcular_vencimento_real(data_mes_parcela.date(), detalhes)
+                    texto_parcela = f"{p+1}/{parcelas}" if parcelas > 1 else ""
+                    
+                    lista_para_enviar.append({
+                        "Data Compra": data_l.strftime("%d/%m/%Y"),
+                        "Vencimento": vencimento.strftime("%d/%m/%Y"),
+                        "Categoria": categoria_nome,
+                        "Descrição": desc,
+                        "Parcela": texto_parcela,
+                        "Tipo": tipo_desp,
+                        "Valor": valor / parcelas,
+                        "Pagamento": forma_sel
+                    })
+                
+                salvar_no_google(lista_para_enviar, aba="Dados")
+                st.success(f"✅ Salvo!")
+                
+                # Se a checkbox NÃO estiver marcada, fecha o modal (st.rerun)
+                # Se estiver marcada, o formulário limpa e continua aberto
+                if not manter_aberto:
+                    st.rerun()
+
+        if btn_cancelar:
+            st.rerun() # Simplesmente reinicia a tela, fechando o modal.
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
 
 @st.dialog("💰 Nova Receita") # Define que esta função abre uma janela pop-up de Receita
@@ -736,6 +731,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
