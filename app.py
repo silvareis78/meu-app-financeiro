@@ -350,30 +350,28 @@ st.markdown("""
 def modal_lancamento_categoria(categoria_nome):
     """
     PARA QUE SERVE: Abre o formulário de cadastro.
-    CORREÇÃO: Adicionada lógica para garantir que o formulário apareça primeiro
-    e a pergunta apenas APÓS um clique real no botão salvar.
+    SOLUÇÃO: Checkbox movida para fora do fluxo de limpeza do formulário.
     """
     
-    # 1. GARANTIA DE INICIALIZAÇÃO
-    # Se a variável não existir, criamos como Falsa para mostrar o formulário
+    # 1. RESET DE SEGURANÇA E CONTROLE
     if 'salvou_agora' not in st.session_state:
         st.session_state.salvou_agora = False
 
-    # 2. INTERFACE DE PERGUNTA (SÓ entra aqui se salvou_agora for True)
+    # 2. INTERFACE DE PERGUNTA (SÓ APARECE APÓS O SALVAMENTO)
     if st.session_state.salvou_agora:
         st.warning(f"🎯 Lançamento concluído em '{categoria_nome}'.")
         st.write("### Deseja adicionar outra despesa nesta mesma categoria?")
         
         col_sim, col_nao = st.columns(2)
         if col_sim.button("👍 SIM, lançar outra", use_container_width=True):
-            st.session_state.salvou_agora = False # Reseta para mostrar o formulário
+            st.session_state.salvou_agora = False 
             st.rerun()
             
         if col_nao.button("👎 NÃO, fechar", use_container_width=True):
-            st.session_state.salvou_agora = False # Reseta para a próxima vez
-            st.rerun() # Fecha o modal
+            st.session_state.salvou_agora = False 
+            st.rerun()
         
-        st.stop() # Garante que o formulário abaixo não apareça junto com a pergunta
+        st.stop() 
 
     # 3. CABEÇALHO
     col_tit, col_edit = st.columns([0.8, 0.2])
@@ -389,6 +387,7 @@ def modal_lancamento_categoria(categoria_nome):
                 st.rerun()
 
     # 4. FORMULÁRIO DE ENTRADA
+    # IMPORTANTE: A checkbox precisa de uma KEY única e ficar fora ou ser lida antes do fechamento
     with st.form(key=f"form_d_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -404,8 +403,9 @@ def modal_lancamento_categoria(categoria_nome):
         
         data_l = st.date_input("Data", format="DD/MM/YYYY")
 
-        # Checkbox para decidir se quer a pergunta ao final
-        perguntar = st.checkbox("Me perguntar se quero lançar mais um ao salvar")
+        # Colocamos a checkbox no final do formulário com uma chave (key) fixa
+        # Isso garante que o Streamlit lembre do valor dela mesmo após o clique no botão
+        perguntar = st.checkbox("Me perguntar se quero lançar mais um ao salvar", key=f"check_perg_{categoria_nome}")
         
         col_btn1, col_btn2 = st.columns(2)
         btn_salvar = col_btn1.form_submit_button("✅ Salvar", use_container_width=True)
@@ -436,16 +436,18 @@ def modal_lancamento_categoria(categoria_nome):
                 
                 salvar_no_google(lista_itens, aba="Dados")
                 
-                # SÓ ATIVA A PERGUNTA SE A CHECKBOX ESTIVER MARCADA
-                if perguntar:
+                # AQUI ESTÁ A MUDANÇA: Lemos o valor da checkbox diretamente do estado da sessão (key)
+                valor_check = st.session_state[f"check_perg_{categoria_nome}"]
+                
+                if valor_check:
                     st.session_state.salvou_agora = True
                     st.rerun() 
                 else:
-                    st.session_state.salvou_agora = False # Garante limpeza
+                    st.session_state.salvou_agora = False 
                     st.rerun()
 
         if btn_cancelar:
-            st.session_state.salvou_agora = False # Reset de segurança ao sair
+            st.session_state.salvou_agora = False 
             st.rerun()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
@@ -751,6 +753,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
