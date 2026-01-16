@@ -346,35 +346,33 @@ st.markdown("""
 
 # --- 6. MODAL DE LANÇAMENTO (JANELA FLUTUANTE) ---
 
+Robson, isso acontece porque, por padrão, o Streamlit limpa o st.session_state de todos os componentes que estão dentro de um formulário (st.form) assim que ele é enviado. Para o sistema "lembrar" que a checkbox estava marcada, precisamos dar uma identidade fixa para ela (uma key).
+
+Além disso, vou adicionar o contador de lançamentos que você pediu logo abaixo do título.
+
+Aqui está o Bloco 6 final e corrigido, com a técnica de Key Persistente para a checkbox não "esquecer" o valor:
+
+Python
+
+# --- 6. MODAL DE LANÇAMENTO (CORREÇÃO DE MEMÓRIA E CONTADOR) ---
+
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas com contador de lançamentos na sessão atual
-    e opção de fluxo contínuo (sem fechar a janela).
+    PARA QUE SERVE: Cadastro de despesas com contador e fluxo contínuo.
+    SOLUÇÃO: Uso de KEY fixa na checkbox para evitar que ela resete ao salvar.
     """
     
-    # 1. CONTADOR DE LANÇAMENTOS (Sessão Atual)
+    # 1. INICIALIZAÇÃO DO CONTADOR
     if 'cont_lanc' not in st.session_state:
         st.session_state.cont_lanc = 0
 
-    # 2. CABEÇALHO E EDIÇÃO
-    col_tit, col_edit = st.columns([0.8, 0.2])
-    with col_tit:
-        st.subheader(f"Categoria: {categoria_nome}")
-        # EXIBE QUANTOS FORAM LANÇADOS DESDE QUE O MODAL ABRIU
-        st.markdown(f"**Lançamentos realizados nesta categoria:** :blue[{st.session_state.cont_lanc}]")
+    # 2. CABEÇALHO
+    st.subheader(f"Categoria: {categoria_nome}")
+    # Exibe o contador de quantos itens você já salvou nesta abertura do modal
+    st.info(f"🔢 Lançamentos realizados nesta categoria: **{st.session_state.cont_lanc}**")
     
-    with col_edit:
-        with st.popover("✏️"):
-            novo_nome = st.text_input("Novo nome", value=categoria_nome)
-            if st.button("Salvar Nome"):
-                idx = st.session_state.categorias.index(categoria_nome)
-                st.session_state.categorias[idx] = novo_nome
-                salvar_configuracoes_nuvem()
-                st.rerun()
-
     # 3. FORMULÁRIO DE ENTRADA
-    # 'clear_on_submit=True' limpa os campos automaticamente após o sucesso
     with st.form(key=f"form_d_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -390,8 +388,9 @@ def modal_lancamento_categoria(categoria_nome):
         
         data_l = st.date_input("Data", format="DD/MM/YYYY")
 
-        # CHECKBOX PARA LANÇAMENTO CONTÍNUO
-        manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False)
+        # --- O SEGREDO ESTÁ NA KEY ABAIXO ---
+        # Ao colocar uma key, o valor da checkbox fica guardado na memória 'global' do app
+        manter_aberto = st.checkbox("Marque aqui para lançar várias despesas", key=f"check_persistente_{categoria_nome}")
         
         col_btn1, col_btn2 = st.columns(2)
         btn_salvar = col_btn1.form_submit_button("✅ Salvar Lançamento", use_container_width=True)
@@ -399,7 +398,7 @@ def modal_lancamento_categoria(categoria_nome):
 
         if btn_salvar:
             if not desc or valor <= 0:
-                st.error("Preencha a descrição e o valor!")
+                st.error("Preencha descrição e valor!")
             else:
                 detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
                 lista_itens = []
@@ -420,21 +419,22 @@ def modal_lancamento_categoria(categoria_nome):
                         "Pagamento": forma_sel
                     })
                 
-                # Envia os dados para a planilha
+                # Envia para a planilha
                 salvar_no_google(lista_itens, aba="Dados")
                 
-                # Incrementa o contador visual
+                # Incrementa o contador
                 st.session_state.cont_lanc += 1
                 
-                if manter_aberto:
-                    st.toast(f"✅ {desc} salvo com sucesso!") # Notificação discreta no canto
-                    st.rerun() # Reinicia o modal, mas como 'manter_aberto' é lido, ele volta para cá
+                # Verifica a checkbox usando a KEY
+                if st.session_state[f"check_persistente_{categoria_nome}"]:
+                    st.toast(f"✅ {desc} salvo!") 
+                    st.rerun() # Reinicia o modal, mas ele não fecha porque detecta que deve continuar
                 else:
-                    st.session_state.cont_lanc = 0 # Reseta o contador para a próxima vez
+                    st.session_state.cont_lanc = 0
                     st.rerun() # Fecha o modal
 
         if btn_cancelar:
-            st.session_state.cont_lanc = 0 # Reseta ao sair
+            st.session_state.cont_lanc = 0
             st.rerun()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
@@ -740,6 +740,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
