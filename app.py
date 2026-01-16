@@ -350,29 +350,30 @@ st.markdown("""
 def modal_lancamento_categoria(categoria_nome):
     """
     PARA QUE SERVE: Abre o formulário de cadastro.
-    CORREÇÃO: A pergunta de 'Continuar' agora é processada fora do formulário
-    para garantir que o modal não feche sozinho.
+    CORREÇÃO: Adicionada lógica para garantir que o formulário apareça primeiro
+    e a pergunta apenas APÓS um clique real no botão salvar.
     """
     
-    # 1. CONTROLE DE MEMÓRIA (Persistência da pergunta)
+    # 1. GARANTIA DE INICIALIZAÇÃO
+    # Se a variável não existir, criamos como Falsa para mostrar o formulário
     if 'salvou_agora' not in st.session_state:
         st.session_state.salvou_agora = False
 
-    # 2. INTERFACE DE PERGUNTA (Aparece após o salvamento)
+    # 2. INTERFACE DE PERGUNTA (SÓ entra aqui se salvou_agora for True)
     if st.session_state.salvou_agora:
         st.warning(f"🎯 Lançamento concluído em '{categoria_nome}'.")
         st.write("### Deseja adicionar outra despesa nesta mesma categoria?")
         
         col_sim, col_nao = st.columns(2)
         if col_sim.button("👍 SIM, lançar outra", use_container_width=True):
-            st.session_state.salvou_agora = False
-            st.rerun() # Reinicia para mostrar o formulário limpo
+            st.session_state.salvou_agora = False # Reseta para mostrar o formulário
+            st.rerun()
             
         if col_nao.button("👎 NÃO, fechar", use_container_width=True):
-            st.session_state.salvou_agora = False
+            st.session_state.salvou_agora = False # Reseta para a próxima vez
             st.rerun() # Fecha o modal
         
-        st.stop() # Bloqueia o resto do código para focar na pergunta
+        st.stop() # Garante que o formulário abaixo não apareça junto com a pergunta
 
     # 3. CABEÇALHO
     col_tit, col_edit = st.columns([0.8, 0.2])
@@ -388,7 +389,6 @@ def modal_lancamento_categoria(categoria_nome):
                 st.rerun()
 
     # 4. FORMULÁRIO DE ENTRADA
-    # Importante: Criamos uma variável para a checkbox fora do formulário ou dentro com chave fixa
     with st.form(key=f"form_d_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -404,7 +404,7 @@ def modal_lancamento_categoria(categoria_nome):
         
         data_l = st.date_input("Data", format="DD/MM/YYYY")
 
-        # Checkbox que define se o fluxo vai para a pergunta ou fecha direto
+        # Checkbox para decidir se quer a pergunta ao final
         perguntar = st.checkbox("Me perguntar se quero lançar mais um ao salvar")
         
         col_btn1, col_btn2 = st.columns(2)
@@ -436,14 +436,16 @@ def modal_lancamento_categoria(categoria_nome):
                 
                 salvar_no_google(lista_itens, aba="Dados")
                 
-                # LÓGICA DE DECISÃO:
+                # SÓ ATIVA A PERGUNTA SE A CHECKBOX ESTIVER MARCADA
                 if perguntar:
                     st.session_state.salvou_agora = True
-                    st.rerun() # Força o código a subir e entrar na Seção 2 (Pergunta)
+                    st.rerun() 
                 else:
-                    st.rerun() # Fecha o modal direto
+                    st.session_state.salvou_agora = False # Garante limpeza
+                    st.rerun()
 
         if btn_cancelar:
+            st.session_state.salvou_agora = False # Reset de segurança ao sair
             st.rerun()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
@@ -749,6 +751,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
