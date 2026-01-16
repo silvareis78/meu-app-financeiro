@@ -7,14 +7,12 @@ from streamlit_gsheets import GSheetsConnection
 # 1. Cria a conexão com o Google ANTES de tentar ler
 conn = st.connection("gsheets", type=GSheetsConnection)
 
-# 2. Agora sim você pode testar a leitura (Remova essa linha após o teste)
-# df_teste = conn.read(worksheet="Config")
-# st.write(df_teste)
+from streamlit_gsheets import GSheetsConnection
 
-# --- 2. FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
+# --- 2. AS FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
 
 def salvar_no_google(dados_lista, aba="Dados"):
-    """Salva os lançamentos financeiros na aba Dados"""
+    """Salva lançamentos na aba Dados"""
     try:
         conn = st.connection("gsheets", type=GSheetsConnection)
         try:
@@ -26,62 +24,64 @@ def salvar_no_google(dados_lista, aba="Dados"):
         df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
         
         conn.update(worksheet=aba, data=df_final)
-        st.success(f"☁️ Lançamento salvo em '{aba}'!")
+        st.success(f"☁️ Sincronizado com a aba {aba}!")
         return True
     except Exception as e:
         st.error(f"Erro ao salvar na aba {aba}: {e}")
         return False
 
 def salvar_configuracoes_nuvem():
-    """Salva TUDO (Categorias e Cartões) na aba 'Config'"""
+    """Salva Categorias e Cartões na aba Config"""
     try:
         conn = st.connection("gsheets", type=GSheetsConnection)
         
-        # Preparamos os dados para colunas diferentes
-        # Detalhes_Pagamento salva o dicionário completo do cartão (fechamento, vencimento, etc)
+        # Preparamos os dados (convertendo cartões para texto JSON)
         configs = {
             "Categorias_Despesa": st.session_state.get("categorias", []),
             "Categorias_Receita": st.session_state.get("categorias_receita", []),
             "Detalhes_Pagamento": [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
         }
         
-        # Alinhamos o tamanho das listas para criar o DataFrame (preenche com vazio)
+        # Alinhamos o tamanho das listas para o DataFrame não dar erro
         max_len = max([len(v) for v in configs.values()]) if any(configs.values()) else 0
         for k in configs:
-            configs[k] = configs[k] + [""] * (max_len - len(configs[k]))
+            configs[k] = list(configs[k]) + [""] * (max_len - len(configs[k]))
             
         df_config = pd.DataFrame(configs)
         
-        # Sobrescreve a aba Config com as listas atualizadas
+        # Atualiza a planilha
         conn.update(worksheet="Config", data=df_config)
-        st.success("✅ Todas as configurações foram salvas na aba Config!")
+        st.success("✅ Configurações salvas na nuvem!")
     except Exception as e:
-        st.error(f"Erro ao sincronizar configurações: {e}")
+        st.error(f"Erro ao salvar Config: {e}")
 
 def carregar_configuracoes_nuvem():
-    """Busca na aba 'Config' as categorias e formas de pagamento ao iniciar"""
+    """Busca na aba 'Config' tudo o que foi cadastrado antes"""
     try:
         conn = st.connection("gsheets", type=GSheetsConnection)
+        # Tenta ler a aba Config
         df_config = conn.read(worksheet="Config")
         
-        # Carrega Categorias de Despesa
+        # Se a planilha estiver vazia, o pandas pode retornar erro ou DF vazio
+        if df_config.empty:
+            return
+
+        # Carrega Categorias Despesa
         if "Categorias_Despesa" in df_config.columns:
             st.session_state.categorias = df_config["Categorias_Despesa"].replace("", pd.NA).dropna().tolist()
         
-        # Carrega Categorias de Receita
+        # Carrega Categorias Receita
         if "Categorias_Receita" in df_config.columns:
             st.session_state.categorias_receita = df_config["Categorias_Receita"].replace("", pd.NA).dropna().tolist()
             
-        # Carrega Detalhes dos Cartões (Formas de Pagamento)
+        # Carrega Detalhes dos Cartões
         if "Detalhes_Pagamento" in df_config.columns:
             formas_json = df_config["Detalhes_Pagamento"].replace("", pd.NA).dropna().tolist()
             st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
             
     except Exception as e:
-        # Se a planilha estiver vazia, garante as listas básicas
-        st.session_state.categorias = []
-        st.session_state.categorias_receita = []
-        st.session_state.formas_pagamento = []
+        # Silencia o erro se a planilha estiver apenas vazia
+        pass
             
 # --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
 def calcular_vencimento_real(data_compra, detalhes_pagto):
@@ -112,18 +112,19 @@ def salvar_no_excel(dados_lista):
         df_final = df_novo
     df_final.to_excel(NOME_ARQUIVO, index=False)
 
-# --- 3. INICIALIZAÇÃO (LOGO ABAIXO DAS FUNÇÕES) ---
+# --- 3. INICIALIZAÇÃO DO APP ---
+
+# Inicializa as listas no session_state para não dar erro de "não definido"
 if 'categorias' not in st.session_state:
-    # 1. Busca tudo o que está na aba 'Config' da planilha
+    st.session_state.categorias = []
+    st.session_state.categorias_receita = []
+    st.session_state.formas_pagamento = []
+    
+    # Agora tenta carregar o que está salvo no Google Sheets
     carregar_configuracoes_nuvem()
-    
-    # 2. Garante que as variáveis existam caso a planilha esteja nova/vazia
-    if 'categorias' not in st.session_state: st.session_state.categorias = []
-    if 'categorias_receita' not in st.session_state: st.session_state.categorias_receita = []
-    if 'formas_pagamento' not in st.session_state: st.session_state.formas_pagamento = []
-    
-    # 3. Define a página inicial do menu
-    if 'pagina' not in st.session_state: st.session_state.pagina = "Painel Inicial"
+
+if 'pagina' not in st.session_state:
+    st.session_state.pagina = "Painel Inicial"
         
 # 1. CONFIGURAÇÃO DA PÁGINA (CSS)
 st.set_page_config(layout="wide", page_title="App Financeiro") # Define layout largo e título da aba
@@ -545,6 +546,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
