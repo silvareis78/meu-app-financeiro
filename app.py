@@ -346,15 +346,6 @@ st.markdown("""
 
 # --- 6. MODAL DE LANÇAMENTO (JANELA FLUTUANTE) ---
 
-Robson, isso acontece porque, por padrão, o Streamlit limpa o st.session_state de todos os componentes que estão dentro de um formulário (st.form) assim que ele é enviado. Para o sistema "lembrar" que a checkbox estava marcada, precisamos dar uma identidade fixa para ela (uma key).
-
-Além disso, vou adicionar o contador de lançamentos que você pediu logo abaixo do título.
-
-Aqui está o Bloco 6 final e corrigido, com a técnica de Key Persistente para a checkbox não "esquecer" o valor:
-
-Python
-
-# --- 6. MODAL DE LANÇAMENTO (CORREÇÃO DE MEMÓRIA E CONTADOR) ---
 
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
@@ -740,6 +731,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
