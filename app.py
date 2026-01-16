@@ -350,82 +350,92 @@ st.markdown("""
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas com controle manual de fechamento.
-    POR QUE FUNCIONA: Ao não usar st.form, temos controle granular sobre o rerun.
+    PARA QUE SERVE: Cadastro de despesas que não fecha a janela.
+    COMO FUNCIONA: O @st.fragment isola o código interno, permitindo 
+    recarregar os campos sem fechar o diálogo (st.dialog).
     """
     
-    # 1. INICIALIZAÇÃO DO CONTADOR
-    if 'cont_lanc' not in st.session_state:
-        st.session_state.cont_lanc = 0
+    # Criamos um fragmento interno. Tudo aqui dentro pode recarregar sozinho.
+    @st.fragment
+    def corpo_do_modal():
+        # 1. INICIALIZAÇÃO DO CONTADOR NA SESSÃO
+        if 'cont_lanc' not in st.session_state:
+            st.session_state.cont_lanc = 0
 
-    # 2. CABEÇALHO E CONTADOR
-    st.subheader(f"Categoria: {categoria_nome}")
-    st.info(f"🔢 Lançamentos realizados agora: **{st.session_state.cont_lanc}**")
-    
-    # 3. CAMPOS DE ENTRADA (SOLTOS - SEM FORMULÁRIO)
-    # Usamos chaves (keys) para podermos limpar os campos manualmente depois
-    desc = st.text_input("Descrição da Despesa", key="input_desc")
-    
-    c_tipo, c_parc = st.columns([2, 1])
-    tipo_desp = c_tipo.selectbox("Tipo", ["Variável", "Fixa"], key="input_tipo")
-    parcelas = c_parc.number_input("Parcelas", min_value=1, value=1, key="input_parc")
-    
-    c_val, c_pag = st.columns([2, 4])
-    valor = c_val.number_input("Valor Total", min_value=0.0, format="%.2f", key="input_valor")
-    
-    opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
-    forma_sel = c_pag.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key="input_pag")
-    
-    data_l = st.date_input("Data", format="DD/MM/YYYY", key="input_data")
+        # 2. CABEÇALHO E CONTADOR
+        st.subheader(f"Categoria: {categoria_nome}")
+        st.info(f"🔢 Lançamentos realizados agora: **{st.session_state.cont_lanc}**")
+        
+        # 3. CAMPOS DE ENTRADA (Limpam automaticamente ao rodar o fragmento)
+        # Usamos chaves dinâmicas baseadas no contador para forçar a limpeza dos campos
+        c_id = st.session_state.cont_lanc
+        
+        desc = st.text_input("Descrição da Despesa", key=f"desc_{c_id}")
+        
+        c_tipo, c_parc = st.columns([2, 1])
+        tipo_desp = c_tipo.selectbox("Tipo", ["Variável", "Fixa"], key=f"tipo_{c_id}")
+        parcelas = c_parc.number_input("Parcelas", min_value=1, value=1, key=f"parc_{c_id}")
+        
+        c_val, c_pag = st.columns([2, 4])
+        valor = c_val.number_input("Valor Total", min_value=0.0, format="%.2f", key=f"val_{c_id}")
+        
+        opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_sel = c_pag.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key=f"pag_{c_id}")
+        
+        data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"data_{c_id}")
 
-    st.write("---")
-    # A CHECKBOX QUE VOCÊ VAI MARCAR
-    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False)
+        st.write("---")
+        # CHECKBOX PARA MANTER ABERTO
+        manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_cont")
 
-    # 4. BOTÕES DE AÇÃO
-    col_btn1, col_btn2 = st.columns(2)
-    
-    # Botão de Salvar
-    if col_btn1.button("✅ Salvar Lançamento", use_container_width=True):
-        if not desc or valor <= 0:
-            st.error("Preencha a descrição e o valor!")
-        else:
-            # Lógica de cálculo de parcelas e envio ao Google
-            detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
-            lista_itens = []
-            
-            for p in range(int(parcelas)):
-                data_parc = data_l + pd.DateOffset(months=p)
-                venc = calcular_vencimento_real(data_parc.date(), detalhes)
-                txt_parc = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
-                
-                lista_itens.append({
-                    "Data Compra": data_l.strftime("%d/%m/%Y"),
-                    "Vencimento": venc.strftime("%d/%m/%Y"),
-                    "Categoria": categoria_nome,
-                    "Descrição": desc,
-                    "Parcela": txt_parc,
-                    "Tipo": tipo_desp,
-                    "Valor": valor / parcelas,
-                    "Pagamento": forma_sel
-                })
-            
-            salvar_no_google(lista_itens, aba="Dados")
-            st.session_state.cont_lanc += 1
-            
-            if manter_aberto:
-                st.toast(f"✅ {desc} salvo!")
-                # Em vez de st.rerun (que fecharia o dialog), apenas limpamos os campos
-                # Como não usamos form, o Streamlit manterá o modal aberto
-                st.rerun() 
+        # 4. BOTÕES DE AÇÃO
+        col_btn1, col_btn2 = st.columns(2)
+        
+        # BOTÃO SALVAR
+        if col_btn1.button("✅ Salvar Lançamento", use_container_width=True):
+            if not desc or valor <= 0:
+                st.error("Preencha descrição e valor!")
             else:
-                st.session_state.cont_lanc = 0
-                st.rerun() # Aqui ele fecha porque o estado de 'manter_aberto' será lido como falso no próximo ciclo
+                # Lógica de cálculo e envio
+                detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
+                lista_itens = []
+                
+                for p in range(int(parcelas)):
+                    data_parc = data_l + pd.DateOffset(months=p)
+                    venc = calcular_vencimento_real(data_parc.date(), detalhes)
+                    txt_parc = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
+                    
+                    lista_itens.append({
+                        "Data Compra": data_l.strftime("%d/%m/%Y"),
+                        "Vencimento": venc.strftime("%d/%m/%Y"),
+                        "Categoria": categoria_nome,
+                        "Descrição": desc,
+                        "Parcela": txt_parc,
+                        "Tipo": tipo_desp,
+                        "Valor": valor / parcelas,
+                        "Pagamento": forma_sel
+                    })
+                
+                salvar_no_google(lista_itens, aba="Dados")
+                st.session_state.cont_lanc += 1
+                
+                if manter_aberto:
+                    st.toast(f"✅ {desc} salvo!")
+                    # O segredo: rerun() dentro de um fragmento NÃO fecha o dialog!
+                    st.rerun() 
+                else:
+                    st.session_state.cont_lanc = 0
+                    # Para fechar o dialog de propósito, precisamos dar um rerun fora do fragmento
+                    # mas o Streamlit fará isso automaticamente se a gente não impedir
+                    st.rerun(scope="app") # Fecha o app/dialog
 
-    # Botão de Sair
-    if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
-        st.session_state.cont_lanc = 0
-        st.rerun()
+        # BOTÃO SAIR
+        if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
+            st.session_state.cont_lanc = 0
+            st.rerun(scope="app") # Força o fechamento total
+
+    # Chama o fragmento que criamos acima
+    corpo_do_modal()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
 
@@ -730,6 +740,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
