@@ -3,45 +3,94 @@ import pandas as pd
 import json
 import os
 from datetime import datetime, date
+from streamlit_gsheets import GSheetsConnection
 
 # --- 1. NOMES DOS ARQUIVOS ---
 NOME_ARQUIVO = "financeiro_controle.xlsx"
 ARQUIVO_CONFIG = "config_gerais.json"
 
-# --- 2. AS FUNÇÕES DE SALVAMENTO (COLOQUE AQUI) ---
-def salvar_no_excel(dados_lista):
+Concordo plenamente, Robson. Centralizar tudo o que é configuração (cartões, categorias de despesa e categorias de receita) na aba Config é a forma mais organizada e segura. Assim, a aba Dados fica exclusiva para o histórico de movimentações (o dinheiro que entra e sai).
+
+Para que isso funcione perfeitamente, precisamos que o código salve essas três listas em colunas separadas na aba Config.
+
+Aqui está o código completo do Bloco 2 ajustado para salvar tudo na aba Config, e também como deve ficar a inicialização (Bloco 3) para carregar tudo corretamente ao abrir o app ou dar F5:
+
+1. Bloco de Funções (Substitua o seu Bloco 2)
+Python
+
+from streamlit_gsheets import GSheetsConnection
+
+# --- 2. FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
+
+def salvar_no_google(dados_lista, aba="Dados"):
+    """Salva os lançamentos financeiros na aba Dados"""
     try:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        try:
+            df_antigo = conn.read(worksheet=aba)
+        except:
+            df_antigo = pd.DataFrame()
+
         df_novo = pd.DataFrame(dados_lista)
-        if os.path.exists(NOME_ARQUIVO):
-            df_antigo = pd.read_excel(NOME_ARQUIVO, engine='openpyxl')
-            df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
-        else:
-            df_final = df_novo
-        df_final.to_excel(NOME_ARQUIVO, index=False, engine='openpyxl')
+        df_final = pd.concat([df_antigo, df_novo], ignore_index=True)
+        
+        conn.update(worksheet=aba, data=df_final)
+        st.success(f"☁️ Lançamento salvo em '{aba}'!")
         return True
     except Exception as e:
-        st.error(f"Erro ao salvar Excel: {e}")
+        st.error(f"Erro ao salvar na aba {aba}: {e}")
         return False
 
-def salvar_configuracoes():
+def salvar_configuracoes_nuvem():
+    """Salva TUDO (Categorias e Cartões) na aba 'Config'"""
     try:
-        dados = {
-            "categorias_despesa": st.session_state.get("categorias", []),
-            "categorias_receita": st.session_state.get("categorias_receita", []),
-            "formas_pagamento": st.session_state.get("formas_pagamento", [])
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        
+        # Preparamos os dados para colunas diferentes
+        # Detalhes_Pagamento salva o dicionário completo do cartão (fechamento, vencimento, etc)
+        configs = {
+            "Categorias_Despesa": st.session_state.get("categorias", []),
+            "Categorias_Receita": st.session_state.get("categorias_receita", []),
+            "Detalhes_Pagamento": [json.dumps(f) for f in st.session_state.get("formas_pagamento", [])]
         }
-        with open(ARQUIVO_CONFIG, "w", encoding="utf-8") as f:
-            json.dump(dados, f, indent=4, ensure_ascii=False)
+        
+        # Alinhamos o tamanho das listas para criar o DataFrame (preenche com vazio)
+        max_len = max([len(v) for v in configs.values()]) if any(configs.values()) else 0
+        for k in configs:
+            configs[k] = configs[k] + [""] * (max_len - len(configs[k]))
+            
+        df_config = pd.DataFrame(configs)
+        
+        # Sobrescreve a aba Config com as listas atualizadas
+        conn.update(worksheet="Config", data=df_config)
+        st.success("✅ Todas as configurações foram salvas na aba Config!")
     except Exception as e:
-        st.error(f"Erro ao salvar configurações: {e}")
+        st.error(f"Erro ao sincronizar configurações: {e}")
 
-def carregar_configuracoes():
-    if os.path.exists(ARQUIVO_CONFIG):
-        with open(ARQUIVO_CONFIG, "r", encoding="utf-8") as f:
-            dados = json.load(f)
-            st.session_state.categorias = dados.get("categorias_despesa", [])
-            st.session_state.categorias_receita = dados.get("categorias_receita", [])
-            st.session_state.formas_pagamento = dados.get("formas_pagamento", [])
+def carregar_configuracoes_nuvem():
+    """Busca na aba 'Config' as categorias e formas de pagamento ao iniciar"""
+    try:
+        conn = st.connection("gsheets", type=GSheetsConnection)
+        df_config = conn.read(worksheet="Config")
+        
+        # Carrega Categorias de Despesa
+        if "Categorias_Despesa" in df_config.columns:
+            st.session_state.categorias = df_config["Categorias_Despesa"].replace("", pd.NA).dropna().tolist()
+        
+        # Carrega Categorias de Receita
+        if "Categorias_Receita" in df_config.columns:
+            st.session_state.categorias_receita = df_config["Categorias_Receita"].replace("", pd.NA).dropna().tolist()
+            
+        # Carrega Detalhes dos Cartões (Formas de Pagamento)
+        if "Detalhes_Pagamento" in df_config.columns:
+            formas_json = df_config["Detalhes_Pagamento"].replace("", pd.NA).dropna().tolist()
+            st.session_state.formas_pagamento = [json.loads(f) for f in formas_json]
+            
+    except Exception as e:
+        # Se a planilha estiver vazia, garante as listas básicas
+        st.session_state.categorias = []
+        st.session_state.categorias_receita = []
+        st.session_state.formas_pagamento = []
             
 # --- 3. FUNÇÕES DE LOGÍSTICA E EXCEL ---
 def calcular_vencimento_real(data_compra, detalhes_pagto):
@@ -74,15 +123,15 @@ def salvar_no_excel(dados_lista):
 
 # --- 3. INICIALIZAÇÃO (LOGO ABAIXO DAS FUNÇÕES) ---
 if 'categorias' not in st.session_state:
-    # 1. Tenta buscar o que está salvo no arquivo JSON
-    carregar_configuracoes()
+    # 1. Busca tudo o que está na aba 'Config' da planilha
+    carregar_configuracoes_nuvem()
     
-    # 2. Se o arquivo não existir ou estiver vazio, cria as listas em branco na memória
+    # 2. Garante que as variáveis existam caso a planilha esteja nova/vazia
     if 'categorias' not in st.session_state: st.session_state.categorias = []
     if 'categorias_receita' not in st.session_state: st.session_state.categorias_receita = []
     if 'formas_pagamento' not in st.session_state: st.session_state.formas_pagamento = []
     
-    # 3. Define a página inicial do sistema para o menu funcionar
+    # 3. Define a página inicial do menu
     if 'pagina' not in st.session_state: st.session_state.pagina = "Painel Inicial"
         
 # 1. CONFIGURAÇÃO DA PÁGINA (CSS)
@@ -223,7 +272,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- FUNÇÃO COM CORREÇÃO DE NOME (TOPO DO SCRIPT) ---
+# --- FUNÇÃO COM CORREÇÃO PARA GOOGLE SHEETS ---
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     # 1. CABEÇALHO COM OPÇÃO DE CORREÇÃO
@@ -241,10 +290,14 @@ def modal_lancamento_categoria(categoria_nome):
                     # Atualiza na lista oficial de categorias
                     idx = st.session_state.categorias.index(categoria_nome)
                     st.session_state.categorias[idx] = novo_nome_cat
+                    
+                    # SALVA NA NUVEM (Aba Config) para não perder no F5
+                    salvar_configuracoes_nuvem()
+                    
                     st.success("Nome alterado!")
-                    st.rerun() # Reinicia para carregar o novo nome no formulário
+                    st.rerun() 
 
-    # 2. FORMULÁRIO DE LANÇAMENTO (O RESTANTE CONTINUA IGUAL)
+    # 2. FORMULÁRIO DE LANÇAMENTO
     with st.form(key=f"form_dialog_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -264,16 +317,15 @@ def modal_lancamento_categoria(categoria_nome):
         data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"d_d_{categoria_nome}")
         
         if st.form_submit_button("Confirmar e Salvar", use_container_width=True):
-            # TUDO DAQUI PARA BAIXO PRECISA DE RECUO (INDENTAÇÃO)
             detalhes = next((item for item in st.session_state.formas_pagamento if item["nome"] == forma_sel), None)
             
-            lista_para_excel = []
+            lista_para_enviar = []
             for p in range(parcelas):
                 # Calcula a data de vencimento mês a mês
                 data_parcela = data_l + pd.DateOffset(months=p)
                 vencimento = calcular_vencimento_real(data_parcela.date(), detalhes)
                 
-                lista_para_excel.append({
+                lista_para_enviar.append({
                     "Data Compra": data_l.strftime("%d/%m/%Y"),
                     "Vencimento": vencimento.strftime("%d/%m/%Y"),
                     "Categoria": categoria_nome,
@@ -283,9 +335,9 @@ def modal_lancamento_categoria(categoria_nome):
                     "Pagamento": forma_sel
                 })
             
-            # Chama a função de salvar no arquivo Excel
-            salvar_no_excel(lista_para_excel)
-            st.success(f"✅ {parcelas} parcela(s) salvas no Excel com sucesso!")
+            # ALTERAÇÃO: Chama a função de salvar na aba "Dados" do Google Sheets
+            salvar_no_google(lista_para_enviar, aba="Dados")
+            st.success(f"✅ {parcelas} parcela(s) sincronizadas com a nuvem!")
             st.rerun()
 
 @st.dialog("💰 Nova Receita")
@@ -301,10 +353,11 @@ def modal_receita_categoria(categoria_nome):
                 if novo_nome and novo_nome != categoria_nome:
                     idx = st.session_state.categorias_receita.index(categoria_nome)
                     st.session_state.categorias_receita[idx] = novo_nome
-                    salvar_configuracoes()
+                    # ALTERAÇÃO: Salva a alteração do nome na aba Config
+                    salvar_configuracoes_nuvem()
                     st.rerun()
 
-    # --- FORMULÁRIO (CUIDADO COM O ALINHAMENTO ABAIXO) ---
+    # --- FORMULÁRIO ---
     with st.form(key=f"form_receita_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Receita")
         c1, c2 = st.columns([2, 4])
@@ -328,9 +381,9 @@ def modal_receita_categoria(categoria_nome):
                 "Pagamento": forma
             }]
             
-            # SALVAMENTO NO EXCEL
-            salvar_no_excel(nova_rec)
-            st.success(f"✅ Receita de '{categoria_nome}' cadastrada com sucesso!")
+            # ALTERAÇÃO: Salva agora na aba "Dados" do Google Sheets
+            salvar_no_google(nova_rec, aba="Dados")
+            st.success(f"✅ Receita de '{categoria_nome}' sincronizada com a nuvem!")
             st.rerun()
 
 @st.dialog("💳 Gerenciar Formas de Pagamento")
@@ -352,6 +405,8 @@ def modal_forma_pagamento():
                 st.session_state.formas_pagamento.append({
                     "nome": nova_f, "tipo": tipo_f, "fechamento": fech, "vencimento": venc
                 })
+                # --- SALVAMENTO NA NUVEM ---
+                salvar_configuracoes_nuvem()
                 st.success(f"✅ Forma '{nova_f}' cadastrada com sucesso!")
                 st.rerun()
 
@@ -373,11 +428,15 @@ def modal_forma_pagamento():
                     st.session_state.formas_pagamento[i] = {
                         "nome": edit_nome, "tipo": edit_tipo, "fechamento": edit_fech, "vencimento": edit_venc
                     }
+                    # --- SALVAMENTO NA NUVEM ---
+                    salvar_configuracoes_nuvem()
                     st.success("Alterado com sucesso!")
                     st.rerun()
                 
                 if col_btn2.button("Remover", key=f"del_{i}", use_container_width=True):
                     st.session_state.formas_pagamento.pop(i)
+                    # --- SALVAMENTO NA NUVEM ---
+                    salvar_configuracoes_nuvem()
                     st.rerun()
                     
 
@@ -453,8 +512,8 @@ if selecionado == "Cadastros Iniciais":
             if st.button("Salvar", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
-                    # --- SALVAMENTO E MENSAGEM ---
-                    salvar_configuracoes() 
+                    # --- SALVAMENTO NA NUVEM (CORRIGIDO) ---
+                    salvar_configuracoes_nuvem() 
                     st.success(f"✅ Categoria '{n_cat}' cadastrada com sucesso!")
                     st.rerun()
         
@@ -473,8 +532,8 @@ if selecionado == "Cadastros Iniciais":
                     st.session_state.categorias_receita = []
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
-                    # --- SALVAMENTO E MENSAGEM ---
-                    salvar_configuracoes()
+                    # --- SALVAMENTO NA NUVEM (CORRIGIDO) ---
+                    salvar_configuracoes_nuvem()
                     st.success(f"✅ Fonte '{n_rec}' cadastrada com sucesso!")
                     st.rerun()
         
@@ -493,7 +552,7 @@ if selecionado == "Cadastros Iniciais":
         st.write("") 
         if 'formas_pagamento' in st.session_state:
             for f in st.session_state.formas_pagamento:
-                # Aqui você já visualiza o que está no JSON
+                # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
 
 
