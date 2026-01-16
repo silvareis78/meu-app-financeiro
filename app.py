@@ -5,20 +5,6 @@ import os
 from datetime import datetime, date
 from streamlit_gsheets import GSheetsConnection
 
-# --- 1. NOMES DOS ARQUIVOS ---
-NOME_ARQUIVO = "financeiro_controle.xlsx"
-ARQUIVO_CONFIG = "config_gerais.json"
-
-Concordo plenamente, Robson. Centralizar tudo o que é configuração (cartões, categorias de despesa e categorias de receita) na aba Config é a forma mais organizada e segura. Assim, a aba Dados fica exclusiva para o histórico de movimentações (o dinheiro que entra e sai).
-
-Para que isso funcione perfeitamente, precisamos que o código salve essas três listas em colunas separadas na aba Config.
-
-Aqui está o código completo do Bloco 2 ajustado para salvar tudo na aba Config, e também como deve ficar a inicialização (Bloco 3) para carregar tudo corretamente ao abrir o app ou dar F5:
-
-1. Bloco de Funções (Substitua o seu Bloco 2)
-Python
-
-from streamlit_gsheets import GSheetsConnection
 
 # --- 2. FUNÇÕES DE SALVAMENTO (GOOGLE SHEETS) ---
 
@@ -554,6 +540,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # Agora visualiza o que vem da aba Config
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
