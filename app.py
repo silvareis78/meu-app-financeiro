@@ -350,51 +350,58 @@ st.markdown("""
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas que GARANTE que o modal fique aberto.
-    COMO FUNCIONA: Ele limpa os campos via código em vez de dar refresh na página.
+    PARA QUE SERVE: Cadastrar despesas sem fechar o modal.
+    COMO FUNCIONA: Usa chaves (keys) para limpar os campos sem precisar de st.form.
     """
     
-    # 1. INICIALIZAÇÃO DE VARIÁVEIS DE CONTROLE
+    # 1. INICIALIZAÇÃO DO CONTADOR
     if 'cont_lanc' not in st.session_state:
         st.session_state.cont_lanc = 0
 
-    # 2. CABEÇALHO E CONTADOR
+    # 2. CABEÇALHO
     st.subheader(f"Categoria: {categoria_nome}")
-    st.info(f"🔢 Lançamentos realizados nesta categoria: **{st.session_state.cont_lanc}**")
+    st.info(f"🔢 Lançamentos realizados agora: **{st.session_state.cont_lanc}**")
     
-    # 3. CAMPOS DE ENTRADA
-    # Importante: usamos 'key' para limpar os campos via código depois
-    desc = st.text_input("Descrição da Despesa", key="desc_manual")
+    # 3. CAMPOS DE ENTRADA (SEM FORMULÁRIO)
+    # Importante: A descrição e o valor serão resetados manualmente
+    desc = st.text_input("Descrição da Despesa", key="input_desc_manual")
     
     c_tipo, c_parc = st.columns([2, 1])
-    tipo_desp = c_tipo.selectbox("Tipo", ["Variável", "Fixa"], key="tipo_manual")
-    parcelas = c_parc.number_input("Parcelas", min_value=1, value=1, key="parc_manual")
+    with c_tipo:
+        tipo_desp = st.selectbox("Tipo", ["Variável", "Fixa"], key="input_tipo_manual")
+    with c_parc:
+        parcelas = st.number_input("Parcelas", min_value=1, value=1, key="input_parc_manual")
     
     c_val, c_pag = st.columns([2, 4])
-    valor = c_val.number_input("Valor Total", min_value=0.0, format="%.2f", key="val_manual")
+    with c_val:
+        valor = st.number_input("Valor Total", min_value=0.0, format="%.2f", key="input_valor_manual")
+    with c_pag:
+        opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_sel = st.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key="input_pag_manual")
     
-    opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
-    forma_sel = c_pag.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key="pag_manual")
-    
-    data_l = st.date_input("Data", format="DD/MM/YYYY", key="data_manual")
+    data_l = st.date_input("Data", format="DD/MM/YYYY", key="input_data_manual")
 
     st.write("---")
-    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_fluxo")
+    # CHECKBOX QUE VOCÊ VAI MARCAR
+    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_fluxo_cont")
 
     # 4. BOTÕES DE AÇÃO
     col_btn1, col_btn2 = st.columns(2)
     
+    # BOTÃO SALVAR
     if col_btn1.button("✅ Salvar Lançamento", use_container_width=True):
         if not desc or valor <= 0:
-            st.error("Preencha descrição e valor!")
+            st.error("Preencha a descrição e o valor!")
         else:
-            # Lógica de salvamento (Igual às anteriores)
+            # Processamento dos dados
             detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
             lista_itens = []
+            
             for p in range(int(parcelas)):
                 data_parc = data_l + pd.DateOffset(months=p)
                 venc = calcular_vencimento_real(data_parc.date(), detalhes)
                 txt_parc = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
+                
                 lista_itens.append({
                     "Data Compra": data_l.strftime("%d/%m/%Y"),
                     "Vencimento": venc.strftime("%d/%m/%Y"),
@@ -406,31 +413,24 @@ def modal_lancamento_categoria(categoria_nome):
                     "Pagamento": forma_sel
                 })
             
+            # Chama a função de salvamento no Sheets
             salvar_no_google(lista_itens, aba="Dados")
             st.session_state.cont_lanc += 1
             
             if manter_aberto:
-                # --- O PULO DO GATO ---
-                # Em vez de st.rerun(), limpamos os campos diretamente no session_state
-                st.session_state.desc_manual = ""
-                st.session_state.val_manual = 0.0
-                st.toast(f"✅ {desc} salvo! Pode lançar o próximo.")
-                st.rerun() # Agora o rerun funciona porque o estado foi alterado antes
+                # LIMPANDO OS CAMPOS MANUALMENTE PARA O PRÓXIMO
+                st.session_state.input_desc_manual = ""
+                st.session_state.input_valor_manual = 0.0
+                st.toast(f"✅ {desc} salvo com sucesso!")
+                st.rerun() # Reinicia o modal, mas como a ação foi rápida, ele não fecha
             else:
                 st.session_state.cont_lanc = 0
-                st.rerun() # Sem a checkbox, ele fecha o modal normalmente
+                st.rerun() # Fecha o modal
 
+    # BOTÃO SAIR
     if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
         st.session_state.cont_lanc = 0
         st.rerun()
-
-        # BOTÃO SAIR
-        if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
-            st.session_state.cont_lanc = 0
-            st.rerun(scope="app") # Força o fechamento total
-
-    # Chama o fragmento que criamos acima
-    corpo_do_modal()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
 
@@ -735,6 +735,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
