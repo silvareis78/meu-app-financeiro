@@ -928,7 +928,7 @@ if selecionado == "Cartões":
             # --- QUADRO 2: RESUMO (LAYOUT AJUSTADO) ---
             with st.container(border=True):
                 # Linha de Cima: Título na Esquerda e Datas na Direita
-                col_titulo, col_datas, col_espaco = st.columns([1, 1, 0.5])
+                col_titulo, col_datas, col_espaco = st.columns([1, 1, 0.1])
                 
                 with col_titulo:
                     st.markdown("<div style='text-align: left; font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
@@ -954,7 +954,7 @@ if selecionado == "Cartões":
 
             # --- QUADRO 3: ITENS DA FATURA ---
             with st.container(border=True):
-                st.markdown("📝 **Itens da Fatura**")
+                st.markdown("📝 **Detalhamento da Fatura**")
                 if not df_fatura.empty:
                     df_fatura['Venc_View'] = df_fatura['Vencimento'].dt.date
                     df_fatura['Valor_Formatado'] = df_fatura['Valor'].apply(lambda x: f"R$ {x:,.2f}")
@@ -979,6 +979,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela de cartões: {e}")
+
 
 
 
