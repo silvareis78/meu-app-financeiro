@@ -516,10 +516,11 @@ def modal_receita_categoria(fonte_nome):
                 "Vencimento": data_r.strftime("%d/%m/%Y"),
                 "Categoria": fonte_nome,
                 "Descrição": desc,
-                "Parcela": "1/1",
+                "Parcela": "",
                 "Tipo": "Receita", # Identificador para os cálculos futuros
                 "Valor": valor,
-                "Pagamento": conta_destino
+                "Pagamento": conta_destino,
+                "Status"
             }]
             
             # Salva no Google Sheets (Aba Dados)
@@ -829,6 +830,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
