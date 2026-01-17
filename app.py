@@ -346,7 +346,6 @@ st.markdown("""
 
 # --- 6. MODAL DE LANÇAMENTO (JANELA FLUTUANTE) ---
 
-
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
@@ -446,74 +445,99 @@ def modal_lancamento_categoria(categoria_nome):
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
 
-@st.dialog("💰 Nova Receita") # Define que esta função abre uma janela pop-up de Receita
-def modal_receita_categoria(categoria_nome):
-    """Cria o formulário para adicionar ganhos dentro de cada fonte/categoria de receita"""
-    
-    # --- CABEÇALHO COM EDIÇÃO ---
-    # Coluna 1 (80% da largura) para o título | Coluna 2 (20%) para o botão de editar
-    col_tit, col_edit = st.columns([0.8, 0.2])
-    
-    with col_tit:
-        st.subheader(f"Fonte: {categoria_nome}") # Exibe o nome da fonte de renda (ex: Salário)
-        
-    with col_edit:
-        # Abre uma caixinha de edição se o nome da fonte estiver errado
-        with st.popover("✏️"):
-            novo_nome = st.text_input("Novo nome", value=categoria_nome)
-            if st.button("Salvar Alteração"):
-                if novo_nome and novo_nome != categoria_nome:
-                    # LOCALIZA: Busca a posição exata na lista de RECEITAS
-                    idx = st.session_state.categorias_receita.index(categoria_nome)
-                    # SUBSTITUI: Coloca o novo nome naquela posição
-                    st.session_state.categorias_receita[idx] = novo_nome
-                    
-                    # SINCRONIZA: Salva a lista de nomes atualizada na aba 'Config' da planilha
-                    salvar_configuracoes_nuvem()
-                    st.rerun()
+@st.dialog("💰 Nova Receita")
+def modal_receita(fonte_nome):
+    """
+    PARA QUE SERVE: Cadastro de entradas financeiras com as mesmas melhorias do modal de despesas.
+    """
+    import datetime
+    import pytz
 
-    # --- FORMULÁRIO DE ENTRADA ---
-    # 'clear_on_submit=True' limpa os campos após clicar em salvar
-    with st.form(key=f"form_receita_{categoria_nome}", clear_on_submit=True):
+    # 1. GARANTE QUE O CONTADOR EXISTE
+    if 'cont_receita' not in st.session_state:
+        st.session_state.cont_receita = 0
+
+    # --- AJUSTE DE DATA (FUSO HORÁRIO BRASIL) ---
+    fuso_br = pytz.timezone('America/Sao_Paulo')
+    data_hoje = datetime.datetime.now(fuso_br).date()
+
+    # --- CABEÇALHO COM EDIÇÃO ---
+    col_tit, col_edit = st.columns([0.8, 0.2])
+    with col_tit:
+        st.subheader(f"Fonte: {fonte_nome}")
+    with col_edit:
+        with st.popover("✏️"):
+            novo_nome = st.text_input("Renomear Fonte:", value=fonte_nome)
+            if st.button("Confirmar Nome"):
+                if novo_nome and novo_nome != fonte_nome:
+                    # Ajuste aqui conforme sua lista de fontes de receita
+                    if fonte_nome in st.session_state.fontes_receita:
+                        idx = st.session_state.fontes_receita.index(fonte_nome)
+                        st.session_state.fontes_receita[idx] = novo_nome
+                        salvar_configuracoes_nuvem()
+                        st.rerun()
+
+    # Placeholder para o contador atualizar na hora
+    placeholder_cont = st.empty()
+    placeholder_cont.success(f"💵 Receitas lançadas agora: **{st.session_state.cont_receita}**")
+    
+    # Checkbox externa para não resetar com o formulário
+    manter_aberto = st.checkbox(
+        "Marque para Lançar Várias receitas", 
+        key=f"persist_receita_{fonte_nome}"
+    )
+
+    # 2. FORMULÁRIO DE ENTRADA
+    with st.form(key=f"form_receita_{fonte_nome}", clear_on_submit=True):
+        desc = st.text_input("Descrição da Receita (Ex: Salário, Venda, etc)")
         
-        # Campo para escrever o que é (ex: 'Bonus Janeiro')
-        desc = st.text_input("Descrição da Receita")
+        c1, c2 = st.columns(2)
+        valor = c1.number_input("Valor Recebido", min_value=0.0, format="%.2f")
         
-        # Divide em duas colunas para o Valor e a Conta de destino
-        c1, c2 = st.columns([2, 4])
+        # Busca as contas de destino (Onde o dinheiro vai cair)
+        opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
+        conta_destino = c2.selectbox("Receber em:", options=opcoes_pag if opcoes_pag else ["Dinheiro"])
         
-        with c1:
-            # PARA ALTERAR: Se quiser um valor padrão sugerido, mude 'value=0.0' para 'value=1000.0'
-            valor = st.number_input("Valor", min_value=0.0, format="%.2f")
+        data_r = st.date_input("Data do Recebimento", value=data_hoje, format="DD/MM/YYYY")
+
+        btn_salvar = st.form_submit_button("✅ Salvar Receita", use_container_width=True)
+
+    # 3. LÓGICA DE SALVAMENTO
+    if btn_salvar:
+        if not desc or valor <= 0:
+            st.error("Preencha a descrição e o valor!")
+        else:
+            # Incrementa contador antes do salvamento
+            st.session_state.cont_receita += 1
             
-        with c2:
-            # Busca as formas de pagamento cadastradas para saber onde o dinheiro caiu
-            opcoes = [f['nome'] for f in st.session_state.formas_pagamento]
-            forma = st.selectbox("Recebido via", options=opcoes if opcoes else ["Conta Corrente"])
-        
-        # Seleção da data em que o dinheiro entrou/entrará
-        data_r = st.date_input("Data", format="DD/MM/YYYY")
-        
-        # BOTÃO DE CONFIRMAÇÃO
-        if st.form_submit_button("Confirmar Receita", use_container_width=True):
-            # Prepara os dados no formato que a planilha aceita
-            # Para Receitas, a 'Data Compra' e o 'Vencimento' são o mesmo dia
-            nova_rec = [{
-                "Data Compra": data_r.strftime("%d/%m/%Y"),
+            # Prepara o dado para a planilha
+            novo_item = [{
+                "Data Compra": data_r.strftime("%d/%m/%Y"), # Mantemos o padrão da coluna
                 "Vencimento": data_r.strftime("%d/%m/%Y"),
-                "Categoria": categoria_nome,
+                "Categoria": fonte_nome,
                 "Descrição": desc,
-                "Tipo": "RECEITA", # Identificador vital para os gráficos separarem ganhos de gastos
+                "Parcela": "1/1",
+                "Tipo": "Receita", # Identificador para os cálculos futuros
                 "Valor": valor,
-                "Pagamento": forma
+                "Pagamento": conta_destino
             }]
             
-            # ENVIO PARA NUVEM: Salva na mesma aba 'Dados' onde ficam as despesas
-            # A diferença é que aqui o 'Tipo' vai como 'RECEITA'
-            salvar_no_google(nova_rec, aba="Dados")
+            # Salva no Google Sheets (Aba Dados)
+            salvar_no_google(novo_item, aba="Dados")
             
-            st.success(f"✅ Receita de '{categoria_nome}' sincronizada com a nuvem!")
-            st.rerun() # Fecha o modal e atualiza os saldos na tela principal
+            # Atualiza visualmente o contador e limpa campos
+            placeholder_cont.success(f"💵 Receitas lançadas agora: **{st.session_state.cont_receita}**")
+            st.toast(f"💰 Receita '{desc}' salva!")
+
+            # Controle de fechamento
+            if not st.session_state[f"persist_receita_{fonte_nome}"]:
+                st.session_state.cont_receita = 0
+                st.rerun()
+
+    # 4. BOTÃO DE SAIR
+    if st.button("❌ Concluir", use_container_width=True):
+        st.session_state.cont_receita = 0
+        st.rerun()
 
 # --- 8. MODAL DE GERENCIAR CARTÕES E PAGAMENTOS ---
 
@@ -747,6 +771,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
