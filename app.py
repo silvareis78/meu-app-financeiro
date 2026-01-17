@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (TRÊS QUADROS PADRONIZADOS) ---
+# --- 12. TELA DE CARTÕES (FILTROS, RESUMO EVOLUÍDO E ITENS) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -889,12 +889,10 @@ if selecionado == "Cartões":
 
     try:
         import json
-        # Lendo os Dados e a aba Config
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
         df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Config') 
 
         if not df_config.empty and 'Detalhes_Pagamento' in df_config.columns:
-            # Extração dos dados JSON da aba Config
             def extrair_json(x):
                 try: return json.loads(x.replace("'", '"'))
                 except: return {}
@@ -914,28 +912,41 @@ if selecionado == "Cartões":
                     meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
                     mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
 
-            # Cálculos dos Dados para o Resumo
+            # Cálculos dos Dados
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
+            
+            # Lógica para À Vista vs Parcelado
+            # Considera parcelado se a coluna 'Parcela' contiver '/' ou se for diferente de '1/1' ou vazio (ajuste conforme seu padrão)
+            mask_parcelado = df_fatura['Parcela'].astype(str).str.contains('/', na=False) & (df_fatura['Parcela'] != '1/1')
+            total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
+            total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
             total_fatura = df_fatura['Valor'].sum()
 
-            # --- QUADRO 2: RESULTADOS (RESUMO) ---
+            # --- QUADRO 2: RESUMO (ESTILIZADO) ---
             with st.container(border=True):
-                st.markdown("📊 **Resumo da Fatura**")
-                col_res1, col_res2, col_res3 = st.columns(3)
-                with col_res1:
+                # Cabeçalho do Quadro: Fechamento e Vencimento no canto superior esquerdo
+                st.markdown(f"""
+                    <div style="text-align: left; line-height: 1.2; margin-bottom: 20px;">
+                        <span style="font-size: 18px; font-weight: bold;">Fechamento:</span> <span style="font-size: 16px;">Dia {info.get('fechamento', '?')}</span><br>
+                        <span style="font-size: 18px; font-weight: bold;">Vencimento:</span> <span style="font-size: 16px;">Dia {info.get('vencimento', '?')}</span>
+                    </div>
+                """, unsafe_allow_html=True)
+                
+                # Linha de Métricas
+                col_avista, col_parc, col_total = st.columns(3)
+                with col_avista:
+                    st.metric("Total à Vista", f"R$ {total_avista:,.2f}")
+                with col_parc:
+                    st.metric("Total Parcelado", f"R$ {total_parcelado:,.2f}")
+                with col_total:
+                    # Destaque em azul para o total geral
                     st.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
-                with col_res2:
-                    st.metric("Fechamento", f"Dia {info.get('fechamento', '?')}")
-                with col_res3:
-                    st.metric("Vencimento", f"Dia {info.get('vencimento', '?')}")
 
-            # --- QUADRO 3: ITENS DA FATURA (TABELA DENTRO DO QUADRO) ---
+            # --- QUADRO 3: ITENS DA FATURA ---
             with st.container(border=True):
                 st.markdown("📝 **Itens da Fatura**")
-                
                 if not df_fatura.empty:
-                    # Preparando dados para visualização
                     df_fatura['Venc_View'] = df_fatura['Vencimento'].dt.date
                     df_fatura['Valor_Formatado'] = df_fatura['Valor'].apply(lambda x: f"R$ {x:,.2f}")
 
@@ -943,7 +954,7 @@ if selecionado == "Cartões":
                         "Venc_View": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=100),
                         "Descrição": st.column_config.TextColumn("Descrição", width=300),
                         "Valor_Formatado": st.column_config.TextColumn("Valor", width=120),
-                        "Parcela": st.column_config.TextColumn("Parcela.", width=70),
+                        "Parcela": st.column_config.TextColumn("Parc.", width=70),
                         "Status": st.column_config.TextColumn("Status", width=110)
                     }
 
@@ -952,16 +963,14 @@ if selecionado == "Cartões":
                         use_container_width=True,
                         hide_index=True,
                         column_config=config_v,
-                        height=400 # Altura fixa para manter o quadro elegante
+                        height=400
                     )
                 else:
-                    st.info(f"Nenhum lançamento encontrado para {cartao_sel} em {mes_sel}.")
-
-        else:
-            st.warning("Verifique a aba 'Config' ou a coluna 'Detalhes_Pagamento'.")
+                    st.info(f"Nenhum lançamento para {cartao_sel} em {mes_sel}.")
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela de cartões: {e}")
+
 
 
 
