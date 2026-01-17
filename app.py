@@ -350,25 +350,43 @@ st.markdown("""
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas.
-    SOLUÇÃO: Checkbox fora do formulário com Key persistente.
+    PARA QUE SERVE: Cadastro de despesas com ajuste de fuso horário.
     """
-    
-    # 1. INICIALIZAÇÃO DO CONTADOR
+    import datetime
+    import pytz # Certifique-se de que o pytz está no seu requirements.txt
+
+    # 1. GARANTE QUE O CONTADOR EXISTE
     if 'cont_lanc' not in st.session_state:
         st.session_state.cont_lanc = 0
 
-    st.subheader(f"Categoria: {categoria_nome}")
-    st.markdown(f"✅ **Lançamentos realizados:** `{st.session_state.cont_lanc}`")
+    # --- AJUSTE DE DATA (FUSO HORÁRIO BRASIL) ---
+    fuso_br = pytz.timezone('America/Sao_Paulo')
+    data_hoje = datetime.datetime.now(fuso_br).date()
+
+    # --- CABEÇALHO COM EDIÇÃO ---
+    col_tit, col_edit = st.columns([0.8, 0.2])
+    with col_tit:
+        st.subheader(f"Categoria: {categoria_nome}")
+    with col_edit:
+        with st.popover("✏️"):
+            novo_nome = st.text_input("Renomear:", value=categoria_nome)
+            if st.button("Confirmar"):
+                if novo_nome and novo_nome != categoria_nome:
+                    idx = st.session_state.categorias.index(categoria_nome)
+                    st.session_state.categorias[idx] = novo_nome
+                    salvar_configuracoes_nuvem()
+                    st.rerun()
+
+    # Placeholder para o contador atualizar na hora
+    placeholder_cont = st.empty()
+    placeholder_cont.info(f"🔢 Lançamentos realizados: **{st.session_state.cont_lanc}**")
     
-    # --- A CHECKBOX FICA FORA DO FORMULÁRIO ---
-    # Usamos uma KEY para que o valor não se perca nunca
     manter_aberto = st.checkbox(
         "Marque aqui para Lançar Várias despesas", 
         key=f"persist_check_{categoria_nome}"
     )
 
-    # 2. O FORMULÁRIO (Configurado para limpar os campos internos ao salvar)
+    # 2. FORMULÁRIO
     with st.form(key=f"form_final_{categoria_nome}", clear_on_submit=True):
         desc = st.text_input("Descrição da Despesa")
         
@@ -382,17 +400,18 @@ def modal_lancamento_categoria(categoria_nome):
         opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
         forma_sel = c4.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"])
         
-        data_l = st.date_input("Data", format="DD/MM/YYYY")
+        # AQUI A DATA USA O data_hoje CALCULADO COM FUSO BRASIL
+        data_l = st.date_input("Data", value=data_hoje, format="DD/MM/YYYY")
 
-        # Botão de salvar (dentro do formulário)
         btn_salvar = st.form_submit_button("✅ Salvar Lançamento", use_container_width=True)
 
-    # 3. LÓGICA DE PROCESSAMENTO
+    # 3. LÓGICA DE SALVAMENTO
     if btn_salvar:
         if not desc or valor <= 0:
             st.error("Preencha descrição e valor!")
         else:
-            # Lógica de envio para o Google
+            st.session_state.cont_lanc += 1
+            
             detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
             lista_itens = []
             
@@ -413,20 +432,14 @@ def modal_lancamento_categoria(categoria_nome):
                 })
             
             salvar_no_google(lista_itens, aba="Dados")
-            st.session_state.cont_lanc += 1
-            st.toast(f"✅ {desc} salvo!")
+            
+            placeholder_cont.info(f"🔢 Lançamentos realizados: **{st.session_state.cont_lanc}**")
+            st.toast(f"✅ {desc} salvos!")
 
-            # SÓ DAREMOS RERUN SE A CHECKBOX ESTIVER DESMARCADA
-            # Se ela estiver MARCADA, o código não faz nada (não dá rerun),
-            # o que mantém o Modal aberto e o clear_on_submit limpa os campos.
             if not st.session_state[f"persist_check_{categoria_nome}"]:
                 st.session_state.cont_lanc = 0
                 st.rerun()
-            else:
-                # Se for para ficar aberto, apenas forçamos uma atualização visual leve
-                st.success("Salvo! Digite a próxima despesa.")
 
-    # 4. BOTÃO DE SAIR MANUAL
     if st.button("❌ Sair / Concluir", use_container_width=True):
         st.session_state.cont_lanc = 0
         st.rerun()
@@ -734,6 +747,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
