@@ -702,13 +702,11 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # CSS PARA GARANTIR O VERDE (Usando os nomes que você definir nos botões)
+    # 1. CSS PARA FORÇAR O BOTÃO A SER VERDE (PELO NOME DA CHAVE)
     st.markdown("""
         <style>
-        button[key="btn_save_desp"], 
-        button[key="btn_save_rec"],
-        button[key="btn_close_desp"],
-        button[key="btn_close_rec"] {
+        button[key="btn_save_desp"], button[key="btn_save_rec"],
+        button[key="btn_close_desp"], button[key="btn_close_rec"] {
             background-color: #28a745 !important;
             color: white !important;
             border: none !important;
@@ -725,21 +723,22 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        with st.popover("➕ Inserir Categoria", use_container_width=True):
+        # O segredo do fechamento: st.session_state.get garante que não dê erro e mude a key
+        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"pop_d_{st.session_state.get('p_id_d', 0)}"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
-            # Botão Salvar (Mude o nome entre aspas se desejar)
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
+            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
+                    # Muda a key para fechar
+                    st.session_state['p_id_d'] = st.session_state.get('p_id_d', 0) + 1
                     st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # Botão Concluir / Sair (FORÇANDO FECHAMENTO)
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
-                # Criamos uma mudança de estado simples para forçar o fechamento
-                st.session_state["force_close"] = True
+                # Muda a key para fechar
+                st.session_state['p_id_d'] = st.session_state.get('p_id_d', 0) + 1
                 st.rerun()
         
         st.write("") 
@@ -751,23 +750,24 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        with st.popover("💰 Inserir Fonte", use_container_width=True):
+        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"pop_r_{st.session_state.get('p_id_r', 0)}"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
-            # Botão Salvar (Mude o nome entre aspas se desejar)
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
+            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
+                    # Muda a key para fechar
+                    st.session_state['p_id_r'] = st.session_state.get('p_id_r', 0) + 1
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # Botão Concluir / Sair (FORÇANDO FECHAMENTO)
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
-                st.session_state["force_close"] = True
+                # Muda a key para fechar
+                st.session_state['p_id_r'] = st.session_state.get('p_id_r', 0) + 1
                 st.rerun()
         
         st.write("") 
@@ -789,6 +789,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
