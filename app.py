@@ -702,24 +702,16 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # CSS ULTRA FORTE: Alvo direto no ID do botão para garantir o VERDE
+    # CSS PARA GARANTIR O VERDE (Usando os nomes que você definir nos botões)
     st.markdown("""
         <style>
-        /* Força verde no botão Salvar Categoria */
         button[key="btn_save_desp"], 
         button[key="btn_save_rec"],
         button[key="btn_close_desp"],
         button[key="btn_close_rec"] {
             background-color: #28a745 !important;
             color: white !important;
-            border: 2px solid #28a745 !important;
-        }
-        
-        /* Efeito de passar o mouse */
-        button[key="btn_save_desp"]:hover, 
-        button[key="btn_save_rec"]:hover {
-            background-color: #218838 !important;
-            border-color: #1e7e34 !important;
+            border: none !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -736,16 +728,18 @@ if selecionado == "Cadastros Iniciais":
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
-            # Botão Salvar
-            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
+            # Botão Salvar (Mude o nome entre aspas se desejar)
+            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
                     st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # Botão Fechar em Verde
+            # Botão Concluir / Sair (FORÇANDO FECHAMENTO)
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
+                # Criamos uma mudança de estado simples para forçar o fechamento
+                st.session_state["force_close"] = True
                 st.rerun()
         
         st.write("") 
@@ -760,8 +754,8 @@ if selecionado == "Cadastros Iniciais":
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
-            # Botão Salvar
-            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
+            # Botão Salvar (Mude o nome entre aspas se desejar)
+            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
@@ -771,16 +765,16 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # Botão Fechar em Verde
+            # Botão Concluir / Sair (FORÇANDO FECHAMENTO)
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
+                st.session_state["force_close"] = True
                 st.rerun()
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                    modal_receita_categoria(cat_r)
-                    
+                    modal_receita_categoria(cat_r)                    
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -795,6 +789,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
