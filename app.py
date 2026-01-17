@@ -880,10 +880,12 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (QUADRO UNIFICADO) ---
+# --- 12. TELA DE CARTÕES (FILTROS E RESULTADOS SEPARADOS) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
+    
+    LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
     try:
         import json
@@ -899,11 +901,9 @@ if selecionado == "Cartões":
             df_detalhes = pd.DataFrame(df_config['Detalhes_Pagamento'].apply(extrair_json).tolist())
             df_cartoes = df_detalhes[df_detalhes['tipo'] == 'Cartão de Crédito']
 
-            # --- QUADRO ÚNICO DE FILTROS E RESULTADOS ---
+            # --- QUADRO 1: FILTROS ---
             with st.container(border=True):
-                st.markdown("### 📋 Gestão de Fatura")
-                
-                # Linha 1: Inputs de Seleção
+                st.markdown("🔍 **Filtros de Busca**")
                 c1, c2 = st.columns(2)
                 with c1:
                     cartao_sel = st.selectbox("Escolha o Cartão:", sorted(df_cartoes['nome'].unique()))
@@ -913,16 +913,15 @@ if selecionado == "Cartões":
                     meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
                     mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
 
-                st.markdown("---") # Linha divisória dentro do quadro
+            # Cálculos dos Dados
+            info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
+            df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
+            total_fatura = df_fatura['Valor'].sum()
 
-                # Dados do cartão e fatura
-                info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
-                df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
-                total_fatura = df_fatura['Valor'].sum()
-
-                # Linha 2: Resultados em Destaque
+            # --- QUADRO 2: RESULTADOS ---
+            with st.container(border=True):
+                st.markdown("📊 **Resumo da Fatura**")
                 col_res1, col_res2, col_res3 = st.columns(3)
-                
                 with col_res1:
                     st.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
                 with col_res2:
@@ -930,14 +929,14 @@ if selecionado == "Cartões":
                 with col_res3:
                     st.metric("Vencimento", f"Dia {info.get('vencimento', '?')}")
 
-            # --- TABELA DE DETALHES (FORA DO QUADRO DE RESUMO) ---
+            # --- TABELA DE DETALHES ---
             st.markdown("### 📝 Itens da Fatura")
             if not df_fatura.empty:
                 df_fatura['Venc_View'] = df_fatura['Vencimento'].dt.date
                 df_fatura['Valor_Formatado'] = df_fatura['Valor'].apply(lambda x: f"R$ {x:,.2f}")
 
                 config_v = {
-                    "Venc_View": st.column_config.DateColumn("Vencimento", width=100),
+                    "Venc_View": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=100),
                     "Descrição": st.column_config.TextColumn("Descrição", width=350),
                     "Valor_Formatado": st.column_config.TextColumn("Valor", width=120),
                     "Parcela": st.column_config.TextColumn("Parc.", width=70),
@@ -953,9 +952,12 @@ if selecionado == "Cartões":
                 )
             else:
                 st.info(f"Nenhum lançamento para {cartao_sel} em {mes_sel}.")
+        else:
+            st.warning("Aba 'Config' ou coluna 'Detalhes_Pagamento' não localizada.")
 
     except Exception as e:
-        st.error(f"Erro ao carregar o quadro: {e}")
+        st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
