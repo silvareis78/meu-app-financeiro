@@ -648,6 +648,9 @@ if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
 if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
     st.session_state.pagina = "Visualizar Lançamentos"
 
+if st.sidebar.button("💳 Cartões", use_container_width=True):
+    st.session_state.pagina = "Visualizar Lançamentos"
+
 # Garante que a variável 'selecionado' sempre tenha um valor para não dar erro nos IFs
 selecionado = st.session_state.get('pagina', "Painel Inicial")
 
@@ -877,6 +880,65 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
+# --- 12. TELA DE CARTÕES DE CRÉDITO ---
+
+if selecionado == "Cartões":
+    st.markdown("## 💳 Gestão de Cartões")
+    st.markdown("---")
+
+    try:
+        # Lendo os dados da planilha principal
+        df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
+        
+        # Filtrando apenas o que é cartão e ainda não foi pago (Não Realizado)
+        df_cartao = df_geral[
+            (df_geral['Pagamento'].str.contains('Cartão', case=False, na=False)) & 
+            (df_geral['Status'] == 'Não Realizado')
+        ].copy()
+
+        # 1. RESUMO POR BANDEIRA/NOME DO CARTÃO
+        cartoes_nomes = df_cartao['Pagamento'].unique()
+        
+        if len(cartoes_nomes) == 0:
+            st.info("Nenhuma despesa pendente em cartões de crédito.")
+        else:
+            cols = st.columns(len(cartoes_nomes))
+            
+            for i, nome_cartao in enumerate(cartoes_nomes):
+                total_fatura = df_cartao[df_cartao['Pagamento'] == nome_cartao]['Valor'].sum()
+                with cols[i]:
+                    st.metric(label=f"Fatura: {nome_cartao}", value=f"R$ {total_fatura:,.2f}")
+            
+            st.markdown("---")
+            
+            # 2. FILTRO POR CARTÃO ESPECÍFICO
+            cartao_sel = st.selectbox("Selecione o Cartão para ver detalhes:", ["Todos"] + list(cartoes_nomes))
+            
+            df_detalhe = df_cartao.copy()
+            if cartao_sel != "Todos":
+                df_detalhe = df_detalhe[df_detalhe['Pagamento'] == cartao_sel]
+
+            # Formatação para exibição
+            df_detalhe['Vencimento'] = pd.to_datetime(df_detalhe['Vencimento']).dt.date
+            
+            # Configuração da tabela
+            config_cartao = {
+                "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY"),
+                "Descrição": st.column_config.TextColumn("Descrição", width=300),
+                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f"),
+                "Parcela": st.column_config.TextColumn("Parc."),
+                "Status": st.column_config.TextColumn("Status")
+            }
+
+            st.dataframe(
+                df_detalhe[["Vencimento", "Descrição", "Valor", "Parcela", "Status"]],
+                use_container_width=True,
+                hide_index=True,
+                column_config=config_cartao
+            )
+
+    except Exception as e:
+        st.error(f"Erro ao carregar tela de cartões: {e}")
 
 
 
