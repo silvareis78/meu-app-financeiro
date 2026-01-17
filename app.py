@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (LAYOUT REORGANIZADO) ---
+# --- 12. TELA DE CARTÕES (LAYOUT FINAL REORGANIZADO) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -921,25 +921,29 @@ if selecionado == "Cartões":
             total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
             total_fatura = df_fatura['Valor'].sum()
 
-            # --- QUADRO 2: RESUMO (NOVO LAYOUT) ---
+            # Ajuste para remover o .0 dos números
+            f_dia = int(info.get('fechamento', 0)) if str(info.get('fechamento')).replace('.','').isdigit() else '?'
+            v_dia = int(info.get('vencimento', 0)) if str(info.get('vencimento')).replace('.','').isdigit() else '?'
+
+            # --- QUADRO 2: RESUMO (LAYOUT AJUSTADO) ---
             with st.container(border=True):
-                # Linha de Cima: Datas na Esquerda e Título na Direita
-                col_datas, col_titulo = st.columns([1, 1])
+                # Linha de Cima: Título na Esquerda e Datas na Direita
+                col_titulo, col_datas = st.columns([1, 1])
                 
+                with col_titulo:
+                    st.markdown("<div style='text-align: left; font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
+
                 with col_datas:
                     st.markdown(f"""
-                        <div style="text-align: left; line-height: 1.2;">
-                            <span style="font-size: 18px; font-weight: bold;">Fechamento:</span> <span style="font-size: 16px;">{info.get('fechamento', '?')}</span><br>
-                            <span style="font-size: 18px; font-weight: bold;">Vencimento:</span> <span style="font-size: 16px;">{info.get('vencimento', '?')}</span>
+                        <div style="text-align: right; line-height: 1.2;">
+                            <span style="font-size: 18px; font-weight: bold;">Fechamento:</span> <span style="font-size: 16px;">{f_dia}</span><br>
+                            <span style="font-size: 18px; font-weight: bold;">Vencimento:</span> <span style="font-size: 16px;">{v_dia}</span>
                         </div>
                     """, unsafe_allow_html=True)
                 
-                with col_titulo:
-                    st.markdown("<div style='text-align: right; font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
-                
                 st.markdown("---") 
                 
-                # Linha de Baixo: Os três totais lado a lado
+                # Linha de Baixo: Valores
                 c_v1, c_v2, c_v3 = st.columns(3)
                 with c_v1:
                     st.metric("Total à Vista", f"R$ {total_avista:,.2f}")
@@ -975,6 +979,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela de cartões: {e}")
+
 
 
 
