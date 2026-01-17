@@ -794,9 +794,9 @@ if selecionado == "Visualizar Lançamentos":
                     if isinstance(val, (pd.Timestamp, datetime.date)):
                         dia = str(val.day)
                         mes = str(val.month)
-                       return f"{dia}/{mes}"
-                   return str(val)
-                
+                        return f"{dia}/{mes}"
+                    return str(val)
+                                
                 df_geral['Parcela'] = df_geral['Parcela'].apply(limpar_parcela)
 
             # --- 3. CONFIGURAÇÃO DE LARGURA E FORMATO ---
@@ -832,6 +832,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
