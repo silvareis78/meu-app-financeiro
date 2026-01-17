@@ -883,7 +883,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (LAYOUT ALINHADO E BARRA PERSONALIZADA) ---
+# --- 12. TELA DE CARTÕES (LAYOUT ALINHADO E FONTE DO LIMITE AMPLIADA) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -915,7 +915,7 @@ if selecionado == "Cartões":
             df_detalhes = pd.DataFrame(df_config['Detalhes_Pagamento'].apply(extrair_json).tolist())
             df_cartoes = df_detalhes[df_detalhes['tipo'] == 'Cartão de Crédito']
 
-            # --- LINHA SUPERIOR: FILTROS E META (ALINHADOS) ---
+            # --- LINHA SUPERIOR: FILTROS E META (ALINHAMENTO DE ALTURA) ---
             col_esq, col_dir = st.columns(2)
 
             with col_esq:
@@ -934,7 +934,7 @@ if selecionado == "Cartões":
                     with c2:
                         tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
 
-            # Processamento de dados para a Meta
+            # Dados da Meta
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
             total_fatura = df_fatura['Valor'].sum()
@@ -946,18 +946,24 @@ if selecionado == "Cartões":
                     
                     if limite_fixo > 0:
                         percentual = min((total_fatura / limite_fixo) * 100, 100.0)
-                        cor_barra = "#2e7d32" if percentual < 80 else "#d32f2f" # Verde ou Vermelho se > 80%
+                        cor_barra = "#2e7d32" if percentual < 85 else "#d32f2f"
                         
-                        st.markdown(f"**Limite:** R$ {limite_fixo:,.2f} | **Gasto:** R$ {total_fatura:,.2f}")
-                        
-                        # BARRA PERSONALIZADA (MAIS GROSSA E COM ESCALA)
+                        # Fonte ampliada para o limite e remoção do texto "Gasto"
                         st.markdown(f"""
-                            <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 25px; margin-top: 10px;">
-                                <div style="width: {percentual}%; background-color: {cor_barra}; height: 25px; border-radius: 10px; text-align: center; color: white; font-size: 14px; font-weight: bold; line-height: 25px;">
+                            <div style="margin-bottom: 5px;">
+                                <span style="font-size: 16px; font-weight: bold;">Limite:</span> 
+                                <span style="font-size: 24px; font-weight: bold; color: #1E88E5;">R$ {limite_fixo:,.2f}</span>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # BARRA PERSONALIZADA COM ESCALA
+                        st.markdown(f"""
+                            <div style="width: 100%; background-color: #e0e0e0; border-radius: 8px; height: 28px;">
+                                <div style="width: {percentual}%; background-color: {cor_barra}; height: 28px; border-radius: 8px; text-align: center; color: white; font-size: 14px; font-weight: bold; line-height: 28px;">
                                     {percentual:.1f}%
                                 </div>
                             </div>
-                            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; padding: 2px 5px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; padding: 2px 5px; color: #555;">
                                 <span>0%</span>
                                 <span>50%</span>
                                 <span>100%</span>
@@ -966,15 +972,16 @@ if selecionado == "Cartões":
                         
                         disponivel = limite_fixo - total_fatura
                         if disponivel < 0:
-                            st.warning(f"⚠️ Excedido em R$ {abs(disponivel):,.2f}")
+                            st.markdown(f"<span style='color: #d32f2f; font-size: 14px; font-weight: bold;'>⚠️ Excedido: R$ {abs(disponivel):,.2f}</span>", unsafe_allow_html=True)
                         else:
-                            st.success(f"✅ Disponível: R$ {disponivel:,.2f}")
+                            st.markdown(f"<span style='color: #2e7d32; font-size: 14px; font-weight: bold;'>✅ Disponível: R$ {disponivel:,.2f}</span>", unsafe_allow_html=True)
                     else:
-                        st.info("💡 Limite não configurado para este cartão.")
+                        st.info("💡 Limite não configurado.")
+                        st.write("") # Espaçadores para equilibrar altura
                         st.write("")
-                        st.write("") # Espaçadores para manter a altura
+                        st.write("")
 
-            # --- CÁLCULOS DOS TOTAIS E EXIBIÇÃO ---
+            # --- PROCESSAMENTO DOS TOTAIS E EXIBIÇÃO ---
             df_fatura = df_fatura.sort_values(by='Vencimento', ascending=True)
             mask_parcelado = df_fatura['Parcela'].str.contains('/', na=False)
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
@@ -1011,6 +1018,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
