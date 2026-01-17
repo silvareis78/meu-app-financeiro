@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (FILTROS E RESULTADOS SEPARADOS) ---
+# --- 12. TELA DE CARTÕES (TRÊS QUADROS PADRONIZADOS) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -889,11 +889,12 @@ if selecionado == "Cartões":
 
     try:
         import json
+        # Lendo os Dados e a aba Config
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
         df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Config') 
 
         if not df_config.empty and 'Detalhes_Pagamento' in df_config.columns:
-            # Extração dos dados JSON
+            # Extração dos dados JSON da aba Config
             def extrair_json(x):
                 try: return json.loads(x.replace("'", '"'))
                 except: return {}
@@ -913,12 +914,12 @@ if selecionado == "Cartões":
                     meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
                     mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
 
-            # Cálculos dos Dados
+            # Cálculos dos Dados para o Resumo
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
             total_fatura = df_fatura['Valor'].sum()
 
-            # --- QUADRO 2: RESULTADOS ---
+            # --- QUADRO 2: RESULTADOS (RESUMO) ---
             with st.container(border=True):
                 st.markdown("📊 **Resumo da Fatura**")
                 col_res1, col_res2, col_res3 = st.columns(3)
@@ -929,34 +930,39 @@ if selecionado == "Cartões":
                 with col_res3:
                     st.metric("Vencimento", f"Dia {info.get('vencimento', '?')}")
 
-            # --- TABELA DE DETALHES ---
-            st.markdown("### 📝 Itens da Fatura")
-            if not df_fatura.empty:
-                df_fatura['Venc_View'] = df_fatura['Vencimento'].dt.date
-                df_fatura['Valor_Formatado'] = df_fatura['Valor'].apply(lambda x: f"R$ {x:,.2f}")
+            # --- QUADRO 3: ITENS DA FATURA (TABELA DENTRO DO QUADRO) ---
+            with st.container(border=True):
+                st.markdown("📝 **Itens da Fatura**")
+                
+                if not df_fatura.empty:
+                    # Preparando dados para visualização
+                    df_fatura['Venc_View'] = df_fatura['Vencimento'].dt.date
+                    df_fatura['Valor_Formatado'] = df_fatura['Valor'].apply(lambda x: f"R$ {x:,.2f}")
 
-                config_v = {
-                    "Venc_View": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=100),
-                    "Descrição": st.column_config.TextColumn("Descrição", width=350),
-                    "Valor_Formatado": st.column_config.TextColumn("Valor", width=120),
-                    "Parcela": st.column_config.TextColumn("Parc.", width=70),
-                    "Status": st.column_config.TextColumn("Status", width=110)
-                }
+                    config_v = {
+                        "Venc_View": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=100),
+                        "Descrição": st.column_config.TextColumn("Descrição", width=300),
+                        "Valor_Formatado": st.column_config.TextColumn("Valor", width=120),
+                        "Parcela": st.column_config.TextColumn("Parcela.", width=70),
+                        "Status": st.column_config.TextColumn("Status", width=110)
+                    }
 
-                st.dataframe(
-                    df_fatura[["Venc_View", "Descrição", "Valor_Formatado", "Parcela", "Status"]],
-                    use_container_width=True,
-                    hide_index=True,
-                    column_config=config_v,
-                    height=450
-                )
-            else:
-                st.info(f"Nenhum lançamento para {cartao_sel} em {mes_sel}.")
+                    st.dataframe(
+                        df_fatura[["Venc_View", "Descrição", "Valor_Formatado", "Parcela", "Status"]],
+                        use_container_width=True,
+                        hide_index=True,
+                        column_config=config_v,
+                        height=400 # Altura fixa para manter o quadro elegante
+                    )
+                else:
+                    st.info(f"Nenhum lançamento encontrado para {cartao_sel} em {mes_sel}.")
+
         else:
-            st.warning("Aba 'Config' ou coluna 'Detalhes_Pagamento' não localizada.")
+            st.warning("Verifique a aba 'Config' ou a coluna 'Detalhes_Pagamento'.")
 
     except Exception as e:
-        st.error(f"Erro ao carregar a tela: {e}")
+        st.error(f"Erro ao carregar a tela de cartões: {e}")
+
 
 
 
