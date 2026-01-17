@@ -773,36 +773,45 @@ if selecionado == "Visualizar Lançamentos":
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
     try:
+        # Lendo a planilha (forçamos a coluna Parcela a ser lida como texto se possível)
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
 
         if not df_geral.empty:
-            # --- FORMATAÇÃO DAS DATAS ---
+            # --- 1. FORMATAÇÃO DAS DATAS REAIS ---
             if 'Data Compra' in df_geral.columns:
-                df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra']).dt.date
+                df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra'], errors='coerce').dt.date
             if 'Vencimento' in df_geral.columns:
-                df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento']).dt.date
+                df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce').dt.date
 
-            # --- TRATAMENTO DA COLUNA PARCELA ---
+            # --- 2. TRATAMENTO AGRESSIVO DA COLUNA PARCELA ---
             if 'Parcela' in df_geral.columns:
-                df_geral['Parcela'] = df_geral['Parcela'].astype(str).replace(['nan', 'None', 'none'], '')
-                df_geral['Parcela'] = df_geral['Parcela'].apply(lambda x: x.split(' ')[0] if '00:00:00' in x else x)
+                # Primeiro: Se houver datas falsas (como 2026-01-05), pegamos só o que importa
+                # Se o valor for uma data, tentamos converter para o formato dia/mês (que seria sua parcela)
+                def limpar_parcela(val):
+                    if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none']:
+                        return ""
+                    # Se o pandas converteu 1/05 para data, ele vira um objeto datetime
+                    if isinstance(val, (pd.Timestamp, datetime.date)):
+                        return val.strftime('%d/%m').lstrip('0') # Transforma 01/05 em 1/05
+                    return str(val)
 
-            # --- AJUSTE DE LARGURA DAS COLUNAS (width) ---
-            # "small" = pequena, "medium" = média, "large" = grande, ou use números (ex: 100)
+                df_geral['Parcela'] = df_geral['Parcela'].apply(limpar_parcela)
+
+            # --- 3. CONFIGURAÇÃO DE LARGURA E FORMATO ---
             config_datas = {
                 "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width="small"),
                 "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width="small"),
                 "Descrição": st.column_config.TextColumn("Descrição", width="large"),
                 "Categoria": st.column_config.TextColumn("Categoria", width="medium"),
                 "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width="small"),
-                "Parcela": st.column_config.TextColumn("Parcela", width="small"),
+                "Parcela": st.column_config.TextColumn("Parcela", width="small"), # Agora é texto puro
                 "Tipo": st.column_config.TextColumn("Tipo", width="small"),
                 "Status": st.column_config.TextColumn("Status", width="small")
             }
 
             tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
-            # Separando por Tipo
+            # Separando por Tipo conforme sua planilha
             df_receitas = df_geral[df_geral['Tipo'] == 'Receita'].copy()
             df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
