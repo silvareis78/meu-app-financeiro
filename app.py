@@ -702,7 +702,7 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # MELHORIA: CSS para forçar o botão a ser VERDE (Independente do tema)
+    # MELHORIA: CSS para forçar o botão a ser VERDE (Sem mudar a estrutura do código)
     st.markdown("""
         <style>
         button[kind="primary"] {
@@ -711,6 +711,10 @@ if selecionado == "Cadastros Iniciais":
         }
         </style>
     """, unsafe_allow_html=True)
+
+    # Inicializa IDs para as chaves dos popovers se não existirem
+    if 'pop_id_d' not in st.session_state: st.session_state.pop_id_d = 0
+    if 'pop_id_r' not in st.session_state: st.session_state.pop_id_r = 0
 
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
@@ -724,9 +728,10 @@ if selecionado == "Cadastros Iniciais":
         st.markdown("### 🔴 Categoria Despesa")
         
         # O Popover cria um menu flutuante para não ocupar espaço na tela
-        with st.popover("➕ Inserir Categoria", use_container_width=True):
+        # MELHORIA: Key dinâmica para forçar o fechamento
+        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{st.session_state.pop_id_d}"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            # MELHORIA: type="primary" e lógica de fechamento forçado
+            # MELHORIA: type="primary" para cor verde
             if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     # Adiciona à lista temporária
@@ -734,7 +739,9 @@ if selecionado == "Cadastros Iniciais":
                     # SALVAMENTO NA NUVEM: Envia a nova lista para o Google Sheets (Aba Config)
                     salvar_configuracoes_nuvem() 
                     st.toast(f"✅ Categoria '{n_cat}' cadastrada!")
-                    st.rerun() # MELHORIA: O rerun agora fechará o popover devido ao toast/css
+                    # MELHORIA: Muda a key para fechar o popover
+                    st.session_state.pop_id_d += 1
+                    st.rerun() # Atualiza a tela para o botão da categoria aparecer
         
         st.write("") # Pequeno espaço vertical
         # CRIAÇÃO AUTOMÁTICA DE BOTÕES: Para cada categoria na lista, cria um botão
@@ -747,9 +754,10 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        with st.popover("💰 Inserir Fonte", use_container_width=True):
+        # MELHORIA: Key dinâmica para forçar o fechamento
+        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{st.session_state.pop_id_r}"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            # MELHORIA: type="primary" e lógica de fechamento forçado
+            # MELHORIA: type="primary" para cor verde
             if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
                 # Garante que a lista de receitas exista antes de adicionar
                 if 'categorias_receita' not in st.session_state:
@@ -760,7 +768,9 @@ if selecionado == "Cadastros Iniciais":
                     # SINCRONIZA COM GOOGLE: Salva a nova fonte na aba Config
                     salvar_configuracoes_nuvem()
                     st.toast(f"✅ Fonte '{n_rec}' cadastrada!")
-                    st.rerun() # MELHORIA: O rerun agora fechará o popover
+                    # MELHORIA: Muda a key para fechar o popover
+                    st.session_state.pop_id_r += 1
+                    st.rerun()
         
         st.write("") 
         # Mostra os botões de Receita (apenas se a lista existir)
@@ -783,6 +793,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
