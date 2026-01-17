@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (LAYOUT COM QUADROS LADO A LADO) ---
+# --- 12. TELA DE CARTÕES (CORREÇÃO DE PARCELAS E LAYOUT) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -891,6 +891,12 @@ if selecionado == "Cartões":
         import json
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
         df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Config') 
+
+        # --- TRATAMENTO DA COLUNA PARCELA ---
+        # 1. Converte para string, remove o '.0' se houver e trata nulos
+        df_geral['Parcela'] = df_geral['Parcela'].astype(str).replace(['nan', 'None', 'none'], '')
+        # 2. Se o pandas leu como float (ex: 1.0), removemos o .0
+        df_geral['Parcela'] = df_geral['Parcela'].apply(lambda x: x.split('.')[0] if '.' in x and x.split('.')[1] == '0' else x)
 
         if not df_config.empty and 'Detalhes_Pagamento' in df_config.columns:
             def extrair_json(x):
@@ -903,12 +909,9 @@ if selecionado == "Cartões":
             # --- LINHA SUPERIOR: DOIS QUADROS LADO A LADO ---
             col_esq, col_dir = st.columns(2)
 
-            # QUADRO 1 (ESQUERDA): FILTROS DE BUSCA
             with col_esq:
                 with st.container(border=True):
                     st.markdown("🔍 **Filtros de Busca**")
-                    
-                    # Organizando os 3 inputs de forma compacta dentro do quadro
                     cartao_sel = st.selectbox("Escolha o Cartão:", sorted(df_cartoes['nome'].unique()))
                     
                     c1, c2 = st.columns(2)
@@ -919,29 +922,26 @@ if selecionado == "Cartões":
                         mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
                     with c2:
                         tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
-                    
-                    # Espaçador para garantir que os quadros fiquem com altura similar se o da direita for maior
-                    st.write("") 
 
-            # QUADRO 2 (DIREITA): ESPAÇO PARA SEU NOVO QUADRO
             with col_dir:
                 with st.container(border=True):
                     st.markdown("📌 **Novo Quadro**")
                     st.info("Espaço reservado para o seu novo conteúdo.")
-                    # Você pode inserir aqui os componentes do seu próximo quadro
-                    st.write("Os dois quadros possuem o mesmo tamanho de largura.")
+                    st.write("")
                     st.write("")
 
             # --- PROCESSAMENTO DOS DADOS ---
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
             
-            mask_parcelado = df_fatura['Parcela'].astype(str).str.contains('/', na=False) & (df_fatura['Parcela'] != '1/1')
+            # Lógica para identificar parcelados (contém '/' e não é vazio)
+            mask_parcelado = df_fatura['Parcela'].str.contains('/', na=False)
             
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
             total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
             total_fatura = df_fatura['Valor'].sum()
 
+            # Filtro da Tabela
             if tipo_compra == "À Vista":
                 df_exibir = df_fatura[~mask_parcelado]
             elif tipo_compra == "Parcelado":
@@ -952,7 +952,7 @@ if selecionado == "Cartões":
             f_dia = int(info.get('fechamento', 0)) if str(info.get('fechamento')).replace('.','').isdigit() else '?'
             v_dia = int(info.get('vencimento', 0)) if str(info.get('vencimento')).replace('.','').isdigit() else '?'
 
-            # --- QUADRO RESUMO (ABAIXO DOS FILTROS) ---
+            # --- QUADRO RESUMO ---
             with st.container(border=True):
                 col_titulo, col_datas = st.columns([1, 1])
                 with col_titulo:
@@ -994,10 +994,11 @@ if selecionado == "Cartões":
                         height=400
                     )
                 else:
-                    st.info(f"Nenhum lançamento do tipo '{tipo_compra}' encontrado.")
+                    st.info(f"Nenhum lançamento encontrado.")
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
