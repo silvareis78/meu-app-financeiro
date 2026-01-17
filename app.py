@@ -770,28 +770,41 @@ if selecionado == "Visualizar Lançamentos":
     st.markdown("## 📊 Histórico de Lançamentos")
     st.markdown("---")
 
-    # Link da sua planilha que você me passou
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
     try:
-        # Lendo diretamente do Google Sheets através do link de exportação
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
 
         if not df_geral.empty:
-            # Separando por Tipo conforme vi na sua planilha (Receita, Fixa, Variável)
+            # --- FORMATAÇÃO DAS DATAS ---
+            # Converte para datetime e depois para o formato brasileiro DD/MM/AAAA
+            if 'Data Compra' in df_geral.columns:
+                df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra']).dt.date
+            
+            if 'Vencimento' in df_geral.columns:
+                df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento']).dt.date
+
+            # Separando por Tipo
             df_receitas = df_geral[df_geral['Tipo'] == 'Receita'].copy()
             df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
             tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
+            # Configuração de colunas para o Streamlit forçar o formato de data
+            config_datas = {
+                "Data Compra": st.column_config.DateColumn("Data Compra", format="DD/MM/YYYY"),
+                "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY"),
+                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")
+            }
+
             with tab1:
                 st.subheader("Todos os Lançamentos")
-                st.dataframe(df_geral, use_container_width=True, hide_index=True)
+                st.dataframe(df_geral, use_container_width=True, hide_index=True, column_config=config_datas)
 
             with tab2:
                 st.subheader("🔴 Lista de Despesas")
                 if not df_despesas.empty:
-                    st.dataframe(df_despesas, use_container_width=True, hide_index=True)
+                    st.dataframe(df_despesas, use_container_width=True, hide_index=True, column_config=config_datas)
                     st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
                 else:
                     st.info("Nenhuma despesa encontrada.")
@@ -799,16 +812,13 @@ if selecionado == "Visualizar Lançamentos":
             with tab3:
                 st.subheader("🟢 Lista de Receitas")
                 if not df_receitas.empty:
-                    st.dataframe(df_receitas, use_container_width=True, hide_index=True)
+                    st.dataframe(df_receitas, use_container_width=True, hide_index=True, column_config=config_datas)
                     st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
                 else:
                     st.info("Nenhuma receita encontrada.")
-        else:
-            st.warning("A aba 'Dados' parece estar vazia.")
 
     except Exception as e:
-        st.error(f"Erro ao acessar a planilha online: {e}")
-        st.info("Dica: Verifique se a planilha está compartilhada como 'Qualquer pessoa com o link' para o App conseguir ler.")
+        st.error(f"Erro ao processar as datas: {e}")
 
 
 
