@@ -777,17 +777,6 @@ if selecionado == "Cadastros Iniciais":
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW) ---
 
 if selecionado == "Visualizar Lançamentos":
-    # --- TRUQUE CSS PARA COLORIR O CABEÇALHO ---
-    st.markdown("""
-        <style>
-            /* Alvos: Títulos das colunas da tabela */
-            div[data-testid="stDataFrame"] th {
-                background-color: #004A8D !important; /* Cor Azul Escuro */
-                color: white !important;              /* Texto Branco */
-            }
-        </style>
-    """, unsafe_allow_html=True)
-
     st.markdown("## 📊 Histórico de Lançamentos")
     st.markdown("---")
 
@@ -799,38 +788,60 @@ if selecionado == "Visualizar Lançamentos":
 
         if not df_geral.empty:
             # --- 1. FORMATAÇÃO DAS DATAS ---
-            if 'Data Compra' in df_geral.columns:
-                df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra'], errors='coerce').dt.date
-            if 'Vencimento' in df_geral.columns:
-                df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce').dt.date
+            # Convertendo para datetime primeiro para permitir filtros de data
+            df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra'], errors='coerce')
+            df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
+
+            # --- IMPLEMENTAÇÃO DOS FILTROS (CAIXAS DE COMBINAÇÃO) ---
+            st.markdown("### 🔍 Filtros")
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                # Filtro por Mês (Baseado no Vencimento)
+                df_geral['Mes_Filtro'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
+                meses = sorted(df_geral['Mes_Filtro'].dropna().unique())
+                mes_sel = st.selectbox("Mês de Vencimento:", ["Todos"] + meses)
+            
+            with col2:
+                # Filtro por Categoria
+                categorias = sorted(df_geral['Categoria'].dropna().unique())
+                cat_sel = st.selectbox("Categoria:", ["Todas"] + categorias)
+                
+            with col3:
+                # Filtro por Pagamento
+                pagamentos = sorted(df_geral['Pagamento'].dropna().unique())
+                pag_sel = st.selectbox("Forma de Pagamento:", ["Todos"] + pagamentos)
+
+            # Aplicando a lógica de filtragem
+            df_display = df_geral.copy()
+            if mes_sel != "Todos":
+                df_display = df_display[df_display['Mes_Filtro'] == mes_sel]
+            if cat_sel != "Todas":
+                df_display = df_display[df_display['Categoria'] == cat_sel]
+            if pag_sel != "Todos":
+                df_display = df_display[df_display['Pagamento'] == pag_sel]
+
+            # Voltando as colunas para o formato de exibição (date) após filtrar
+            df_display['Data Compra'] = df_display['Data Compra'].dt.date
+            df_display['Vencimento'] = df_display['Vencimento'].dt.date
 
             # --- 2. TRATAMENTO DA PARCELA (PARA ELIMINAR O 'NONE') ---
-            if 'Parcela' in df_geral.columns:
+            if 'Parcela' in df_display.columns:
                 def limpar_parcela(row):
-                    # Se for Receita, fica vazio
                     if str(row.get('Tipo', '')).lower() == 'receita':
                         return ""
-                    
                     val = row['Parcela']
-                    
-                    # Verifica se é nulo, se é a string 'None', 'nan' ou 'NaT'
                     if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none', '']:
                         return ""
-                    
-                    # Se o pandas converter 1/1 para data, formatamos como 1/1
                     if isinstance(val, (pd.Timestamp, datetime.date)):
                         return f"{val.day}/{val.month}"
-                    
-                    # Caso seja um valor "None" que veio como string da planilha
                     if str(val).strip() == "None":
                         return ""
-                        
                     return str(val)
                 
-                # Aplica a regra linha por linha
-                df_geral['Parcela'] = df_geral.apply(limpar_parcela, axis=1)
+                df_display['Parcela'] = df_display.apply(limpar_parcela, axis=1)
                 
-            # --- 3. CONFIGURAÇÃO DE LARGURA E COLUNAS (INCLUINDO PAGAMENTO) ---
+            # --- 3. CONFIGURAÇÃO DE LARGURA E COLUNAS ---
             config_datas = {
                 "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=90),
                 "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=90),
@@ -838,32 +849,36 @@ if selecionado == "Visualizar Lançamentos":
                 "Categoria": st.column_config.TextColumn("Categoria", width=120),
                 "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
                 "Parcela": st.column_config.TextColumn("Parcela", width=65),
-                "Pagamento": st.column_config.TextColumn("Pagamento", width=20), 
+                "Pagamento": st.column_config.TextColumn("Pagamento", width=150), # Ajustei de 20 para 150 para ser visível
                 "Tipo": st.column_config.TextColumn("Tipo", width=70),
                 "Status": st.column_config.TextColumn("Status", width=100)
             }
 
             tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
-            # Separando por Tipo conforme sua planilha
-            df_receitas = df_geral[df_geral['Tipo'] == 'Receita'].copy()
-            df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
+            # Filtros específicos das abas sobre o DataFrame já filtrado
+            df_receitas = df_display[df_display['Tipo'] == 'Receita'].copy()
+            df_despesas = df_display[df_display['Tipo'].isin(['Fixa', 'Variável'])].copy()
+
+            # Removendo coluna auxiliar de filtro antes de exibir
+            cols_exibir = [c for c in df_display.columns if c != 'Mes_Filtro']
 
             with tab1:
-                st.dataframe(df_geral, use_container_width=False, hide_index=True, column_config=config_datas)
+                st.dataframe(df_display[cols_exibir], use_container_width=False, hide_index=True, column_config=config_datas, height=600)
 
             with tab2:
                 if not df_despesas.empty:
-                    st.dataframe(df_despesas, use_container_width=False, hide_index=True, column_config=config_datas)
+                    st.dataframe(df_despesas[cols_exibir], use_container_width=False, hide_index=True, column_config=config_datas, height=600)
                     st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
 
             with tab3:
                 if not df_receitas.empty:
-                    st.dataframe(df_receitas, use_container_width=False, hide_index=True, column_config=config_datas)
+                    st.dataframe(df_receitas[cols_exibir], use_container_width=False, hide_index=True, column_config=config_datas, height=600)
                     st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
