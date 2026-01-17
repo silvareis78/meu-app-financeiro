@@ -715,23 +715,17 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (CORREÇÃO DO SCROLL) ---
+# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
 if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
     
-    # CSS aprimorado para garantir que a barra de rolagem apareça
+    # CSS para forçar a barra de rolagem a ser tratada corretamente pelo navegador
     st.markdown("""
         <style>
-            .caixa-rolagem {
-                max-height: 100px;
-                overflow-y: auto;
-                overflow-x: hidden;
-                padding: 10px;
-                border: 1px solid #f0f2f6;
-                border-radius: 5px;
-                background-color: #fafafa;
+            [data-testid="stVerticalBlock"] > div:has(div.stVerticalBlockBorder) > div {
+                overflow-y: auto !important;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -754,9 +748,8 @@ if selecionado == "Cadastros Iniciais":
             
             st.markdown("---")
             
-            # Criamos uma área de rolagem usando um sub-container do Streamlit
-            # Se o conteúdo passar de 400px, o Streamlit adicionará o scroll automaticamente se usarmos o height
-            with st.container(height=400, border=False):
+            # Usando height para forçar o scroll nativo do Streamlit
+            with st.container(height=250, border=False):
                 for i, cat in enumerate(st.session_state.categorias):
                     c_item, c_del = st.columns([0.8, 0.2])
                     with c_item:
@@ -778,7 +771,7 @@ if selecionado == "Cadastros Iniciais":
                 if st.button("Salvar", key="btn_save_rec", use_container_width=True):
                     if 'categorias_receita' not in st.session_state:
                         st.session_state.categorias_receita = []
-                    if n_rec and n_rec not in st.session_state.categorias_receita:
+                    if n_rec and n_rec not in st.session_state.categorias_rece_ita:
                         st.session_state.categorias_receita.append(n_rec)
                         salvar_configuracoes_nuvem()
                         st.success(f"Fonte '{n_rec}' cadastrada!")
@@ -786,7 +779,7 @@ if selecionado == "Cadastros Iniciais":
             
             st.markdown("---")
             
-            with st.container(height=400, border=False):
+            with st.container(height=250, border=False):
                 if 'categorias_receita' in st.session_state:
                     for i, cat_r in enumerate(st.session_state.categorias_receita):
                         c_item_r, c_del_r = st.columns([0.8, 0.2])
@@ -809,7 +802,7 @@ if selecionado == "Cadastros Iniciais":
             
             st.markdown("---")
             
-            with st.container(height=400, border=False):
+            with st.container(height=250, border=False):
                 if 'formas_pagamento' in st.session_state:
                     for i, f in enumerate(st.session_state.formas_pagamento):
                         c_item_f, c_del_f = st.columns([0.8, 0.2])
@@ -1062,6 +1055,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
