@@ -777,48 +777,51 @@ if selecionado == "Visualizar Lançamentos":
 
         if not df_geral.empty:
             # --- FORMATAÇÃO DAS DATAS ---
-            # Converte para datetime e depois para o formato brasileiro DD/MM/AAAA
             if 'Data Compra' in df_geral.columns:
                 df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra']).dt.date
-            
             if 'Vencimento' in df_geral.columns:
                 df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento']).dt.date
+
+            # --- TRATAMENTO DA COLUNA PARCELA ---
+            if 'Parcela' in df_geral.columns:
+                df_geral['Parcela'] = df_geral['Parcela'].astype(str).replace(['nan', 'None', 'none'], '')
+                df_geral['Parcela'] = df_geral['Parcela'].apply(lambda x: x.split(' ')[0] if '00:00:00' in x else x)
+
+            # --- AJUSTE DE LARGURA DAS COLUNAS (width) ---
+            # "small" = pequena, "medium" = média, "large" = grande, ou use números (ex: 100)
+            config_datas = {
+                "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width="small"),
+                "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width="small"),
+                "Descrição": st.column_config.TextColumn("Descrição", width="large"),
+                "Categoria": st.column_config.TextColumn("Categoria", width="medium"),
+                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width="small"),
+                "Parcela": st.column_config.TextColumn("Parcela", width="small"),
+                "Tipo": st.column_config.TextColumn("Tipo", width="small"),
+                "Status": st.column_config.TextColumn("Status", width="small")
+            }
+
+            tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
             # Separando por Tipo
             df_receitas = df_geral[df_geral['Tipo'] == 'Receita'].copy()
             df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
-            tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
-
-            # Configuração de colunas para o Streamlit forçar o formato de data
-            config_datas = {
-                "Data Compra": st.column_config.DateColumn("Data Compra", format="DD/MM/YYYY"),
-                "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY"),
-                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f")
-            }
-
             with tab1:
-                st.subheader("Todos os Lançamentos")
                 st.dataframe(df_geral, use_container_width=True, hide_index=True, column_config=config_datas)
 
             with tab2:
-                st.subheader("🔴 Lista de Despesas")
                 if not df_despesas.empty:
                     st.dataframe(df_despesas, use_container_width=True, hide_index=True, column_config=config_datas)
                     st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
-                else:
-                    st.info("Nenhuma despesa encontrada.")
 
             with tab3:
-                st.subheader("🟢 Lista de Receitas")
                 if not df_receitas.empty:
                     st.dataframe(df_receitas, use_container_width=True, hide_index=True, column_config=config_datas)
                     st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
-                else:
-                    st.info("Nenhuma receita encontrada.")
 
     except Exception as e:
-        st.error(f"Erro ao processar as datas: {e}")
+        st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
