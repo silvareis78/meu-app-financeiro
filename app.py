@@ -792,9 +792,11 @@ if selecionado == "Visualizar Lançamentos":
                         return ""
                     # Se o pandas converteu 1/05 para data, ele vira um objeto datetime
                     if isinstance(val, (pd.Timestamp, datetime.date)):
-                        return val.strftime('%d/%m').lstrip('0') # Transforma 01/05 em 1/05
-                    return str(val)
-
+                        dia = str(val.day)
+                        mes = str(val.month)
+                       return f"{dia}/{mes}"
+                   return str(val)
+                
                 df_geral['Parcela'] = df_geral['Parcela'].apply(limpar_parcela)
 
             # --- 3. CONFIGURAÇÃO DE LARGURA E FORMATO ---
@@ -830,6 +832,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
