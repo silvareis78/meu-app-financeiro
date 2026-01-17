@@ -889,18 +889,18 @@ if selecionado == "Cartões":
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
     try:
-        # 1. Lendo os Dados e as Configurações
-        # Vou assumir que 'Formas_Pgto' é o nome da aba onde você cadastrou os nomes dos cartões
+        # 1. Lendo os Dados e a aba Config
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
-        df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Forma_Pagamento') 
+        df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Config') 
 
         if not df_config.empty:
-            # 2. Puxa os nomes que são do tipo 'Cartão de Crédito' na sua aba de configurações
-            # Ajuste o nome das colunas ('Nome' e 'Tipo') conforme sua planilha de cadastro
-            cartoes_oficiais = df_config[df_config['Tipo'].str.contains('Cartão', case=False, na=False)]['Nome'].unique()
+            # 2. Puxa os nomes da aba Config filtrando apenas o Tipo "Cartão de Crédito"
+            # Ajustado para usar 'nome' e 'tipo' em minúsculo conforme seu exemplo
+            df_cartoes = df_config[df_config['tipo'] == 'Cartão de Crédito']
+            cartoes_oficiais = sorted(df_cartoes['nome'].dropna().unique())
             
             if len(cartoes_oficiais) == 0:
-                st.warning("Nenhum cartão de crédito localizado no cadastro de Formas de Pagamento.")
+                st.warning("Nenhum cartão de crédito localizado na aba Config.")
             else:
                 # 3. Filtros na Tela
                 col1, col2 = st.columns(2)
@@ -908,22 +908,33 @@ if selecionado == "Cartões":
                     cartao_sel = st.selectbox("Escolha o Cartão:", cartoes_oficiais)
                 
                 with col2:
+                    # Garantir que Vencimento é data para extrair o mês
                     df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
                     df_geral['Mes_Venc'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
                     meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique())
                     mes_sel = st.selectbox("Mês da Fatura:", meses_disp)
 
-                # 4. Filtra a fatura
+                # 4. Pegar informações extras do cartão selecionado (Fechamento e Vencimento fixo)
+                info_cartao = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
+                dia_fechamento = info_cartao['fechamento']
+                dia_vencimento = info_cartao['vencimento']
+
+                # 5. Filtrar os lançamentos da aba 'Dados' correspondentes
                 df_fatura = df_geral[
                     (df_geral['Pagamento'] == cartao_sel) & 
                     (df_geral['Mes_Venc'] == mes_sel)
                 ].copy()
 
-                # 5. Resumo Visual
+                # 6. Resumo Visual com infos do cadastro
                 total_fatura = df_fatura['Valor'].sum()
-                st.metric(label=f"Total da Fatura - {cartao_sel}", value=f"R$ {total_fatura:,.2f}")
+                
+                c1, c2, c3 = st.columns(3)
+                c1.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
+                c2.metric("Dia de Fechamento", f"Dia {dia_fechamento}")
+                c3.metric("Dia de Vencimento", f"Dia {dia_vencimento}")
 
-                # 6. Tabela de Detalhes
+                # 7. Tabela de Detalhes
+                st.markdown("### 📝 Itens da Fatura")
                 if not df_fatura.empty:
                     df_fatura['Vencimento'] = df_fatura['Vencimento'].dt.date
                     
@@ -944,9 +955,12 @@ if selecionado == "Cartões":
                     )
                 else:
                     st.info(f"Sem gastos registrados para {cartao_sel} em {mes_sel}.")
+        else:
+            st.error("A aba 'Config' está vazia.")
 
     except Exception as e:
-        st.error(f"Erro ao carregar cartões: {e}. Verifique se a aba 'Formas_Pgto' existe.")
+        st.error(f"Erro ao carregar dados: {e}")
+
 
 
 
