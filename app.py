@@ -796,7 +796,7 @@ if selecionado == "Visualizar Lançamentos":
             
             # Criamos 5 colunas. Usaremos as 3 do meio para os filtros ficarem menores.
             # Se quiser diminuir AINDA MAIS, aumente para st.columns([1, 1, 1, 1, 1, 1])
-            vazio_esq, c1, c2, c3, vazio_dir = st.columns([0.1, 0.8, 0.8, 0.8, 4])
+            vazio_esq, c1, c2, c3, vazio_dir = st.columns([0, 0.5, 0.8, 1, 5])
             
             with c1:
                 df_geral['Mes_Filtro'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
@@ -875,6 +875,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
