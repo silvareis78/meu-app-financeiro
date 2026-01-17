@@ -404,7 +404,7 @@ def modal_lancamento_categoria(categoria_nome):
 
         btn_salvar = st.form_submit_button("✅ Salvar Lançamento", use_container_width=True)
 
-    # 3. LÓGICA DE SALVAMENTO
+    # 3. LÓGICA DE SALVAMENTO (Dentro do Modal Despesa)
     if btn_salvar:
         if not desc or valor <= 0:
             st.error("Preencha descrição e valor!")
@@ -414,15 +414,18 @@ def modal_lancamento_categoria(categoria_nome):
             detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
             lista_itens = []
             
-            # Definindo o Status automático com base na forma de pagamento
-            # Se contiver a palavra "Cartão", o status será "Não Realizado"
-            status_auto = "Não Realizado" if "Cartão" in forma_sel else "Realizado"
+            # --- NOVA LÓGICA DE STATUS ---
+            # Se for Cartão OU a categoria for Empréstimo, o status é "Não Realizado"
+            if "Cartão" in forma_sel or categoria_nome == "Empréstimo":
+                status_auto = "Não Realizado"
+            else:
+                status_auto = "Realizado"
             
             for p in range(int(parcelas)):
                 data_parc = data_l + pd.DateOffset(months=p)
                 venc = calcular_vencimento_real(data_parc.date(), detalhes)
                 
-                # Formata a parcela: 1/1, 1/2, etc. Se for 1 parcela só, fica vazio.
+                # Parcela vazia se for 1, senão 1/2, 2/2...
                 txt_parc = f"{p+1}/{int(parcelas)}" if int(parcelas) > 1 else ""
                 
                 lista_itens.append({
@@ -434,7 +437,7 @@ def modal_lancamento_categoria(categoria_nome):
                     "Tipo": tipo_desp,
                     "Valor": valor / parcelas,
                     "Pagamento": forma_sel,
-                    "Status": status_auto  # Corrigido e fechado corretamente
+                    "Status": status_auto  # Aplica o status definido acima
                 })
             
             salvar_no_google(lista_itens, aba="Dados")
@@ -774,6 +777,17 @@ if selecionado == "Cadastros Iniciais":
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW) ---
 
 if selecionado == "Visualizar Lançamentos":
+    # --- TRUQUE CSS PARA COLORIR O CABEÇALHO ---
+    st.markdown("""
+        <style>
+            /* Alvos: Títulos das colunas da tabela */
+            div[data-testid="stDataFrame"] th {
+                background-color: #004A8D !important; /* Cor Azul Escuro */
+                color: white !important;              /* Texto Branco */
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("## 📊 Histórico de Lançamentos")
     st.markdown("---")
 
@@ -820,11 +834,11 @@ if selecionado == "Visualizar Lançamentos":
             config_datas = {
                 "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=90),
                 "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=90),
-                "Descrição": st.column_config.TextColumn("Descrição", width=250),
+                "Descrição": st.column_config.TextColumn("Descrição", width=300),
                 "Categoria": st.column_config.TextColumn("Categoria", width=120),
                 "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
                 "Parcela": st.column_config.TextColumn("Parcela", width=65),
-                "Pagamento": st.column_config.TextColumn("Pagamento", width=170), 
+                "Pagamento": st.column_config.TextColumn("Pagamento", width=20), 
                 "Tipo": st.column_config.TextColumn("Tipo", width=70),
                 "Status": st.column_config.TextColumn("Status", width=100)
             }
@@ -850,6 +864,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
