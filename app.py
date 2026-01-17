@@ -715,19 +715,23 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (COM SCROLL E EXCLUSÃO) ---
+# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (CORREÇÃO DO SCROLL) ---
 
 if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
     
-    # CSS para criar a barra de rolagem interna nos containers
+    # CSS aprimorado para garantir que a barra de rolagem apareça
     st.markdown("""
         <style>
-            .scroll-container {
+            .caixa-rolagem {
                 max-height: 400px;
                 overflow-y: auto;
-                padding-right: 10px;
+                overflow-x: hidden;
+                padding: 10px;
+                border: 1px solid #f0f2f6;
+                border-radius: 5px;
+                background-color: #fafafa;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -750,19 +754,19 @@ if selecionado == "Cadastros Iniciais":
             
             st.markdown("---")
             
-            # Início da área de scroll
-            st.markdown('<div class="scroll-container">', unsafe_allow_html=True)
-            for i, cat in enumerate(st.session_state.categorias):
-                c_item, c_del = st.columns([0.8, 0.2])
-                with c_item:
-                    if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}_{i}"):
-                        modal_lancamento_categoria(cat)
-                with c_del:
-                    if st.button("🗑️", key=f"del_d_{cat}_{i}", help=f"Excluir {cat}"):
-                        st.session_state.categorias.remove(cat)
-                        salvar_configuracoes_nuvem()
-                        st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True) # Fim da área de scroll
+            # Criamos uma área de rolagem usando um sub-container do Streamlit
+            # Se o conteúdo passar de 400px, o Streamlit adicionará o scroll automaticamente se usarmos o height
+            with st.container(height=400, border=False):
+                for i, cat in enumerate(st.session_state.categorias):
+                    c_item, c_del = st.columns([0.8, 0.2])
+                    with c_item:
+                        if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}_{i}"):
+                            modal_lancamento_categoria(cat)
+                    with c_del:
+                        if st.button("🗑️", key=f"del_d_{cat}_{i}"):
+                            st.session_state.categorias.remove(cat)
+                            salvar_configuracoes_nuvem()
+                            st.rerun()
 
     # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
     with col_rec:
@@ -774,7 +778,6 @@ if selecionado == "Cadastros Iniciais":
                 if st.button("Salvar", key="btn_save_rec", use_container_width=True):
                     if 'categorias_receita' not in st.session_state:
                         st.session_state.categorias_receita = []
-                    
                     if n_rec and n_rec not in st.session_state.categorias_receita:
                         st.session_state.categorias_receita.append(n_rec)
                         salvar_configuracoes_nuvem()
@@ -783,19 +786,18 @@ if selecionado == "Cadastros Iniciais":
             
             st.markdown("---")
             
-            st.markdown('<div class="scroll-container">', unsafe_allow_html=True)
-            if 'categorias_receita' in st.session_state:
-                for i, cat_r in enumerate(st.session_state.categorias_receita):
-                    c_item_r, c_del_r = st.columns([0.8, 0.2])
-                    with c_item_r:
-                        if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}_{i}"):
-                            modal_receita_categoria(cat_r)
-                    with c_del_r:
-                        if st.button("🗑️", key=f"del_r_{cat_r}_{i}", help=f"Excluir {cat_r}"):
-                            st.session_state.categorias_receita.remove(cat_r)
-                            salvar_configuracoes_nuvem()
-                            st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container(height=400, border=False):
+                if 'categorias_receita' in st.session_state:
+                    for i, cat_r in enumerate(st.session_state.categorias_receita):
+                        c_item_r, c_del_r = st.columns([0.8, 0.2])
+                        with c_item_r:
+                            if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}_{i}"):
+                                modal_receita_categoria(cat_r)
+                        with c_del_r:
+                            if st.button("🗑️", key=f"del_r_{cat_r}_{i}"):
+                                st.session_state.categorias_receita.remove(cat_r)
+                                salvar_configuracoes_nuvem()
+                                st.rerun()
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -807,18 +809,17 @@ if selecionado == "Cadastros Iniciais":
             
             st.markdown("---")
             
-            st.markdown('<div class="scroll-container">', unsafe_allow_html=True)
-            if 'formas_pagamento' in st.session_state:
-                for i, f in enumerate(st.session_state.formas_pagamento):
-                    c_item_f, c_del_f = st.columns([0.8, 0.2])
-                    with c_item_f:
-                        st.caption(f"✅ {f['nome']}")
-                    with c_del_f:
-                        if st.button("🗑️", key=f"del_f_{f['nome']}_{i}", help=f"Remover {f['nome']}"):
-                            st.session_state.formas_pagamento.pop(i)
-                            salvar_configuracoes_nuvem()
-                            st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+            with st.container(height=400, border=False):
+                if 'formas_pagamento' in st.session_state:
+                    for i, f in enumerate(st.session_state.formas_pagamento):
+                        c_item_f, c_del_f = st.columns([0.8, 0.2])
+                        with c_item_f:
+                            st.caption(f"✅ {f['nome']}")
+                        with c_del_f:
+                            if st.button("🗑️", key=f"del_f_{f['nome']}_{i}"):
+                                st.session_state.formas_pagamento.pop(i)
+                                salvar_configuracoes_nuvem()
+                                st.rerun()
 
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW EM UM QUADRO ÚNICO) ---
 
@@ -1061,6 +1062,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
