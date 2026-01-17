@@ -773,42 +773,39 @@ if selecionado == "Visualizar Lançamentos":
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
     try:
-        # Lendo a planilha (forçamos a coluna Parcela a ser lida como texto se possível)
+        # Lendo a planilha
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
 
         if not df_geral.empty:
-            # --- 1. FORMATAÇÃO DAS DATAS REAIS ---
+            # --- 1. FORMATAÇÃO DAS DATAS ---
             if 'Data Compra' in df_geral.columns:
                 df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra'], errors='coerce').dt.date
             if 'Vencimento' in df_geral.columns:
                 df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce').dt.date
 
-            # --- 2. TRATAMENTO AGRESSIVO DA COLUNA PARCELA ---
+            # --- 2. TRATAMENTO DA PARCELA (PARA FICAR 1/1) ---
             if 'Parcela' in df_geral.columns:
-                # Primeiro: Se houver datas falsas (como 2026-01-05), pegamos só o que importa
-                # Se o valor for uma data, tentamos converter para o formato dia/mês (que seria sua parcela)
                 def limpar_parcela(val):
-                    if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none']:
+                    if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none', '']:
                         return ""
-                    # Se o pandas converteu 1/05 para data, ele vira um objeto datetime
+                    # Se o pandas converter 1/1 para data, pegamos dia e mês
                     if isinstance(val, (pd.Timestamp, datetime.date)):
-                        dia = str(val.day)
-                        mes = str(val.month)
-                        return f"{dia}/{mes}"
+                        return f"{val.day}/{val.month}"
                     return str(val)
-                                
+                
                 df_geral['Parcela'] = df_geral['Parcela'].apply(limpar_parcela)
 
-            # --- 3. CONFIGURAÇÃO DE LARGURA E FORMATO ---
+            # --- 3. CONFIGURAÇÃO DE LARGURA E COLUNAS (INCLUINDO PAGAMENTO) ---
             config_datas = {
-                "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=80),
-                "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=80),
-                "Descrição": st.column_config.TextColumn("Descrição", width=300),
-                "Categoria": st.column_config.TextColumn("Categoria", width=115),
-                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=110),
-                "Parcela": st.column_config.TextColumn("Parcela", width=60), # Agora é texto puro
+                "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=90),
+                "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=90),
+                "Descrição": st.column_config.TextColumn("Descrição", width=250),
+                "Categoria": st.column_config.TextColumn("Categoria", width=120),
+                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
+                "Parcela": st.column_config.TextColumn("Parcela", width=50),
+                "Pagamento": st.column_config.TextColumn("Pagamento", width=150), 
                 "Tipo": st.column_config.TextColumn("Tipo", width=70),
-                "Pagamento": st.column_config.TextColumn("Pagamento", width=150)
+                "Status": st.column_config.TextColumn("Status", width=100)
             }
 
             tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
@@ -832,6 +829,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
