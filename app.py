@@ -715,11 +715,22 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (VERSÃO COM QUADROS DINÂMICOS) ---
+# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (COM SCROLL E EXCLUSÃO) ---
 
 if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
+    
+    # CSS para criar a barra de rolagem interna nos containers
+    st.markdown("""
+        <style>
+            .scroll-container {
+                max-height: 400px;
+                overflow-y: auto;
+                padding-right: 10px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
     col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
 
@@ -737,12 +748,21 @@ if selecionado == "Cadastros Iniciais":
                         st.success(f"Categoria '{n_cat}' cadastrada!")
                         st.rerun() 
             
-            st.markdown("---") # Linha divisória dentro do quadro
+            st.markdown("---")
             
-            # A lista abaixo faz o quadro crescer automaticamente
-            for cat in st.session_state.categorias:
-                if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
-                    modal_lancamento_categoria(cat)
+            # Início da área de scroll
+            st.markdown('<div class="scroll-container">', unsafe_allow_html=True)
+            for i, cat in enumerate(st.session_state.categorias):
+                c_item, c_del = st.columns([0.8, 0.2])
+                with c_item:
+                    if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}_{i}"):
+                        modal_lancamento_categoria(cat)
+                with c_del:
+                    if st.button("🗑️", key=f"del_d_{cat}_{i}", help=f"Excluir {cat}"):
+                        st.session_state.categorias.remove(cat)
+                        salvar_configuracoes_nuvem()
+                        st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True) # Fim da área de scroll
 
     # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
     with col_rec:
@@ -761,33 +781,44 @@ if selecionado == "Cadastros Iniciais":
                         st.success(f"Fonte '{n_rec}' cadastrada!")
                         st.rerun() 
             
-            st.markdown("---") # Linha divisória dentro do quadro
+            st.markdown("---")
             
+            st.markdown('<div class="scroll-container">', unsafe_allow_html=True)
             if 'categorias_receita' in st.session_state:
-                for cat_r in st.session_state.categorias_receita:
-                    if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                        modal_receita_categoria(cat_r)                    
+                for i, cat_r in enumerate(st.session_state.categorias_receita):
+                    c_item_r, c_del_r = st.columns([0.8, 0.2])
+                    with c_item_r:
+                        if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}_{i}"):
+                            modal_receita_categoria(cat_r)
+                    with c_del_r:
+                        if st.button("🗑️", key=f"del_r_{cat_r}_{i}", help=f"Excluir {cat_r}"):
+                            st.session_state.categorias_receita.remove(cat_r)
+                            salvar_configuracoes_nuvem()
+                            st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
         with st.container(border=True):
             st.markdown("### 💳 Forma Pagamento")
             
-            # Este botão abre o gerenciador completo
             if st.button("⚙️ Criar Pagamento", use_container_width=True):
                 modal_forma_pagamento()
             
-            st.markdown("---") # Linha divisória dentro do quadro
+            st.markdown("---")
             
-            # A lista de nomes também fará este quadro crescer
+            st.markdown('<div class="scroll-container">', unsafe_allow_html=True)
             if 'formas_pagamento' in st.session_state:
-                for f in st.session_state.formas_pagamento:
-                    st.caption(f"✅ {f['nome']}")
-                
-                # Espaçador extra para manter o design limpo se a lista for pequena
-                if len(st.session_state.formas_pagamento) < 3:
-                    st.write("")
-
+                for i, f in enumerate(st.session_state.formas_pagamento):
+                    c_item_f, c_del_f = st.columns([0.8, 0.2])
+                    with c_item_f:
+                        st.caption(f"✅ {f['nome']}")
+                    with c_del_f:
+                        if st.button("🗑️", key=f"del_f_{f['nome']}_{i}", help=f"Remover {f['nome']}"):
+                            st.session_state.formas_pagamento.pop(i)
+                            salvar_configuracoes_nuvem()
+                            st.rerun()
+            st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW EM UM QUADRO ÚNICO) ---
 
@@ -1030,6 +1061,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
