@@ -770,46 +770,53 @@ if selecionado == "Visualizar Lançamentos":
     st.markdown("## 📊 Histórico de Lançamentos")
     st.markdown("---")
 
-    # 1. PEGANDO AS CATEGORIAS DO SEU BLOCO 10
-    # Ajustado para usar o nome exato que você tem no estado da sessão
-    cats_desp = st.session_state.get('categorias', [])  
-    cats_rec = st.session_state.get('categorias_receita', [])
+    # 1. PEGANDO AS CATEGORIAS DO SEU BLOCO 10 (Sincronizado com a aba Config da planilha)
+    cats_desp = st.session_state.get('categorias', ["Alimentação", "Compras", "Moradia", "Lazer", "Saúde"])  
+    cats_rec = st.session_state.get('categorias_receita', ["Salário", "Recebimento de PIX"])
 
     try:
-        # 2. LER A PLANILHA (Ajuste o nome se for .csv ou .xlsx)
-        df_geral = pd.read_excel('Controle Financeiro.xlsx') 
+        # 2. LER A ABA 'DADOS' DA SUA PLANILHA
+        # O sistema busca os lançamentos na aba onde estão os itens como 'Supermercado' e 'Salário'
+        df_geral = pd.read_excel('Controle Financeiro.xlsx', sheet_name='Dados') 
 
         if not df_geral.empty:
-            # 3. FILTRAGEM PELAS CATEGORIAS
-            # O código olha a coluna 'Categoria' e vê se o nome está na lista de despesas ou receitas
-            df_despesas = df_geral[df_geral['Categoria'].isin(cats_desp)].copy()
-            df_receitas = df_geral[df_geral['Categoria'].isin(cats_rec)].copy()
+            # 3. FILTRAGEM PELO CAMPO 'TIPO' (Identificado na sua planilha)
+            # Receitas são identificadas pelo tipo 'Receita'
+            df_receitas = df_geral[df_geral['Tipo'] == 'Receita'].copy()
+            
+            # Despesas são identificadas pelos tipos 'Fixa' ou 'Variável'
+            df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
             # --- EXIBIÇÃO EM ABAS ---
-            tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
+            tab1, tab2, tab3 = st.tabs(["📑 Todos", "🔴 Despesas", "🟢 Receitas"])
 
             with tab1:
-                st.subheader("Todos os Lançamentos")
+                st.subheader("Visão Geral")
                 st.dataframe(df_geral, use_container_width=True, hide_index=True)
 
             with tab2:
-                st.subheader("Lista de Despesas")
+                st.subheader("🔴 Lista de Despesas")
                 if not df_despesas.empty:
                     st.dataframe(df_despesas, use_container_width=True, hide_index=True)
+                    total_d = df_despesas['Valor'].sum()
+                    st.metric("Total de Gastos", f"R$ {total_d:,.2f}")
                 else:
-                    st.info("Nenhuma despesa encontrada com as categorias cadastradas.")
+                    st.info("Nenhuma despesa (Fixa/Variável) encontrada.")
 
             with tab3:
-                st.subheader("Lista de Receitas")
+                st.subheader("🟢 Lista de Receitas")
                 if not df_receitas.empty:
                     st.dataframe(df_receitas, use_container_width=True, hide_index=True)
+                    total_r = df_receitas['Valor'].sum()
+                    st.metric("Total de Entradas", f"R$ {total_r:,.2f}")
                 else:
-                    st.info("Nenhuma receita encontrada com as categorias cadastradas.")
+                    st.info("Nenhuma receita encontrada.")
         else:
-            st.warning("A planilha está vazia.")
+            st.warning("A aba 'Dados' está sem lançamentos.")
 
     except Exception as e:
         st.error(f"Erro ao carregar os dados: {e}")
+
 
 
 
