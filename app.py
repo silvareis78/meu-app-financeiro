@@ -702,7 +702,7 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. CSS PARA FORÇAR O BOTÃO A SER VERDE
+    # CSS PARA FORÇAR O BOTÃO PRIMARY A SER VERDE
     st.markdown("""
         <style>
         div[data-testid="stPopover"] button[kind="primary"] {
@@ -716,23 +716,27 @@ if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
     
+    # Criamos 3 colunas principais para organizar tudo verticalmente na tela
     col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
 
     # --- COLUNA 1: GESTÃO DE DESPESAS ---
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # MELHORIA: Usamos .get() diretamente na key. Se não existir, usa 0. Isso mata o erro.
-        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{st.session_state.get('f_p_d', 0)}"):
+        with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
+            
+            # Botão Salvar (Verde)
+            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
-                    # MUDAMOS A KEY AQUI -> ISSO FECHA O POPOVER NA HORA
-                    st.session_state['f_p_d'] = st.session_state.get('f_p_d', 0) + 1
-                    st.toast(f"✅ Categoria '{n_cat}' cadastrada!")
-                    st.rerun() 
+                    st.success(f"✅ '{n_cat}' salva!")
+                    st.rerun()
+            
+            # Botão Fechar (Para fechar sem salvar ou após salvar)
+            if st.button("Fechar Janela", key="btn_close_desp", use_container_width=True):
+                st.rerun()
         
         st.write("") 
         for cat in st.session_state.categorias:
@@ -743,26 +747,30 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # MELHORIA: Usamos .get() diretamente na key. Se não existir, usa 0.
-        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{st.session_state.get('f_p_r', 0)}"):
+        with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
+            
+            # Botão Salvar (Verde)
+            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True, type="primary"):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
-                    # MUDAMOS A KEY AQUI -> ISSO FECHA O POPOVER NA HORA
-                    st.session_state['f_p_r'] = st.session_state.get('f_p_r', 0) + 1
-                    st.toast(f"✅ Fonte '{n_rec}' cadastrada!")
-                    st.rerun() 
+                    st.success(f"✅ '{n_rec}' salva!")
+                    st.rerun()
+            
+            # Botão Fechar
+            if st.button("Fechar Janela", key="btn_close_rec", use_container_width=True):
+                st.rerun()
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
                     modal_receita_categoria(cat_r)
+                    
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -777,6 +785,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
