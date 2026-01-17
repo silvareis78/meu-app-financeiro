@@ -886,6 +886,9 @@ if selecionado == "Cartões":
     st.markdown("## 💳 Gestão de Cartões")
     st.markdown("---")
 
+    LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
+
+
     try:
         # Lendo os dados da planilha principal
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
@@ -939,6 +942,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar tela de cartões: {e}")
+
 
 
 
