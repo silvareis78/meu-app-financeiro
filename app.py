@@ -699,7 +699,7 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
- # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
+# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
@@ -713,7 +713,8 @@ if selecionado == "Cadastros Iniciais":
         
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
+            # Removido o type="primary" para o botão não ficar vermelho
+            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
@@ -731,7 +732,8 @@ if selecionado == "Cadastros Iniciais":
         
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
+            # Removido o type="primary" para o botão não ficar vermelho
+            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
@@ -745,7 +747,7 @@ if selecionado == "Cadastros Iniciais":
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                    modal_receita_categoria(cat_r)               
+                    modal_receita_categoria(cat_r)                
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -760,6 +762,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
