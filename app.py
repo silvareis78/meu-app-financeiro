@@ -770,52 +770,46 @@ if selecionado == "Visualizar Lançamentos":
     st.markdown("## 📊 Histórico de Lançamentos")
     st.markdown("---")
 
-    # 1. PEGANDO AS CATEGORIAS DO SEU BLOCO 10 (Sincronizado com a aba Config da planilha)
-    cats_desp = st.session_state.get('categorias', ["Alimentação", "Compras", "Moradia", "Lazer", "Saúde"])  
-    cats_rec = st.session_state.get('categorias_receita', ["Salário", "Recebimento de PIX"])
+    # Link da sua planilha que você me passou
+    LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
     try:
-        # 2. LER A ABA 'DADOS' DA SUA PLANILHA
-        # O sistema busca os lançamentos na aba onde estão os itens como 'Supermercado' e 'Salário'
-        df_geral = pd.read_excel('Controle Financeiro.xlsx', sheet_name='Dados') 
+        # Lendo diretamente do Google Sheets através do link de exportação
+        df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
 
         if not df_geral.empty:
-            # 3. FILTRAGEM PELO CAMPO 'TIPO' (Identificado na sua planilha)
-            # Receitas são identificadas pelo tipo 'Receita'
+            # Separando por Tipo conforme vi na sua planilha (Receita, Fixa, Variável)
             df_receitas = df_geral[df_geral['Tipo'] == 'Receita'].copy()
-            
-            # Despesas são identificadas pelos tipos 'Fixa' ou 'Variável'
             df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
-            # --- EXIBIÇÃO EM ABAS ---
-            tab1, tab2, tab3 = st.tabs(["📑 Todos", "🔴 Despesas", "🟢 Receitas"])
+            tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
             with tab1:
-                st.subheader("Visão Geral")
+                st.subheader("Todos os Lançamentos")
                 st.dataframe(df_geral, use_container_width=True, hide_index=True)
 
             with tab2:
                 st.subheader("🔴 Lista de Despesas")
                 if not df_despesas.empty:
                     st.dataframe(df_despesas, use_container_width=True, hide_index=True)
-                    total_d = df_despesas['Valor'].sum()
-                    st.metric("Total de Gastos", f"R$ {total_d:,.2f}")
+                    st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
                 else:
-                    st.info("Nenhuma despesa (Fixa/Variável) encontrada.")
+                    st.info("Nenhuma despesa encontrada.")
 
             with tab3:
                 st.subheader("🟢 Lista de Receitas")
                 if not df_receitas.empty:
                     st.dataframe(df_receitas, use_container_width=True, hide_index=True)
-                    total_r = df_receitas['Valor'].sum()
-                    st.metric("Total de Entradas", f"R$ {total_r:,.2f}")
+                    st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
                 else:
                     st.info("Nenhuma receita encontrada.")
         else:
-            st.warning("A aba 'Dados' está sem lançamentos.")
+            st.warning("A aba 'Dados' parece estar vazia.")
 
     except Exception as e:
-        st.error(f"Erro ao carregar os dados: {e}")
+        st.error(f"Erro ao acessar a planilha online: {e}")
+        st.info("Dica: Verifique se a planilha está compartilhada como 'Qualquer pessoa com o link' para o App conseguir ler.")
+
 
 
 
