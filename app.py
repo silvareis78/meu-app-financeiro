@@ -351,10 +351,11 @@ st.markdown("""
 def modal_lancamento_categoria(categoria_nome):
     """
     PARA QUE SERVE: Cadastrar despesas sem fechar o modal.
-    COMO FUNCIONA: Usa chaves (keys) para limpar os campos sem precisar de st.form.
+    COMO FUNCIONA: Usa um sufixo no 'key' que muda a cada salvamento, 
+    forçando o Streamlit a limpar os campos sem gerar erro de permissão.
     """
     
-    # 1. INICIALIZAÇÃO DO CONTADOR
+    # 1. INICIALIZAÇÃO DO CONTADOR (Ele servirá como nossa chave de limpeza)
     if 'cont_lanc' not in st.session_state:
         st.session_state.cont_lanc = 0
 
@@ -362,38 +363,40 @@ def modal_lancamento_categoria(categoria_nome):
     st.subheader(f"Categoria: {categoria_nome}")
     st.info(f"🔢 Lançamentos realizados agora: **{st.session_state.cont_lanc}**")
     
+    # Criamos um sufixo único para as chaves baseado no contador
+    # Quando cont_lanc aumenta, as keys mudam e os campos resetam sozinhos
+    sufixo = st.session_state.cont_lanc
+
     # 3. CAMPOS DE ENTRADA (SEM FORMULÁRIO)
-    # Importante: A descrição e o valor serão resetados manualmente
-    desc = st.text_input("Descrição da Despesa", key="input_desc_manual")
+    desc = st.text_input("Descrição da Despesa", key=f"desc_{sufixo}")
     
     c_tipo, c_parc = st.columns([2, 1])
     with c_tipo:
-        tipo_desp = st.selectbox("Tipo", ["Variável", "Fixa"], key="input_tipo_manual")
+        tipo_desp = st.selectbox("Tipo", ["Variável", "Fixa"], key=f"tipo_{sufixo}")
     with c_parc:
-        parcelas = st.number_input("Parcelas", min_value=1, value=1, key="input_parc_manual")
+        parcelas = st.number_input("Parcelas", min_value=1, value=1, key=f"parc_{sufixo}")
     
     c_val, c_pag = st.columns([2, 4])
     with c_val:
-        valor = st.number_input("Valor Total", min_value=0.0, format="%.2f", key="input_valor_manual")
+        valor = st.number_input("Valor Total", min_value=0.0, format="%.2f", key=f"val_{sufixo}")
     with c_pag:
         opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
-        forma_sel = st.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key="input_pag_manual")
+        forma_sel = st.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key=f"pag_{sufixo}")
     
-    data_l = st.date_input("Data", format="DD/MM/YYYY", key="input_data_manual")
+    data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"data_{sufixo}")
 
     st.write("---")
-    # CHECKBOX QUE VOCÊ VAI MARCAR
-    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_fluxo_cont")
+    # Checkbox para manter aberto
+    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key=f"check_{sufixo}")
 
     # 4. BOTÕES DE AÇÃO
     col_btn1, col_btn2 = st.columns(2)
     
-    # BOTÃO SALVAR
     if col_btn1.button("✅ Salvar Lançamento", use_container_width=True):
         if not desc or valor <= 0:
             st.error("Preencha a descrição e o valor!")
         else:
-            # Processamento dos dados
+            # Processamento (Igual ao anterior)
             detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
             lista_itens = []
             
@@ -413,21 +416,21 @@ def modal_lancamento_categoria(categoria_nome):
                     "Pagamento": forma_sel
                 })
             
-            # Chama a função de salvamento no Sheets
             salvar_no_google(lista_itens, aba="Dados")
-            st.session_state.cont_lanc += 1
             
+            # SE CLICOU EM MANTER ABERTO:
             if manter_aberto:
-                # LIMPANDO OS CAMPOS MANUALMENTE PARA O PRÓXIMO
-                st.session_state.input_desc_manual = ""
-                st.session_state.input_valor_manual = 0.0
-                st.toast(f"✅ {desc} salvo com sucesso!")
-                st.rerun() # Reinicia o modal, mas como a ação foi rápida, ele não fecha
+                # Aumentamos o contador. Isso muda o 'sufixo' de todas as chaves (keys).
+                # Na próxima linha (rerun), o Streamlit verá 'desc_1' em vez de 'desc_0' 
+                # e mostrará o campo vazio!
+                st.session_state.cont_lanc += 1
+                st.toast(f"✅ {desc} salvo!")
+                st.rerun() 
             else:
+                # Se não marcou, resetamos o contador e fechamos
                 st.session_state.cont_lanc = 0
-                st.rerun() # Fecha o modal
+                st.rerun()
 
-    # BOTÃO SAIR
     if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
         st.session_state.cont_lanc = 0
         st.rerun()
@@ -735,6 +738,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
