@@ -699,17 +699,15 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-   # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
+    # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # CSS PARA GARANTIR O VERDE NOS BOTÕES (Usando as chaves dos botões)
+    # CSS PARA FORÇAR O VERDE (Busca botões que contenham as palavras Salvar ou Concluir)
     st.markdown("""
         <style>
-        button[key="btn_save_desp"], button[key="btn_save_rec"],
-        button[key="btn_close_desp"], button[key="btn_close_rec"] {
+        div[data-testid="stPopover"] button {
             background-color: #28a745 !important;
             color: white !important;
-            border: none !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -723,11 +721,9 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # REMOVIDO O PARÂMETRO KEY PARA EVITAR TYPEERROR
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
-            # Botão Salvar
             if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
@@ -735,8 +731,9 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # Botão Concluir / Sair
+            # O botão Concluir limpa o texto e dá o rerun para fechar
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
+                st.session_state["new_cat_desp"] = ""
                 st.rerun()
         
         st.write("") 
@@ -748,11 +745,9 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # REMOVIDO O PARÂMETRO KEY PARA EVITAR TYPEERROR
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
-            # Botão Salvar
             if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
@@ -763,8 +758,9 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # Botão Concluir / Sair
+            # O botão Concluir limpa o texto e dá o rerun para fechar
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
+                st.session_state["new_cat_rec"] = ""
                 st.rerun()
         
         st.write("") 
@@ -786,6 +782,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
