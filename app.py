@@ -446,7 +446,7 @@ def modal_lancamento_categoria(categoria_nome):
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
 
 @st.dialog("💰 Nova Receita")
-def modal_receita(fonte_nome):
+def modal_receita_categoria(fonte_nome):
     """
     PARA QUE SERVE: Cadastro de entradas financeiras com as mesmas melhorias do modal de despesas.
     """
@@ -771,6 +771,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
