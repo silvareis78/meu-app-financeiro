@@ -635,101 +635,120 @@ def modal_forma_pagamento():
                     st.rerun()
                     
 
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (CORREÇÕES DE ALINHAMENTO E OVERFLOW) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO ALINHADA E PROFISSIONAL) ---
 
-# CSS Corretivo para Sidebar e Cards
+# CSS Corretivo para Sidebar, Cards e Alinhamento
 st.markdown("""
     <style>
-        /* 1. FORÇA ALINHAMENTO À ESQUERDA NO MENU */
+        /* 1. MENU LATERAL ALINHADO À ESQUERDA */
         [data-testid="stSidebar"] .stButton button {
             display: flex !important;
-            justify-content: flex-start !important; /* Alinha o conteúdo à esquerda */
+            justify-content: flex-start !important;
             text-align: left !important;
             width: 100% !important;
-            padding-left: 10px !important;
-            border: none !important;
+            padding-left: 15px !important;
         }
-        
-        /* Garante que o ícone e o texto fiquem juntos na esquerda */
         [data-testid="stSidebar"] .stButton button p {
             width: 100%;
             text-align: left !important;
+            font-weight: 500;
         }
 
-        /* 2. CORREÇÃO DOS CARDS PARA NÃO ULTRAPASSAR O QUADRO */
-        .card {
-            width: 100% !important;   /* Ocupa apenas o que o quadro permite */
-            box-sizing: border-box !important; /* Garante que padding não aumente o tamanho */
-            margin: 5px 0px !important; /* Remove margens laterais que empurram para fora */
-            padding: 15px !important;
-        }
-        
-        .card-vertical {
+        /* 2. AJUSTE DE CARDS (PREVENIR OVERFLOW) */
+        .card, .card-vertical {
             width: 100% !important;
             box-sizing: border-box !important;
-            margin: 5px 0px !important;
+            margin: 0px !important; 
+            padding: 15px !important;
+            border-radius: 8px;
+        }
+
+        /* 3. ESTILO PARA MENSAGEM PROFISSIONAL */
+        .status-box {
+            padding: 5px;
+            border-radius: 8px;
+        }
+        .status-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1E1E1E;
         }
     </style>
 """, unsafe_allow_html=True)
 
 # --- MENU LATERAL ---
 st.sidebar.title("MENU PRINCIPAL") 
-
 if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
     st.session_state.pagina = "Painel Inicial"
-
 if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
     st.session_state.pagina = "Cadastros Iniciais"
-
 if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
     st.session_state.pagina = "Visualizar Lançamentos"
-
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
 selecionado = st.session_state.get('pagina', "Painel Inicial")
 
-# --- TELA: PAINEL INICIAL ---
 if selecionado == "Painel Inicial":
-    st.markdown("## 🏠 Painel Inicial")
-    
-    # QUADRO 1: FILTROS
-    with st.container(border=True):
-        c_mes, c_ano, c_vazio = st.columns([1, 1, 3])
-        with c_mes:
-            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0)
-        with c_ano:
-            ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2)
+    st.markdown("## 🏠 Painel de Controle")
 
-    # QUADRO 2: RESUMO FINANCEIRO (Resolvendo o overflow)
+    # --- LINHA 1: FILTROS E MENSAGEM PROFISSIONAL (LADO A LADO) ---
+    col_esquerda, col_direita = st.columns([1, 2])
+
+    with col_esquerda:
+        with st.container(height=160, border=True):
+            st.markdown("🔍 **Período**")
+            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
+            ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
+
+    with col_direita:
+        with st.container(height=160, border=True):
+            # Lógica de cor baseada no consumo (surpresa interativa)
+            consumo = 49 # Simulação
+            cor_status = "#008080" if consumo < 70 else "#D4AF37" if consumo < 90 else "#FF4B4B"
+            
+            st.markdown(f"""
+                <div class="status-box">
+                    <div class="status-title">Desempenho de Gastos em {mes_sel}</div>
+                    <div class="status-value">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">do orçamento utilizado</span></div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.progress(consumo / 100)
+            
+            if consumo < 50:
+                st.caption("🟢 Excelente! Seu nível de gastos está abaixo da média projetada.")
+            elif consumo < 80:
+                st.caption("🟡 Atenção: Você está entrando na margem de segurança do orçamento.")
+            else:
+                st.caption("🔴 Alerta: Limite orçamentário próximo do esgotamento.")
+
+    # --- LINHA 2: RESUMO FINANCEIRO (KPIs) ---
     with st.container(border=True):
-        st.markdown("**💰 Resumo Consolidado**")
-        col_rec, col_desp, col_sal = st.columns(3)
-        
-        with col_rec:
+        st.markdown("**💰 Consolidado Mensal**")
+        c_rec, c_desp, c_sal = st.columns(3)
+        with c_rec:
             st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
-        with col_desp:
+        with c_desp:
             st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
-        with col_sal:
+        with c_sal:
             st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
 
-    # QUADRO 3: PROGRESSO
-    with st.container(border=True):
-        c_av, c_txt = st.columns([0.15, 0.85]) # Colunas bem ajustadas para o avatar
-        with c_av:
-            st.markdown('<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="50">', unsafe_allow_html=True)
-        with c_txt:
-            st.write(f"Você já utilizou **49%** do seu orçamento de {mes_sel}.")
-            st.progress(0.49)
-
-    # QUADRO 4: STATUS LADO A LADO
-    st.markdown("### 📊 Status de Pagamentos")
+    # --- LINHA 3: STATUS DETALHADO ---
+    st.markdown("### 📊 Status por Categoria")
     with st.container(border=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical card-pagar"><b>A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical card-prevista"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
         with c3:
             st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
             
@@ -1074,6 +1093,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
