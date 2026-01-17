@@ -818,20 +818,21 @@ if selecionado == "Visualizar Lançamentos":
             df_despesas = df_geral[df_geral['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
             with tab1:
-                st.dataframe(df_geral, use_container_width=True, hide_index=True, column_config=config_datas)
+                st.dataframe(df_geral, use_container_width=False, hide_index=True, column_config=config_datas)
 
             with tab2:
                 if not df_despesas.empty:
-                    st.dataframe(df_despesas, use_container_width=True, hide_index=True, column_config=config_datas)
+                    st.dataframe(df_despesas, use_container_width=False, hide_index=True, column_config=config_datas)
                     st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
 
             with tab3:
                 if not df_receitas.empty:
-                    st.dataframe(df_receitas, use_container_width=True, hide_index=True, column_config=config_datas)
+                    st.dataframe(df_receitas, use_container_width=False, hide_index=True, column_config=config_datas)
                     st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
