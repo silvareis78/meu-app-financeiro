@@ -727,7 +727,6 @@ if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
     
-    # Criamos 3 colunas principais para organizar tudo verticalmente na tela
     col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
 
     # --- COLUNA 1: GESTÃO DE DESPESAS ---
@@ -737,16 +736,16 @@ if selecionado == "Cadastros Iniciais":
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
-            # Botão Salvar (Verde)
-            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True, type="primary"):
+            # Botão Salvar
+            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
-                    st.success(f"✅ '{n_cat}' salva!")
+                    st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # Botão Fechar (Para fechar sem salvar ou após salvar)
-            if st.button("Fechar Janela", key="btn_close_desp", use_container_width=True):
+            # Botão Fechar em Verde
+            if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
                 st.rerun()
         
         st.write("") 
@@ -761,19 +760,19 @@ if selecionado == "Cadastros Iniciais":
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
-            # Botão Salvar (Verde)
-            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True, type="primary"):
+            # Botão Salvar
+            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
-                    st.success(f"✅ '{n_rec}' salva!")
+                    st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # Botão Fechar
-            if st.button("Fechar Janela", key="btn_close_rec", use_container_width=True):
+            # Botão Fechar em Verde
+            if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
                 st.rerun()
         
         st.write("") 
@@ -796,6 +795,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
