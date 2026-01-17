@@ -715,7 +715,7 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
+# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (VERSÃO COM QUADROS DINÂMICOS) ---
 
 if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
@@ -725,59 +725,68 @@ if selecionado == "Cadastros Iniciais":
 
     # --- COLUNA 1: GESTÃO DE DESPESAS ---
     with col_desp:
-        st.markdown("### 🔻 Categoria Despesa")
-        
-        with st.popover("➕ Inserir Categoria", use_container_width=True):
-            n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            # Removido o type="primary" para o botão não ficar vermelho
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
-                if n_cat and n_cat not in st.session_state.categorias:
-                    st.session_state.categorias.append(n_cat)
-                    salvar_configuracoes_nuvem() 
-                    st.success(f"Categoria '{n_cat}' cadastrada!")
-                    st.rerun() 
-        
-        st.write("") 
-        for cat in st.session_state.categorias:
-            if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
-                modal_lancamento_categoria(cat)
+        with st.container(border=True):
+            st.markdown("### 🔻 Categoria Despesa")
+            
+            with st.popover("➕ Inserir Categoria", use_container_width=True):
+                n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
+                if st.button("Salvar", key="btn_save_desp", use_container_width=True):
+                    if n_cat and n_cat not in st.session_state.categorias:
+                        st.session_state.categorias.append(n_cat)
+                        salvar_configuracoes_nuvem() 
+                        st.success(f"Categoria '{n_cat}' cadastrada!")
+                        st.rerun() 
+            
+            st.markdown("---") # Linha divisória dentro do quadro
+            
+            # A lista abaixo faz o quadro crescer automaticamente
+            for cat in st.session_state.categorias:
+                if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
+                    modal_lancamento_categoria(cat)
 
     # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
     with col_rec:
-        st.markdown("### 💹 Fonte de Receita")
-        
-        with st.popover("💰 Inserir Fonte", use_container_width=True):
-            n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            # Removido o type="primary" para o botão não ficar vermelho
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
-                if 'categorias_receita' not in st.session_state:
-                    st.session_state.categorias_receita = []
-                
-                if n_rec and n_rec not in st.session_state.categorias_receita:
-                    st.session_state.categorias_receita.append(n_rec)
-                    salvar_configuracoes_nuvem()
-                    st.success(f"Fonte '{n_rec}' cadastrada!")
-                    st.rerun() 
-        
-        st.write("") 
-        if 'categorias_receita' in st.session_state:
-            for cat_r in st.session_state.categorias_receita:
-                if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                    modal_receita_categoria(cat_r)                
+        with st.container(border=True):
+            st.markdown("### 💹 Fonte de Receita")
+            
+            with st.popover("💰 Inserir Fonte", use_container_width=True):
+                n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
+                if st.button("Salvar", key="btn_save_rec", use_container_width=True):
+                    if 'categorias_receita' not in st.session_state:
+                        st.session_state.categorias_receita = []
+                    
+                    if n_rec and n_rec not in st.session_state.categorias_receita:
+                        st.session_state.categorias_receita.append(n_rec)
+                        salvar_configuracoes_nuvem()
+                        st.success(f"Fonte '{n_rec}' cadastrada!")
+                        st.rerun() 
+            
+            st.markdown("---") # Linha divisória dentro do quadro
+            
+            if 'categorias_receita' in st.session_state:
+                for cat_r in st.session_state.categorias_receita:
+                    if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
+                        modal_receita_categoria(cat_r)                    
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
-        st.markdown("### 💳 Forma Pagamento")
-        # Este botão abre o gerenciador completo (Cadastro, Edição e Exclusão)
-        if st.button("⚙️ Criar Pagamento", use_container_width=True):
-            modal_forma_pagamento()
-        
-        st.write("") 
-        # Lista apenas os nomes das formas já cadastradas para conferência visual
-        if 'formas_pagamento' in st.session_state:
-            for f in st.session_state.formas_pagamento:
-                # st.caption cria um texto menor e mais discreto
-                st.caption(f"✅ {f['nome']}")
+        with st.container(border=True):
+            st.markdown("### 💳 Forma Pagamento")
+            
+            # Este botão abre o gerenciador completo
+            if st.button("⚙️ Criar Pagamento", use_container_width=True):
+                modal_forma_pagamento()
+            
+            st.markdown("---") # Linha divisória dentro do quadro
+            
+            # A lista de nomes também fará este quadro crescer
+            if 'formas_pagamento' in st.session_state:
+                for f in st.session_state.formas_pagamento:
+                    st.caption(f"✅ {f['nome']}")
+                
+                # Espaçador extra para manter o design limpo se a lista for pequena
+                if len(st.session_state.formas_pagamento) < 3:
+                    st.write("")
 
 
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW EM UM QUADRO ÚNICO) ---
@@ -1021,6 +1030,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
