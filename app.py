@@ -764,6 +764,50 @@ if selecionado == "Cadastros Iniciais":
                 st.caption(f"✅ {f['nome']}")
 
 
+# --- 11. TELA DE VISUALIZAÇÃO DE LANÇAMENTOS (LISTVIEW) ---
+
+if selecionado == "Visualizar Lançamentos":
+    st.markdown("## 📊 Histórico de Lançamentos")
+    st.markdown("---")
+
+    # Criando abas para separar Despesas de Receitas
+    tab_desp, tab_rec = st.tabs(["🔴 Despesas", "🟢 Receitas"])
+
+    with tab_desp:
+        st.subheader("Lista de Despesas")
+        if "df_despesas" in st.session_state and not st.session_state.df_despesas.empty:
+            # Exibe a lista de despesas formatada
+            st.dataframe(
+                st.session_state.df_despesas,
+                use_container_width=True,
+                hide_index=True
+            )
+            
+            # Botão para limpar histórico de despesas (opcional)
+            if st.button("Limpar Despesas", key="clear_desp"):
+                st.session_state.df_despesas = st.session_state.df_despesas.iloc[0:0]
+                salvar_dados_nuvem() # Supondo que você tenha essa função de salvamento
+                st.rerun()
+        else:
+            st.info("Nenhuma despesa lançada até o momento.")
+
+    with tab_rec:
+        st.subheader("Lista de Receitas")
+        if "df_receitas" in st.session_state and not st.session_state.df_receitas.empty:
+            # Exibe a lista de receitas formatada
+            st.dataframe(
+                st.session_state.df_receitas,
+                use_container_width=True,
+                hide_index=True
+            )
+            
+            # Botão para limpar histórico de receitas (opcional)
+            if st.button("Limpar Receitas", key="clear_rec"):
+                st.session_state.df_receitas = st.session_state.df_receitas.iloc[0:0]
+                salvar_dados_nuvem()
+                st.rerun()
+        else:
+            st.info("Nenhuma receita lançada até o momento.")
 
 
 
