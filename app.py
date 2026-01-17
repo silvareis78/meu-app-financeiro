@@ -702,7 +702,7 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. CSS PARA FORÇAR O BOTÃO A SER VERDE (PELO NOME DA CHAVE)
+    # CSS PARA GARANTIR O VERDE NOS BOTÕES (Usando as chaves dos botões)
     st.markdown("""
         <style>
         button[key="btn_save_desp"], button[key="btn_save_rec"],
@@ -723,23 +723,21 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # O segredo do fechamento: st.session_state.get garante que não dê erro e mude a key
-        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"pop_d_{st.session_state.get('p_id_d', 0)}"):
+        # Usamos uma key fixa e simples para evitar o TypeError
+        with st.popover("➕ Inserir Categoria", use_container_width=True, key="pop_desp_fixo"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
+            # Botão Salvar
             if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
-                    # Muda a key para fechar
-                    st.session_state['p_id_d'] = st.session_state.get('p_id_d', 0) + 1
                     st.toast(f"✅ '{n_cat}' salva!")
-                    st.rerun()
+                    st.rerun() # O rerun reinicia a página e fecha o popover
             
+            # Botão Concluir / Sair
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
-                # Muda a key para fechar
-                st.session_state['p_id_d'] = st.session_state.get('p_id_d', 0) + 1
-                st.rerun()
+                st.rerun() # Apenas reinicia a página para fechar a janela
         
         st.write("") 
         for cat in st.session_state.categorias:
@@ -750,9 +748,11 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"pop_r_{st.session_state.get('p_id_r', 0)}"):
+        # Usamos uma key fixa e simples para evitar o TypeError
+        with st.popover("💰 Inserir Fonte", use_container_width=True, key="pop_rec_fixo"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
+            # Botão Salvar
             if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
@@ -760,14 +760,11 @@ if selecionado == "Cadastros Iniciais":
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
-                    # Muda a key para fechar
-                    st.session_state['p_id_r'] = st.session_state.get('p_id_r', 0) + 1
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
+            # Botão Concluir / Sair
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
-                # Muda a key para fechar
-                st.session_state['p_id_r'] = st.session_state.get('p_id_r', 0) + 1
                 st.rerun()
         
         st.write("") 
@@ -789,6 +786,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
