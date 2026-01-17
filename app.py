@@ -719,7 +719,7 @@ if selecionado == "Cadastros Iniciais":
 
     # --- COLUNA 1: GESTÃO DE DESPESAS ---
     with col_desp:
-        st.markdown("### 🔴 Categoria Despesa")
+        st.markdown("### 🔻 Categoria Despesa")
         
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
@@ -738,7 +738,7 @@ if selecionado == "Cadastros Iniciais":
 
     # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
     with col_rec:
-        st.markdown("### 🟢 Fonte de Receita")
+        st.markdown("### 💹 Fonte de Receita")
         
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
@@ -756,14 +756,14 @@ if selecionado == "Cadastros Iniciais":
         st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
-                if st.button(f"▲🟢 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
+                if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
                     modal_receita_categoria(cat_r)                
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
-        st.markdown("### 💳 Forma Pagto/Receb")
+        st.markdown("### 💳 Forma Pagamento")
         # Este botão abre o gerenciador completo (Cadastro, Edição e Exclusão)
-        if st.button("⚙️ Gerenciar Formas", use_container_width=True):
+        if st.button("⚙️ Criar Pagamento", use_container_width=True):
             modal_forma_pagamento()
         
         st.write("") 
@@ -875,6 +875,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
