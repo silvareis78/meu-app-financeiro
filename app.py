@@ -892,7 +892,7 @@ if selecionado == "Cartões":
         # 1. Lendo os Dados e as Configurações
         # Vou assumir que 'Formas_Pgto' é o nome da aba onde você cadastrou os nomes dos cartões
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
-        df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Formas_Pgto') 
+        df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Criar_Pagamento') 
 
         if not df_config.empty:
             # 2. Puxa os nomes que são do tipo 'Cartão de Crédito' na sua aba de configurações
@@ -947,6 +947,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar cartões: {e}. Verifique se a aba 'Formas_Pgto' existe.")
+
 
 
 
