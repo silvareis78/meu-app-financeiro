@@ -716,14 +716,15 @@ if selecionado == "Cadastros Iniciais":
         # O Popover cria um menu flutuante para não ocupar espaço na tela
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
+            # Adicionado type="primary" para o botão ficar verde
+            if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     # Adiciona à lista temporária
                     st.session_state.categorias.append(n_cat)
                     # SALVAMENTO NA NUVEM: Envia a nova lista para o Google Sheets (Aba Config)
                     salvar_configuracoes_nuvem() 
                     st.success(f"✅ Categoria '{n_cat}' cadastrada!")
-                    st.rerun() # Atualiza a tela para o botão da categoria aparecer
+                    st.rerun() # Atualiza a tela e fecha o popover automaticamente
         
         st.write("") # Pequeno espaço vertical
         # CRIAÇÃO AUTOMÁTICA DE BOTÕES: Para cada categoria na lista, cria um botão
@@ -738,7 +739,8 @@ if selecionado == "Cadastros Iniciais":
         
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
+            # Adicionado type="primary" para o botão ficar verde
+            if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
                 # Garante que a lista de receitas exista antes de adicionar
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
@@ -748,7 +750,7 @@ if selecionado == "Cadastros Iniciais":
                     # SINCRONIZA COM GOOGLE: Salva a nova fonte na aba Config
                     salvar_configuracoes_nuvem()
                     st.success(f"✅ Fonte '{n_rec}' cadastrada!")
-                    st.rerun()
+                    st.rerun() # Atualiza a tela e fecha o popover automaticamente
         
         st.write("") 
         # Mostra os botões de Receita (apenas se a lista existir)
@@ -771,6 +773,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
