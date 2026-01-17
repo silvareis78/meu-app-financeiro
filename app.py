@@ -883,7 +883,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (AJUSTE FINAL DE ALTURA E STATUS) ---
+# --- 12. TELA DE CARTÕES (CÓDIGO COMPLETO E CORRIGIDO) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -949,7 +949,7 @@ if selecionado == "Cartões":
                         cor_barra = "#2e7d32" if percentual < 85 else "#d32f2f"
                         disponivel = limite_fixo - total_fatura
                         
-                        # Espaçamento para alinhar com o selectbox da esquerda (ajuste de altura)
+                        # Espaçamento para alinhar altura com o quadro da esquerda
                         st.markdown('<div style="padding-top: 10px;"></div>', unsafe_allow_html=True)
                         
                         st.markdown(f"""
@@ -969,14 +969,14 @@ if selecionado == "Cartões":
                             </div>
                         """, unsafe_allow_html=True)
 
-                        # MENSAGEM DE STATUS (RETORNADA)
+                        # MENSAGEM DE STATUS CORRIGIDA
                         if disponivel < 0:
                             st.markdown(f"<div style='background-color: #ffebee; padding: 5px; border-radius: 5px; text-align: center; color: #d32f2f; font-weight: bold;'>⚠️ Limite Excedido em R$ {abs(disponivel):,.2f}</div>", unsafe_allow_html=True)
                         else:
-                            st.markdown(f Gerald ="<div style='background-color: #e8f5e9; padding: 5px; border-radius: 5px; text-align: center; color: #2e7d32; font-weight: bold;'>✅ Valor Disponível: R$ {disponivel:,.2f}</div>", unsafe_allow_html=True)
+                            st.markdown(f"<div style='background-color: #e8f5e9; padding: 5px; border-radius: 5px; text-align: center; color: #2e7d32; font-weight: bold;'>✅ Valor Disponível: R$ {disponivel:,.2f}</div>", unsafe_allow_html=True)
                         
-                        # Espaçador final para garantir que o container estique até a altura do da esquerda
-                        st.markdown('<div style="padding-bottom: 5px;"></div>', unsafe_allow_html=True)
+                        # Espaçador inferior para igualar a altura final
+                        st.markdown('<div style="padding-bottom: 15px;"></div>', unsafe_allow_html=True)
                     else:
                         st.info("💡 Limite não configurado para este cartão.")
                         st.write("")
@@ -1020,6 +1020,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
