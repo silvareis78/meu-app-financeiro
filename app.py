@@ -802,8 +802,8 @@ if selecionado == "Visualizar Lançamentos":
                 "Descrição": st.column_config.TextColumn("Descrição", width=250),
                 "Categoria": st.column_config.TextColumn("Categoria", width=120),
                 "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
-                "Parcela": st.column_config.TextColumn("Parcela", width=50),
-                "Pagamento": st.column_config.TextColumn("Pagamento", width=150), 
+                "Parcela": st.column_config.TextColumn("Parcela", width=65),
+                "Pagamento": st.column_config.TextColumn("Pagamento", width=170), 
                 "Tipo": st.column_config.TextColumn("Tipo", width=70),
                 "Status": st.column_config.TextColumn("Status", width=100)
             }
@@ -829,6 +829,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
