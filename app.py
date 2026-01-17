@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (FILTROS, RESUMO EVOLUÍDO E ITENS) ---
+# --- 12. TELA DE CARTÕES (LAYOUT CORRIGIDO - SEM A PALAVRA 'DIA') ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -912,36 +912,38 @@ if selecionado == "Cartões":
                     meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
                     mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
 
-            # Cálculos dos Dados
+            # Cálculos
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
             
-            # Lógica para À Vista vs Parcelado
-            # Considera parcelado se a coluna 'Parcela' contiver '/' ou se for diferente de '1/1' ou vazio (ajuste conforme seu padrão)
             mask_parcelado = df_fatura['Parcela'].astype(str).str.contains('/', na=False) & (df_fatura['Parcela'] != '1/1')
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
             total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
             total_fatura = df_fatura['Valor'].sum()
 
-            # --- QUADRO 2: RESUMO (ESTILIZADO) ---
+            # --- QUADRO 2: RESUMO (FECHAMENTO E VENCIMENTO APENAS NÚMEROS) ---
             with st.container(border=True):
-                # Cabeçalho do Quadro: Fechamento e Vencimento no canto superior esquerdo
-                st.markdown(f"""
-                    <div style="text-align: left; line-height: 1.2; margin-bottom: 20px;">
-                        <span style="font-size: 18px; font-weight: bold;">Fechamento:</span> <span style="font-size: 16px;">Dia {info.get('fechamento', '?')}</span><br>
-                        <span style="font-size: 18px; font-weight: bold;">Vencimento:</span> <span style="font-size: 16px;">Dia {info.get('vencimento', '?')}</span>
-                    </div>
-                """, unsafe_allow_html=True)
+                col_topo_esq, col_topo_dir = st.columns([2, 1])
                 
-                # Linha de Métricas
-                col_avista, col_parc, col_total = st.columns(3)
-                with col_avista:
-                    st.metric("Total à Vista", f"R$ {total_avista:,.2f}")
-                with col_parc:
-                    st.metric("Total Parcelado", f"R$ {total_parcelado:,.2f}")
-                with col_total:
-                    # Destaque em azul para o total geral
+                with col_topo_esq:
                     st.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
+                
+                with col_topo_dir:
+                    # Removido a palavra 'Dia' conforme solicitado
+                    st.markdown(f"""
+                        <div style="text-align: right; line-height: 1.2;">
+                            <span style="font-size: 18px; font-weight: bold;">Fechamento:</span> <span style="font-size: 16px;">{info.get('fechamento', '?')}</span><br>
+                            <span style="font-size: 18px; font-weight: bold;">Vencimento:</span> <span style="font-size: 16px;">{info.get('vencimento', '?')}</span>
+                        </div>
+                    """, unsafe_allow_html=True)
+                
+                st.markdown("---") 
+                
+                c_inf1, c_inf2 = st.columns(2)
+                with c_inf1:
+                    st.metric("Total à Vista", f"R$ {total_avista:,.2f}")
+                with c_inf2:
+                    st.metric("Total Parcelado", f"R$ {total_parcelado:,.2f}")
 
             # --- QUADRO 3: ITENS DA FATURA ---
             with st.container(border=True):
