@@ -702,7 +702,7 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. CSS PARA BOTÃO VERDE (Injetado apenas nesta tela)
+    # 1. CSS PARA BOTÃO VERDE (Injetado diretamente)
     st.markdown("""
         <style>
         button[kind="primary"] {
@@ -722,17 +722,15 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # O .get(key, 0) evita o TypeError se a variável ainda não existir
-        pop_id_d = st.session_state.get('pop_id_d', 0)
-        
-        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{pop_id_d}"):
+        # O segredo é usar o .get diretamente na key para evitar o TypeError
+        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{st.session_state.get('pop_id_d', 0)}"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
-                    # Incrementa para forçar o fechamento no próximo ciclo
-                    st.session_state['pop_id_d'] = pop_id_d + 1
+                    # Atualiza o contador para fechar o popover
+                    st.session_state['pop_id_d'] = st.session_state.get('pop_id_d', 0) + 1
                     st.toast(f"✅ Categoria '{n_cat}' cadastrada!")
                     st.rerun()
         
@@ -745,10 +743,8 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # O .get(key, 0) evita o TypeError
-        pop_id_r = st.session_state.get('pop_id_r', 0)
-        
-        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{pop_id_r}"):
+        # O segredo é usar o .get diretamente na key para evitar o TypeError
+        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{st.session_state.get('pop_id_r', 0)}"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
                 if 'categorias_receita' not in st.session_state:
@@ -757,8 +753,8 @@ if selecionado == "Cadastros Iniciais":
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
-                    # Incrementa para forçar o fechamento
-                    st.session_state['pop_id_r'] = pop_id_r + 1
+                    # Atualiza o contador para fechar o popover
+                    st.session_state['pop_id_r'] = st.session_state.get('pop_id_r', 0) + 1
                     st.toast(f"✅ Fonte '{n_rec}' cadastrada!")
                     st.rerun()
         
@@ -781,6 +777,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
