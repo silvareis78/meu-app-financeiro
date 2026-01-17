@@ -883,7 +883,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (LAYOUT ALINHADO E FONTE DO LIMITE AMPLIADA) ---
+# --- 12. TELA DE CARTÕES (VERSÃO CORRIGIDA E ALINHADA) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -915,61 +915,71 @@ if selecionado == "Cartões":
             df_detalhes = pd.DataFrame(df_config['Detalhes_Pagamento'].apply(extrair_json).tolist())
             df_cartoes = df_detalhes[df_detalhes['tipo'] == 'Cartão de Crédito']
 
-            # --- LINHA SUPERIOR: FILTROS E META (AJUSTE DE ALTURA IGUAL) ---
-col_esq, col_dir = st.columns(2)
+            # --- LINHA SUPERIOR: FILTROS E META (ALINHAMENTO DE ALTURA) ---
+            col_esq, col_dir = st.columns(2)
 
-with col_esq:
-    with st.container(border=True):
-        st.markdown("🔍 **Filtros de Busca**")
-        cartao_sel = st.selectbox("Escolha o Cartão:", sorted(df_cartoes['nome'].unique()))
-        
-        c1, c2 = st.columns(2)
-        with c1:
-            # Seletores de data e tipo
-            mes_sel = st.selectbox("Mês de Fechamento:", meses_disp, index=indice_padrao)
-        with c2:
-            tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
+            with col_esq:
+                with st.container(border=True):
+                    st.markdown("🔍 **Filtros de Busca**")
+                    cartao_sel = st.selectbox("Escolha o Cartão:", sorted(df_cartoes['nome'].unique()))
+                    
+                    c1, c2 = st.columns(2)
+                    with c1:
+                        df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
+                        df_geral['Mes_Venc'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
+                        meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
+                        mes_atual = datetime.now().strftime('%m/%Y')
+                        indice_padrao = meses_disp.index(mes_atual) if mes_atual in meses_disp else 0
+                        mes_sel = st.selectbox("Mês de Fechamento:", meses_disp, index=indice_padrao)
+                    with c2:
+                        tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
 
-with col_dir:
-    with st.container(border=True):
-        st.markdown("🎯 **Meta de Limite**")
-        
-        if limite_fixo > 0:
-            # ADICIONADO: Espaçador superior para empurrar o conteúdo e alinhar com os campos da esquerda
-            st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
-            
-            st.markdown(f"""
-                <div style="margin-bottom: 5px;">
-                    <span style="font-size: 16px; font-weight: bold;">Limite:</span> 
-                    <span style="font-size: 24px; font-weight: bold; color: #1E88E5;">R$ {limite_fixo:,.2f}</span>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # Barra com 28px de altura
-            st.markdown(f"""
-                <div style="width: 100%; background-color: #e0e0e0; border-radius: 8px; height: 28px;">
-                    <div style="width: {percentual}%; background-color: {cor_barra}; height: 28px; border-radius: 8px; text-align: center; color: white; font-size: 14px; font-weight: bold; line-height: 28px;">
-                        {percentual:.1f}%
-                    </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; padding: 2px 5px; color: #555;">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # ADICIONADO: Espaçador inferior para "esticar" a borda do container
-            st.markdown('<div style="margin-bottom: 12px;"></div>', unsafe_allow_html=True)
-            
-        else:
-            st.info("💡 Limite não configurado.")
-            # Espaçadores extras caso não tenha limite, para manter a caixa no mesmo tamanho
-            st.write("")
-            st.write("")
-            st.write("")
+            # Dados para a Meta
+            info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
+            df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
+            total_fatura = df_fatura['Valor'].sum()
+            limite_fixo = float(info.get('limite_sugerido', 0.0))
 
-            # --- PROCESSAMENTO DOS TOTAIS E EXIBIÇÃO ---
+            with col_dir:
+                with st.container(border=True):
+                    st.markdown("🎯 **Meta de Limite**")
+                    
+                    if limite_fixo > 0:
+                        percentual = min((total_fatura / limite_fixo) * 100, 100.0)
+                        cor_barra = "#2e7d32" if percentual < 85 else "#d32f2f"
+                        
+                        # Espaçador superior para alinhar com o selectbox da esquerda
+                        st.markdown('<div style="margin-top: 15px;"></div>', unsafe_allow_html=True)
+                        
+                        st.markdown(f"""
+                            <div style="margin-bottom: 5px;">
+                                <span style="font-size: 16px; font-weight: bold;">Limite:</span> 
+                                <span style="font-size: 24px; font-weight: bold; color: #1E88E5;">R$ {limite_fixo:,.2f}</span>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        st.markdown(f"""
+                            <div style="width: 100%; background-color: #e0e0e0; border-radius: 8px; height: 28px;">
+                                <div style="width: {percentual}%; background-color: {cor_barra}; height: 28px; border-radius: 8px; text-align: center; color: white; font-size: 14px; font-weight: bold; line-height: 28px;">
+                                    {percentual:.1f}%
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; padding: 2px 5px; color: #555;">
+                                <span>0%</span>
+                                <span>50%</span>
+                                <span>100%</span>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
+                        # Espaçador inferior para "puxar" a altura do quadro
+                        st.markdown('<div style="margin-bottom: 12px;"></div>', unsafe_allow_html=True)
+                    else:
+                        st.info("💡 Limite não configurado.")
+                        st.write("") # Espaçadores para igualar altura
+                        st.write("")
+                        st.write("")
+
+            # --- CÁLCULOS E TABELA ---
             df_fatura = df_fatura.sort_values(by='Vencimento', ascending=True)
             mask_parcelado = df_fatura['Parcela'].str.contains('/', na=False)
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
@@ -982,10 +992,10 @@ with col_dir:
             f_dia = int(float(info.get('fechamento', 0))) if str(info.get('fechamento')).replace('.','').isdigit() else '?'
             v_dia = int(float(info.get('vencimento', 0))) if str(info.get('vencimento')).replace('.','').isdigit() else '?'
 
-            # --- QUADRO 2: RESUMO DA FATURA ---
+            # --- QUADRO RESUMO ---
             with st.container(border=True):
                 col_t, col_d = st.columns([1, 1])
-                with col_t: st.markdown("<div style='text-align: left; font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
+                with col_t: st.markdown("<div style='font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
                 with col_d:
                     st.markdown(f"<div style='text-align: right; line-height: 1.2;'><span style='font-size: 18px; font-weight: bold;'>Fechamento:</span> <span style='font-size: 16px;'>{f_dia}</span><br><span style='font-size: 18px; font-weight: bold;'>Vencimento:</span> <span style='font-size: 16px;'>{v_dia}</span></div>", unsafe_allow_html=True)
                 st.markdown("---") 
@@ -994,7 +1004,7 @@ with col_dir:
                 with c_v2: st.metric("Total Parcelado", f"R$ {total_parcelado:,.2f}")
                 with c_v3: st.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
 
-            # --- QUADRO 3: ITENS DA FATURA ---
+            # --- QUADRO ITENS DA FATURA ---
             with st.container(border=True):
                 st.markdown(f"📝 **Itens da Fatura ({tipo_compra})**")
                 if not df_exibir.empty:
@@ -1005,7 +1015,9 @@ with col_dir:
                     st.info("Nenhum lançamento encontrado.")
 
     except Exception as e:
-        st.error(f"Erro ao carregar a tela: {e}")
+        # ESTE BLOCO É O QUE ESTAVA FALTANDO E CAUSANDO O ERRO
+        st.error(f"Erro ao carregar a tela de cartões: {e}")
+
 
 
 
