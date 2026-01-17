@@ -883,7 +883,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (DASHBOARD COMPLETO COM LIMITE) ---
+# --- 12. TELA DE CARTÕES (LAYOUT ALINHADO E BARRA PERSONALIZADA) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -915,7 +915,7 @@ if selecionado == "Cartões":
             df_detalhes = pd.DataFrame(df_config['Detalhes_Pagamento'].apply(extrair_json).tolist())
             df_cartoes = df_detalhes[df_detalhes['tipo'] == 'Cartão de Crédito']
 
-            # --- LINHA SUPERIOR: FILTROS E META ---
+            # --- LINHA SUPERIOR: FILTROS E META (ALINHADOS) ---
             col_esq, col_dir = st.columns(2)
 
             with col_esq:
@@ -934,32 +934,48 @@ if selecionado == "Cartões":
                     with c2:
                         tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
 
-            # Dados do Cartão e Processamento da Fatura
+            # Processamento de dados para a Meta
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
-            df_fatura = df_fatura.sort_values(by='Vencimento', ascending=True) # Menor para Maior
-            
             total_fatura = df_fatura['Valor'].sum()
             limite_fixo = float(info.get('limite_sugerido', 0.0))
 
             with col_dir:
                 with st.container(border=True):
                     st.markdown("🎯 **Meta de Limite**")
+                    
                     if limite_fixo > 0:
-                        percentual = min(total_fatura / limite_fixo, 1.0)
+                        percentual = min((total_fatura / limite_fixo) * 100, 100.0)
+                        cor_barra = "#2e7d32" if percentual < 80 else "#d32f2f" # Verde ou Vermelho se > 80%
+                        
+                        st.markdown(f"**Limite:** R$ {limite_fixo:,.2f} | **Gasto:** R$ {total_fatura:,.2f}")
+                        
+                        # BARRA PERSONALIZADA (MAIS GROSSA E COM ESCALA)
+                        st.markdown(f"""
+                            <div style="width: 100%; background-color: #e0e0e0; border-radius: 10px; height: 25px; margin-top: 10px;">
+                                <div style="width: {percentual}%; background-color: {cor_barra}; height: 25px; border-radius: 10px; text-align: center; color: white; font-size: 14px; font-weight: bold; line-height: 25px;">
+                                    {percentual:.1f}%
+                                </div>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; font-size: 12px; font-weight: bold; padding: 2px 5px;">
+                                <span>0%</span>
+                                <span>50%</span>
+                                <span>100%</span>
+                            </div>
+                        """, unsafe_allow_html=True)
+                        
                         disponivel = limite_fixo - total_fatura
-                        
-                        st.metric("Limite de Gasto", f"R$ {limite_fixo:,.2f}", 
-                                  delta=f"Disponível: R$ {disponivel:,.2f}" if disponivel >= 0 else f"Excedido: R$ {abs(disponivel):,.2f}",
-                                  delta_color="normal" if disponivel >= 0 else "inverse")
-                        
-                        st.progress(percentual)
-                        st.caption(f"Uso da meta: {percentual*100:.1f}%")
+                        if disponivel < 0:
+                            st.warning(f"⚠️ Excedido em R$ {abs(disponivel):,.2f}")
+                        else:
+                            st.success(f"✅ Disponível: R$ {disponivel:,.2f}")
                     else:
-                        st.info("💡 Configure um limite para este cartão no modal de gerenciamento.")
-                        st.write("") # Espaçador
+                        st.info("💡 Limite não configurado para este cartão.")
+                        st.write("")
+                        st.write("") # Espaçadores para manter a altura
 
-            # --- CÁLCULOS DOS TOTAIS ---
+            # --- CÁLCULOS DOS TOTAIS E EXIBIÇÃO ---
+            df_fatura = df_fatura.sort_values(by='Vencimento', ascending=True)
             mask_parcelado = df_fatura['Parcela'].str.contains('/', na=False)
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
             total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
@@ -973,17 +989,10 @@ if selecionado == "Cartões":
 
             # --- QUADRO 2: RESUMO DA FATURA ---
             with st.container(border=True):
-                col_titulo, col_datas = st.columns([1, 1])
-                with col_titulo:
-                    st.markdown("<div style='text-align: left; font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
-                with col_datas:
-                    st.markdown(f"""
-                        <div style="text-align: right; line-height: 1.2;">
-                            <span style="font-size: 18px; font-weight: bold;">Fechamento:</span> <span style="font-size: 16px;">{f_dia}</span><br>
-                            <span style="font-size: 18px; font-weight: bold;">Vencimento:</span> <span style="font-size: 16px;">{v_dia}</span>
-                        </div>
-                    """, unsafe_allow_html=True)
-                
+                col_t, col_d = st.columns([1, 1])
+                with col_t: st.markdown("<div style='text-align: left; font-size: 20px; font-weight: bold;'>📊 Resumo da Fatura</div>", unsafe_allow_html=True)
+                with col_d:
+                    st.markdown(f"<div style='text-align: right; line-height: 1.2;'><span style='font-size: 18px; font-weight: bold;'>Fechamento:</span> <span style='font-size: 16px;'>{f_dia}</span><br><span style='font-size: 18px; font-weight: bold;'>Vencimento:</span> <span style='font-size: 16px;'>{v_dia}</span></div>", unsafe_allow_html=True)
                 st.markdown("---") 
                 c_v1, c_v2, c_v3 = st.columns(3)
                 with c_v1: st.metric("Total à Vista", f"R$ {total_avista:,.2f}")
@@ -996,19 +1005,13 @@ if selecionado == "Cartões":
                 if not df_exibir.empty:
                     df_exibir['Venc_View'] = df_exibir['Vencimento'].dt.date
                     df_exibir['Valor_Formatado'] = df_exibir['Valor'].apply(lambda x: f"R$ {x:,.2f}")
-                    st.dataframe(
-                        df_exibir[["Venc_View", "Descrição", "Valor_Formatado", "Parcela", "Status"]],
-                        use_container_width=True, hide_index=True, height=400,
-                        column_config={
-                            "Venc_View": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY"),
-                            "Valor_Formatado": "Valor"
-                        }
-                    )
+                    st.dataframe(df_exibir[["Venc_View", "Descrição", "Valor_Formatado", "Parcela", "Status"]], use_container_width=True, hide_index=True, height=400)
                 else:
-                    st.info(f"Nenhum lançamento encontrado para os filtros selecionados.")
+                    st.info("Nenhum lançamento encontrado.")
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
