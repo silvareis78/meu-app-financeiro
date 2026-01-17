@@ -350,51 +350,49 @@ st.markdown("""
 @st.dialog("🚀 Novo Lançamento")
 def modal_lancamento_categoria(categoria_nome):
     """
-    PARA QUE SERVE: Cadastro de despesas contínuo.
-    SOLUÇÃO: Uso de keys para resetar campos manualmente sem fechar o diálogo.
+    PARA QUE SERVE: Cadastro de despesas.
+    SOLUÇÃO: Checkbox fora do formulário com Key persistente.
     """
     
-    # 1. INICIALIZAÇÃO DO CONTADOR E ESTADO DE LIMPEZA
+    # 1. INICIALIZAÇÃO DO CONTADOR
     if 'cont_lanc' not in st.session_state:
         st.session_state.cont_lanc = 0
-    
-    # Criamos um sufixo para as keys. Se mudarmos esse sufixo, o campo limpa.
-    if 'sufixo_key' not in st.session_state:
-        st.session_state.sufixo_key = 0
 
     st.subheader(f"Categoria: {categoria_nome}")
     st.markdown(f"✅ **Lançamentos realizados:** `{st.session_state.cont_lanc}`")
     
-    # 2. CAMPOS DE ENTRADA (SOLTOS)
-    # Adicionamos o sufixo na key para podermos "resetar" o campo mudando o número
-    sk = st.session_state.sufixo_key
-    
-    desc = st.text_input("Descrição da Despesa", key=f"txt_desc_{sk}")
-    
-    c1, c2 = st.columns([2, 1])
-    tipo_desp = c1.selectbox("Tipo", ["Variável", "Fixa"], key=f"sel_tipo_{sk}")
-    parcelas = c2.number_input("Parcelas", min_value=1, value=1, key=f"num_parc_{sk}")
-    
-    c3, c4 = st.columns([2, 4])
-    valor = c3.number_input("Valor Total", min_value=0.0, format="%.2f", key=f"num_val_{sk}")
-    
-    opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
-    forma_sel = c4.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"], key=f"sel_pag_{sk}")
-    
-    data_l = st.date_input("Data", format="DD/MM/YYYY", key=f"dat_compra_{sk}")
+    # --- A CHECKBOX FICA FORA DO FORMULÁRIO ---
+    # Usamos uma KEY para que o valor não se perca nunca
+    manter_aberto = st.checkbox(
+        "Marque aqui para Lançar Várias despesas", 
+        key=f"persist_check_{categoria_nome}"
+    )
 
-    st.write("---")
-    # A CHECKBOX FICA AQUI, FORA DE QUALQUER FORMULÁRIO
-    manter_aberto = st.checkbox("Marque aqui para Lançar Várias despesas", value=False, key="check_permanente")
+    # 2. O FORMULÁRIO (Configurado para limpar os campos internos ao salvar)
+    with st.form(key=f"form_final_{categoria_nome}", clear_on_submit=True):
+        desc = st.text_input("Descrição da Despesa")
+        
+        c1, c2 = st.columns([2, 1])
+        tipo_desp = c1.selectbox("Tipo", ["Variável", "Fixa"])
+        parcelas = c2.number_input("Parcelas", min_value=1, value=1)
+        
+        c3, c4 = st.columns([2, 4])
+        valor = c3.number_input("Valor Total", min_value=0.0, format="%.2f")
+        
+        opcoes_pag = [f['nome'] for f in st.session_state.formas_pagamento]
+        forma_sel = c4.selectbox("Pagamento", options=opcoes_pag if opcoes_pag else ["Dinheiro"])
+        
+        data_l = st.date_input("Data", format="DD/MM/YYYY")
 
-    # 3. BOTÕES DE AÇÃO
-    col_btn1, col_btn2 = st.columns(2)
-    
-    if col_btn1.button("✅ Salvar Lançamento", use_container_width=True):
+        # Botão de salvar (dentro do formulário)
+        btn_salvar = st.form_submit_button("✅ Salvar Lançamento", use_container_width=True)
+
+    # 3. LÓGICA DE PROCESSAMENTO
+    if btn_salvar:
         if not desc or valor <= 0:
             st.error("Preencha descrição e valor!")
         else:
-            # Lógica de salvamento
+            # Lógica de envio para o Google
             detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
             lista_itens = []
             
@@ -414,25 +412,23 @@ def modal_lancamento_categoria(categoria_nome):
                     "Pagamento": forma_sel
                 })
             
-            # Salva no Google Sheets
             salvar_no_google(lista_itens, aba="Dados")
-            
-            # Incrementa o contador
             st.session_state.cont_lanc += 1
-            
-            if st.session_state.check_permanente:
-                st.toast(f"✅ {desc} salvo!")
-                # MUDAMOS O SUFIXO: Isso faz o Streamlit "esquecer" os textos digitados
-                st.session_state.sufixo_key += 1
-                st.rerun() # O rerun agora funciona pois a key mudou, mas o modal fica estável
-            else:
-                st.session_state.cont_lanc = 0
-                st.session_state.sufixo_key = 0
-                st.rerun()
+            st.toast(f"✅ {desc} salvo!")
 
-    if col_btn2.button("❌ Sair / Concluir", use_container_width=True):
+            # SÓ DAREMOS RERUN SE A CHECKBOX ESTIVER DESMARCADA
+            # Se ela estiver MARCADA, o código não faz nada (não dá rerun),
+            # o que mantém o Modal aberto e o clear_on_submit limpa os campos.
+            if not st.session_state[f"persist_check_{categoria_nome}"]:
+                st.session_state.cont_lanc = 0
+                st.rerun()
+            else:
+                # Se for para ficar aberto, apenas forçamos uma atualização visual leve
+                st.success("Salvo! Digite a próxima despesa.")
+
+    # 4. BOTÃO DE SAIR MANUAL
+    if st.button("❌ Sair / Concluir", use_container_width=True):
         st.session_state.cont_lanc = 0
-        st.session_state.sufixo_key = 0
         st.rerun()
             
 # --- 7. MODAL DE RECEITA (ENTRADAS DE DINHEIRO) ---
@@ -738,6 +734,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
