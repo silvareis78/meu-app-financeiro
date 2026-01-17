@@ -790,18 +790,32 @@ if selecionado == "Visualizar Lançamentos":
             if 'Vencimento' in df_geral.columns:
                 df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce').dt.date
 
-            # --- 2. TRATAMENTO DA PARCELA (PARA FICAR 1/1) ---
+            # --- 2. TRATAMENTO DA PARCELA (PARA ELIMINAR O 'NONE') ---
             if 'Parcela' in df_geral.columns:
-                def limpar_parcela(val):
+                def limpar_parcela(row):
+                    # Se for Receita, fica vazio
+                    if str(row.get('Tipo', '')).lower() == 'receita':
+                        return ""
+                    
+                    val = row['Parcela']
+                    
+                    # Verifica se é nulo, se é a string 'None', 'nan' ou 'NaT'
                     if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none', '']:
                         return ""
-                    # Se o pandas converter 1/1 para data, pegamos dia e mês
+                    
+                    # Se o pandas converter 1/1 para data, formatamos como 1/1
                     if isinstance(val, (pd.Timestamp, datetime.date)):
                         return f"{val.day}/{val.month}"
+                    
+                    # Caso seja um valor "None" que veio como string da planilha
+                    if str(val).strip() == "None":
+                        return ""
+                        
                     return str(val)
                 
-                df_geral['Parcela'] = df_geral['Parcela'].apply(limpar_parcela)
-
+                # Aplica a regra linha por linha
+                df_geral['Parcela'] = df_geral.apply(limpar_parcela, axis=1)
+                
             # --- 3. CONFIGURAÇÃO DE LARGURA E COLUNAS (INCLUINDO PAGAMENTO) ---
             config_datas = {
                 "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=90),
@@ -836,6 +850,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
