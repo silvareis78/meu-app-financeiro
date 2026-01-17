@@ -702,10 +702,11 @@ if selecionado == "Painel Inicial":
    # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. CSS PARA FORÇAR O VERDE (Apenas nos botões de salvar/concluir)
+    # 1. CSS PARA PINTAR DE VERDE APENAS OS BOTÕES DENTRO DO POPOVER
     st.markdown("""
         <style>
-        div[data-testid="stPopover"] button {
+        /* Isso garante que apenas botões DENTRO do popover fiquem verdes */
+        div[data-testid="stPopoverBody"] button {
             background-color: #28a745 !important;
             color: white !important;
             border: none !important;
@@ -732,8 +733,9 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # BOTÃO CONCLUIR ADICIONADO AQUI
+            # Botão Concluir com mudança de estado para forçar fechamento
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
+                st.session_state["p_close"] = True # Força o Streamlit a notar mudança
                 st.rerun()
         
         st.write("") 
@@ -758,15 +760,16 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # BOTÃO CONCLUIR ADICIONADO AQUI
+            # Botão Concluir com mudança de estado para forçar fechamento
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
+                st.session_state["p_close_r"] = True # Força o Streamlit a notar mudança
                 st.rerun()
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                    modal_receita_categoria(cat_r)                
+                    modal_receita_categoria(cat_r))                
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -781,6 +784,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
