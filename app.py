@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (CORREÇÃO DE PARCELAS E LAYOUT) ---
+# --- 12. TELA DE CARTÕES (MÊS ATUAL E ORDENAÇÃO CRONOLÓGICA) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -889,14 +889,23 @@ if selecionado == "Cartões":
 
     try:
         import json
+        from datetime import datetime
+        
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
         df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Config') 
 
         # --- TRATAMENTO DA COLUNA PARCELA ---
-        # 1. Converte para string, remove o '.0' se houver e trata nulos
-        df_geral['Parcela'] = df_geral['Parcela'].astype(str).replace(['nan', 'None', 'none'], '')
-        # 2. Se o pandas leu como float (ex: 1.0), removemos o .0
-        df_geral['Parcela'] = df_geral['Parcela'].apply(lambda x: x.split('.')[0] if '.' in x and x.split('.')[1] == '0' else x)
+        def formatar_parcela(val):
+            if pd.isna(val) or str(val).lower() in ['nan', 'none', 'nat']:
+                return ""
+            if isinstance(val, pd.Timestamp) or hasattr(val, 'month'):
+                return f"{val.day}/{val.month}"
+            val_str = str(val)
+            if val_str.endswith('.0'):
+                return val_str[:-2]
+            return val_str
+
+        df_geral['Parcela'] = df_geral['Parcela'].apply(formatar_parcela)
 
         if not df_config.empty and 'Detalhes_Pagamento' in df_config.columns:
             def extrair_json(x):
@@ -919,7 +928,12 @@ if selecionado == "Cartões":
                         df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
                         df_geral['Mes_Venc'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
                         meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
-                        mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
+                        
+                        # --- LÓGICA DO MÊS ATUAL ---
+                        mes_atual = datetime.now().strftime('%m/%Y')
+                        indice_padrao = meses_disp.index(mes_atual) if mes_atual in meses_disp else 0
+                        
+                        mes_sel = st.selectbox("Mês de Fechamento:", meses_disp, index=indice_padrao)
                     with c2:
                         tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
 
@@ -927,21 +941,20 @@ if selecionado == "Cartões":
                 with st.container(border=True):
                     st.markdown("📌 **Novo Quadro**")
                     st.info("Espaço reservado para o seu novo conteúdo.")
-                    st.write("")
-                    st.write("")
 
             # --- PROCESSAMENTO DOS DADOS ---
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
             
-            # Lógica para identificar parcelados (contém '/' e não é vazio)
+            # Ordenação do Menor para o Maior Vencimento
+            df_fatura = df_fatura.sort_values(by='Vencimento', ascending=True)
+            
             mask_parcelado = df_fatura['Parcela'].str.contains('/', na=False)
             
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
             total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
             total_fatura = df_fatura['Valor'].sum()
 
-            # Filtro da Tabela
             if tipo_compra == "À Vista":
                 df_exibir = df_fatura[~mask_parcelado]
             elif tipo_compra == "Parcelado":
@@ -949,8 +962,8 @@ if selecionado == "Cartões":
             else:
                 df_exibir = df_fatura
 
-            f_dia = int(info.get('fechamento', 0)) if str(info.get('fechamento')).replace('.','').isdigit() else '?'
-            v_dia = int(info.get('vencimento', 0)) if str(info.get('vencimento')).replace('.','').isdigit() else '?'
+            f_dia = int(float(info.get('fechamento', 0))) if str(info.get('fechamento')).replace('.','').isdigit() else '?'
+            v_dia = int(float(info.get('vencimento', 0))) if str(info.get('vencimento')).replace('.','').isdigit() else '?'
 
             # --- QUADRO RESUMO ---
             with st.container(border=True):
@@ -975,6 +988,7 @@ if selecionado == "Cartões":
             with st.container(border=True):
                 st.markdown(f"📝 **Itens da Fatura ({tipo_compra})**")
                 if not df_exibir.empty:
+                    # Formatação de exibição
                     df_exibir['Venc_View'] = df_exibir['Vencimento'].dt.date
                     df_exibir['Valor_Formatado'] = df_exibir['Valor'].apply(lambda x: f"R$ {x:,.2f}")
 
