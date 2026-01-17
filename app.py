@@ -705,7 +705,6 @@ if selecionado == "Cadastros Iniciais":
     # 1. CSS PARA FORÇAR O BOTÃO A SER VERDE
     st.markdown("""
         <style>
-        /* Alvo específico para botões de salvar dentro de popovers */
         div[data-testid="stPopover"] button[kind="primary"] {
             background-color: #28a745 !important;
             color: white !important;
@@ -713,6 +712,10 @@ if selecionado == "Cadastros Iniciais":
         }
         </style>
     """, unsafe_allow_html=True)
+
+    # 2. INICIALIZAÇÃO SEGURA DAS CHAVES (Isso impede o TypeError)
+    if 'fechar_pop_d' not in st.session_state: st.session_state.fechar_pop_d = 0
+    if 'fechar_pop_r' not in st.session_state: st.session_state.fechar_pop_r = 0
 
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
@@ -723,15 +726,17 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # O Popover fecha ao rodar o st.rerun()
-        with st.popover("➕ Inserir Categoria", use_container_width=True):
+        # A key muda toda vez que você salva, forçando o fechamento
+        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"pop_d_{st.session_state.fechar_pop_d}"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
+                    # MUDAMOS A KEY AQUI -> ISSO FECHA O POPOVER NA HORA
+                    st.session_state.fechar_pop_d += 1
                     st.toast(f"✅ Categoria '{n_cat}' cadastrada!")
-                    st.rerun() # O rerun limpa o estado e fecha o popover automaticamente
+                    st.rerun() 
         
         st.write("") 
         for cat in st.session_state.categorias:
@@ -742,7 +747,8 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        with st.popover("💰 Inserir Fonte", use_container_width=True):
+        # A key muda toda vez que você salva, forçando o fechamento
+        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"pop_r_{st.session_state.fechar_pop_r}"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
                 if 'categorias_receita' not in st.session_state:
@@ -751,8 +757,10 @@ if selecionado == "Cadastros Iniciais":
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
+                    # MUDAMOS A KEY AQUI -> ISSO FECHA O POPOVER NA HORA
+                    st.session_state.fechar_pop_r += 1
                     st.toast(f"✅ Fonte '{n_rec}' cadastrada!")
-                    st.rerun() # O rerun limpa o estado e fecha o popover automaticamente
+                    st.rerun() 
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
@@ -773,6 +781,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
