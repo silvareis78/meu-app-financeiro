@@ -635,25 +635,46 @@ def modal_forma_pagamento():
                     st.rerun()
                     
 
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (CORREÇÕES DE ALINHAMENTO E OVERFLOW) ---
 
-# CSS para alinhar o texto dos botões da sidebar à esquerda
+# CSS Corretivo para Sidebar e Cards
 st.markdown("""
     <style>
-        [data-testid="stSidebarNavLink"] {justify-content: flex-start;}
-        [data-testid="stSidebarUserContent"] .stButton button {
-            text-align: left !important;
+        /* 1. FORÇA ALINHAMENTO À ESQUERDA NO MENU */
+        [data-testid="stSidebar"] .stButton button {
             display: flex !important;
-            justify-content: flex-start !important;
-            padding-left: 20px !important;
+            justify-content: flex-start !important; /* Alinha o conteúdo à esquerda */
+            text-align: left !important;
+            width: 100% !important;
+            padding-left: 10px !important;
+            border: none !important;
+        }
+        
+        /* Garante que o ícone e o texto fiquem juntos na esquerda */
+        [data-testid="stSidebar"] .stButton button p {
+            width: 100%;
+            text-align: left !important;
+        }
+
+        /* 2. CORREÇÃO DOS CARDS PARA NÃO ULTRAPASSAR O QUADRO */
+        .card {
+            width: 100% !important;   /* Ocupa apenas o que o quadro permite */
+            box-sizing: border-box !important; /* Garante que padding não aumente o tamanho */
+            margin: 5px 0px !important; /* Remove margens laterais que empurram para fora */
+            padding: 15px !important;
+        }
+        
+        .card-vertical {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            margin: 5px 0px !important;
         }
     </style>
 """, unsafe_allow_html=True)
 
-# Título que aparece no topo do menu lateral
+# --- MENU LATERAL ---
 st.sidebar.title("MENU PRINCIPAL") 
 
-# BOTÕES DE NAVEGAÇÃO NA BARRA LATERAL (Agora alinhados à esquerda)
 if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
     st.session_state.pagina = "Painel Inicial"
 
@@ -668,50 +689,50 @@ if st.sidebar.button("💳 Cartões", use_container_width=True):
 
 selecionado = st.session_state.get('pagina', "Painel Inicial")
 
-# --- LÓGICA DA TELA: PAINEL INICIAL ---
+# --- TELA: PAINEL INICIAL ---
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel Inicial")
     
-    # --- QUADRO 1: FILTROS E RESUMO PRINCIPAL ---
+    # QUADRO 1: FILTROS
     with st.container(border=True):
-        col_f1, col_f2, col_vazio = st.columns([1, 1, 3])
-        with col_f1:
+        c_mes, c_ano, c_vazio = st.columns([1, 1, 3])
+        with c_mes:
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0)
-        with col_f2:
+        with c_ano:
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2)
-        
-        st.markdown("---")
-        
-        c_rec, c_desp, c_sal = st.columns(3)
-        with c_rec:
-            st.markdown('<div class="card receita" style="width:100%">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
-        with c_desp:
-            st.markdown('<div class="card despesa" style="width:100%">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
-        with c_sal:
-            st.markdown('<div class="card saldo" style="width:100%">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
 
-    # --- QUADRO 2: STATUS DE CONSUMO (AVATAR) ---
+    # QUADRO 2: RESUMO FINANCEIRO (Resolvendo o overflow)
     with st.container(border=True):
-        col_ava_img, col_ava_txt = st.columns([0.5, 5])
-        with col_ava_img:
+        st.markdown("**💰 Resumo Consolidado**")
+        col_rec, col_desp, col_sal = st.columns(3)
+        
+        with col_rec:
+            st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
+        with col_desp:
+            st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+        with col_sal:
+            st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+
+    # QUADRO 3: PROGRESSO
+    with st.container(border=True):
+        c_av, c_txt = st.columns([0.15, 0.85]) # Colunas bem ajustadas para o avatar
+        with c_av:
             st.markdown('<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="50">', unsafe_allow_html=True)
-        with col_ava_txt:
-            st.markdown(f"**Opa! Você gastou 49% do recebido em {mes_sel}!**")
+        with c_txt:
+            st.write(f"Você já utilizou **49%** do seu orçamento de {mes_sel}.")
             st.progress(0.49)
 
-    # --- QUADRO 3: DETALHAMENTO DE DESPESAS (LADO A LADO) ---
-    st.markdown("### 📊 Detalhes Financeiros")
+    # QUADRO 4: STATUS LADO A LADO
+    st.markdown("### 📊 Status de Pagamentos")
     with st.container(border=True):
-        col_v1, col_v2, col_v3 = st.columns(3)
-        
-        with col_v1:
+        c1, c2, c3 = st.columns(3)
+        with c1:
             st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
-        
-        with col_v2:
+        with c2:
             st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
-            
-        with col_v3:
+        with c3:
             st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+            
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -1053,6 +1074,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
