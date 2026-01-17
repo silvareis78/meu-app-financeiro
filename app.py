@@ -972,7 +972,8 @@ if selecionado == "Cartões":
             st.error("Coluna 'Detalhes_Pagamento' não encontrada na aba Config.")
 
     except Exception as e:
-        st.error(f"Erro ao processar dados: {e}")")
+        st.error(f"Erro ao processar dados: {e}")
+
 
 
 
