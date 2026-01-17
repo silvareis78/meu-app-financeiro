@@ -699,7 +699,7 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
+   # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
     # CSS PARA GARANTIR O VERDE NOS BOTÕES (Usando as chaves dos botões)
@@ -723,8 +723,8 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # Usamos uma key fixa e simples para evitar o TypeError
-        with st.popover("➕ Inserir Categoria", use_container_width=True, key="pop_desp_fixo"):
+        # REMOVIDO O PARÂMETRO KEY PARA EVITAR TYPEERROR
+        with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
             # Botão Salvar
@@ -733,11 +733,11 @@ if selecionado == "Cadastros Iniciais":
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
                     st.toast(f"✅ '{n_cat}' salva!")
-                    st.rerun() # O rerun reinicia a página e fecha o popover
+                    st.rerun()
             
             # Botão Concluir / Sair
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
-                st.rerun() # Apenas reinicia a página para fechar a janela
+                st.rerun()
         
         st.write("") 
         for cat in st.session_state.categorias:
@@ -748,8 +748,8 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # Usamos uma key fixa e simples para evitar o TypeError
-        with st.popover("💰 Inserir Fonte", use_container_width=True, key="pop_rec_fixo"):
+        # REMOVIDO O PARÂMETRO KEY PARA EVITAR TYPEERROR
+        with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
             # Botão Salvar
@@ -771,7 +771,7 @@ if selecionado == "Cadastros Iniciais":
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                    modal_receita_categoria(cat_r)                    
+                    modal_receita_categoria(cat_r)                 
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -786,6 +786,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
