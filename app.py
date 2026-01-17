@@ -788,31 +788,30 @@ if selecionado == "Visualizar Lançamentos":
 
         if not df_geral.empty:
             # --- 1. FORMATAÇÃO DAS DATAS ---
-            # Convertendo para datetime primeiro para permitir filtros de data
             df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra'], errors='coerce')
             df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
 
-            # --- IMPLEMENTAÇÃO DOS FILTROS (CAIXAS DE COMBINAÇÃO) ---
+            # --- IMPLEMENTAÇÃO DOS FILTROS EM COLUNAS MENORES ---
             st.markdown("### 🔍 Filtros")
-            col1, col2, col3 = st.columns(3)
             
-            with col1:
-                # Filtro por Mês (Baseado no Vencimento)
+            # Criamos 5 colunas. Usaremos as 3 do meio para os filtros ficarem menores.
+            # Se quiser diminuir AINDA MAIS, aumente para st.columns([1, 1, 1, 1, 1, 1])
+            vazio_esq, c1, c2, c3, vazio_dir = st.columns([0.5, 2, 2, 2, 0.5])
+            
+            with c1:
                 df_geral['Mes_Filtro'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
                 meses = sorted(df_geral['Mes_Filtro'].dropna().unique())
-                mes_sel = st.selectbox("Mês de Vencimento:", ["Todos"] + meses)
+                mes_sel = st.selectbox("Mês:", ["Todos"] + meses)
             
-            with col2:
-                # Filtro por Categoria
+            with c2:
                 categorias = sorted(df_geral['Categoria'].dropna().unique())
                 cat_sel = st.selectbox("Categoria:", ["Todas"] + categorias)
                 
-            with col3:
-                # Filtro por Pagamento
+            with c3:
                 pagamentos = sorted(df_geral['Pagamento'].dropna().unique())
-                pag_sel = st.selectbox("Forma de Pagamento:", ["Todos"] + pagamentos)
+                pag_sel = st.selectbox("Pagamento:", ["Todos"] + pagamentos)
 
-            # Aplicando a lógica de filtragem
+            # Lógica de filtragem
             df_display = df_geral.copy()
             if mes_sel != "Todos":
                 df_display = df_display[df_display['Mes_Filtro'] == mes_sel]
@@ -821,11 +820,11 @@ if selecionado == "Visualizar Lançamentos":
             if pag_sel != "Todos":
                 df_display = df_display[df_display['Pagamento'] == pag_sel]
 
-            # Voltando as colunas para o formato de exibição (date) após filtrar
+            # Formatação para exibição
             df_display['Data Compra'] = df_display['Data Compra'].dt.date
             df_display['Vencimento'] = df_display['Vencimento'].dt.date
 
-            # --- 2. TRATAMENTO DA PARCELA (PARA ELIMINAR O 'NONE') ---
+            # --- 2. TRATAMENTO DA PARCELA ---
             if 'Parcela' in df_display.columns:
                 def limpar_parcela(row):
                     if str(row.get('Tipo', '')).lower() == 'receita':
@@ -849,18 +848,16 @@ if selecionado == "Visualizar Lançamentos":
                 "Categoria": st.column_config.TextColumn("Categoria", width=120),
                 "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
                 "Parcela": st.column_config.TextColumn("Parcela", width=65),
-                "Pagamento": st.column_config.TextColumn("Pagamento", width=150), # Ajustei de 20 para 150 para ser visível
+                "Pagamento": st.column_config.TextColumn("Pagamento", width=150),
                 "Tipo": st.column_config.TextColumn("Tipo", width=70),
                 "Status": st.column_config.TextColumn("Status", width=100)
             }
 
             tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
-            # Filtros específicos das abas sobre o DataFrame já filtrado
             df_receitas = df_display[df_display['Tipo'] == 'Receita'].copy()
             df_despesas = df_display[df_display['Tipo'].isin(['Fixa', 'Variável'])].copy()
 
-            # Removendo coluna auxiliar de filtro antes de exibir
             cols_exibir = [c for c in df_display.columns if c != 'Mes_Filtro']
 
             with tab1:
@@ -878,6 +875,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
