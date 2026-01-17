@@ -764,58 +764,53 @@ if selecionado == "Cadastros Iniciais":
                 st.caption(f"✅ {f['nome']}")
 
 
-# --- 11. TELA DE EXTRATO (LISTVIEW) ---
+# --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW) ---
 
 if selecionado == "Visualizar Lançamentos":
-    st.markdown("## 📋 Extrato de Lançamentos")
+    st.markdown("## 📊 Histórico de Lançamentos")
     st.markdown("---")
 
-    # Criando duas colunas para mostrar Resumos Rápidos
-    col1, col2 = st.columns(2)
-    
-    # Verificação de segurança para as bases de dados
-    if "df_despesas" not in st.session_state:
-        st.session_state.df_despesas = pd.DataFrame(columns=["Data", "Categoria", "Descrição", "Valor", "Status"])
-    if "df_receitas" not in st.session_state:
-        st.session_state.df_receitas = pd.DataFrame(columns=["Data", "Fonte", "Descrição", "Valor"])
+    # 1. PEGANDO AS CATEGORIAS DO SEU BLOCO 10
+    # Ajustado para usar o nome exato que você tem no estado da sessão
+    cats_desp = st.session_state.get('categorias', [])  
+    cats_rec = st.session_state.get('categorias_receita', [])
 
-    # --- ABA DE DESPESAS ---
-    st.markdown("### 🔴 Despesas Realizadas")
-    if not st.session_state.df_despesas.empty:
-        # Ordenar por data mais recente
-        df_desp_sorted = st.session_state.df_despesas.sort_values(by="Data", ascending=False)
-        
-        st.dataframe(
-            df_desp_sorted,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Valor": st.column_config.NumberColumn("Valor (R$)", format="R$ %.2f"),
-                "Data": st.column_config.DateColumn("Data do Gasto")
-            }
-        )
-    else:
-        st.info("Ainda não existem despesas lançadas.")
+    try:
+        # 2. LER A PLANILHA (Ajuste o nome se for .csv ou .xlsx)
+        df_geral = pd.read_excel('Controle Financeiro.xlsx') 
 
-    st.markdown("---")
+        if not df_geral.empty:
+            # 3. FILTRAGEM PELAS CATEGORIAS
+            # O código olha a coluna 'Categoria' e vê se o nome está na lista de despesas ou receitas
+            df_despesas = df_geral[df_geral['Categoria'].isin(cats_desp)].copy()
+            df_receitas = df_geral[df_geral['Categoria'].isin(cats_rec)].copy()
 
-    # --- ABA DE RECEITAS ---
-    st.markdown("### 🟢 Receitas Recebidas")
-    if not st.session_state.df_receitas.empty:
-        # Ordenar por data mais recente
-        df_rec_sorted = st.session_state.df_receitas.sort_values(by="Data", ascending=False)
-        
-        st.dataframe(
-            df_rec_sorted,
-            use_container_width=True,
-            hide_index=True,
-            column_config={
-                "Valor": st.column_config.NumberColumn("Valor (R$)", format="R$ %.2f"),
-                "Data": st.column_config.DateColumn("Data do Recebimento")
-            }
-        )
-    else:
-        st.info("Ainda não existem receitas lançadas.")
+            # --- EXIBIÇÃO EM ABAS ---
+            tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
+
+            with tab1:
+                st.subheader("Todos os Lançamentos")
+                st.dataframe(df_geral, use_container_width=True, hide_index=True)
+
+            with tab2:
+                st.subheader("Lista de Despesas")
+                if not df_despesas.empty:
+                    st.dataframe(df_despesas, use_container_width=True, hide_index=True)
+                else:
+                    st.info("Nenhuma despesa encontrada com as categorias cadastradas.")
+
+            with tab3:
+                st.subheader("Lista de Receitas")
+                if not df_receitas.empty:
+                    st.dataframe(df_receitas, use_container_width=True, hide_index=True)
+                else:
+                    st.info("Nenhuma receita encontrada com as categorias cadastradas.")
+        else:
+            st.warning("A planilha está vazia.")
+
+    except Exception as e:
+        st.error(f"Erro ao carregar os dados: {e}")
+
 
 
 
