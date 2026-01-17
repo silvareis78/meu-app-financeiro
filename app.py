@@ -635,8 +635,8 @@ if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
 if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
     st.session_state.pagina = "Cadastros Iniciais"
 
-if st.sidebar.button("📈 Relatórios", use_container_width=True):
-    st.session_state.pagina = "Relatórios"
+if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
+    st.session_state.pagina = "Visualizar Lançamentos"
 
 # Garante que a variável 'selecionado' sempre tenha um valor para não dar erro nos IFs
 selecionado = st.session_state.get('pagina', "Painel Inicial")
@@ -764,50 +764,58 @@ if selecionado == "Cadastros Iniciais":
                 st.caption(f"✅ {f['nome']}")
 
 
-# --- 11. TELA DE VISUALIZAÇÃO DE LANÇAMENTOS (LISTVIEW) ---
+# --- 11. TELA DE EXTRATO (LISTVIEW) ---
 
 if selecionado == "Visualizar Lançamentos":
-    st.markdown("## 📊 Histórico de Lançamentos")
+    st.markdown("## 📋 Extrato de Lançamentos")
     st.markdown("---")
 
-    # Criando abas para separar Despesas de Receitas
-    tab_desp, tab_rec = st.tabs(["🔴 Despesas", "🟢 Receitas"])
+    # Criando duas colunas para mostrar Resumos Rápidos
+    col1, col2 = st.columns(2)
+    
+    # Verificação de segurança para as bases de dados
+    if "df_despesas" not in st.session_state:
+        st.session_state.df_despesas = pd.DataFrame(columns=["Data", "Categoria", "Descrição", "Valor", "Status"])
+    if "df_receitas" not in st.session_state:
+        st.session_state.df_receitas = pd.DataFrame(columns=["Data", "Fonte", "Descrição", "Valor"])
 
-    with tab_desp:
-        st.subheader("Lista de Despesas")
-        if "df_despesas" in st.session_state and not st.session_state.df_despesas.empty:
-            # Exibe a lista de despesas formatada
-            st.dataframe(
-                st.session_state.df_despesas,
-                use_container_width=True,
-                hide_index=True
-            )
-            
-            # Botão para limpar histórico de despesas (opcional)
-            if st.button("Limpar Despesas", key="clear_desp"):
-                st.session_state.df_despesas = st.session_state.df_despesas.iloc[0:0]
-                salvar_dados_nuvem() # Supondo que você tenha essa função de salvamento
-                st.rerun()
-        else:
-            st.info("Nenhuma despesa lançada até o momento.")
+    # --- ABA DE DESPESAS ---
+    st.markdown("### 🔴 Despesas Realizadas")
+    if not st.session_state.df_despesas.empty:
+        # Ordenar por data mais recente
+        df_desp_sorted = st.session_state.df_despesas.sort_values(by="Data", ascending=False)
+        
+        st.dataframe(
+            df_desp_sorted,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Valor": st.column_config.NumberColumn("Valor (R$)", format="R$ %.2f"),
+                "Data": st.column_config.DateColumn("Data do Gasto")
+            }
+        )
+    else:
+        st.info("Ainda não existem despesas lançadas.")
 
-    with tab_rec:
-        st.subheader("Lista de Receitas")
-        if "df_receitas" in st.session_state and not st.session_state.df_receitas.empty:
-            # Exibe a lista de receitas formatada
-            st.dataframe(
-                st.session_state.df_receitas,
-                use_container_width=True,
-                hide_index=True
-            )
-            
-            # Botão para limpar histórico de receitas (opcional)
-            if st.button("Limpar Receitas", key="clear_rec"):
-                st.session_state.df_receitas = st.session_state.df_receitas.iloc[0:0]
-                salvar_dados_nuvem()
-                st.rerun()
-        else:
-            st.info("Nenhuma receita lançada até o momento.")
+    st.markdown("---")
+
+    # --- ABA DE RECEITAS ---
+    st.markdown("### 🟢 Receitas Recebidas")
+    if not st.session_state.df_receitas.empty:
+        # Ordenar por data mais recente
+        df_rec_sorted = st.session_state.df_receitas.sort_values(by="Data", ascending=False)
+        
+        st.dataframe(
+            df_rec_sorted,
+            use_container_width=True,
+            hide_index=True,
+            column_config={
+                "Valor": st.column_config.NumberColumn("Valor (R$)", format="R$ %.2f"),
+                "Data": st.column_config.DateColumn("Data do Recebimento")
+            }
+        )
+    else:
+        st.info("Ainda não existem receitas lançadas.")
 
 
 
