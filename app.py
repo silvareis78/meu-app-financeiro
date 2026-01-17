@@ -725,7 +725,7 @@ if selecionado == "Cadastros Iniciais":
     st.markdown("""
         <style>
             .caixa-rolagem {
-                max-height: 400px;
+                max-height: 100px;
                 overflow-y: auto;
                 overflow-x: hidden;
                 padding: 10px;
@@ -1062,6 +1062,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
