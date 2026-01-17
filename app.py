@@ -756,7 +756,7 @@ if selecionado == "Cadastros Iniciais":
         st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
-                if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
+                if st.button(f"🔼🟢 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
                     modal_receita_categoria(cat_r)                
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
@@ -875,6 +875,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
