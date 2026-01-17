@@ -702,16 +702,13 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. GARANTE QUE AS VARIÁVEIS DE FECHAMENTO EXISTAM (EVITA ERROS)
-    if 'pop_id_d' not in st.session_state: st.session_state.pop_id_d = 0
-    if 'pop_id_r' not in st.session_state: st.session_state.pop_id_r = 0
-
-    # 2. CSS PARA BOTÃO VERDE (SEM MUDAR A ESTRUTURA)
+    # 1. CSS PARA BOTÃO VERDE (Injetado apenas nesta tela)
     st.markdown("""
         <style>
         button[kind="primary"] {
             background-color: #28a745 !important;
             color: white !important;
+            border: none !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -719,34 +716,28 @@ if selecionado == "Cadastros Iniciais":
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
     
-    # Criamos 3 colunas principais para organizar tudo verticalmente na tela
-    # [1, 1, 1] significa que as 3 colunas têm o mesmo tamanho
     col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
 
     # --- COLUNA 1: GESTÃO DE DESPESAS ---
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # O Popover cria um menu flutuante para não ocupar espaço na tela
-        # MELHORIA: Key dinâmica para forçar o fechamento automático
-        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{st.session_state.pop_id_d}"):
+        # O .get(key, 0) evita o TypeError se a variável ainda não existir
+        pop_id_d = st.session_state.get('pop_id_d', 0)
+        
+        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{pop_id_d}"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            # MELHORIA: type="primary" para cor verde
             if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
-                    # Adiciona à lista temporária
                     st.session_state.categorias.append(n_cat)
-                    # SALVAMENTO NA NUVEM: Envia a nova lista para o Google Sheets (Aba Config)
                     salvar_configuracoes_nuvem() 
+                    # Incrementa para forçar o fechamento no próximo ciclo
+                    st.session_state['pop_id_d'] = pop_id_d + 1
                     st.toast(f"✅ Categoria '{n_cat}' cadastrada!")
-                    # MELHORIA: Muda a key para fechar o popover
-                    st.session_state.pop_id_d += 1
-                    st.rerun() # Atualiza a tela para o botão da categoria aparecer
+                    st.rerun()
         
-        st.write("") # Pequeno espaço vertical
-        # CRIAÇÃO AUTOMÁTICA DE BOTÕES: Para cada categoria na lista, cria um botão
+        st.write("") 
         for cat in st.session_state.categorias:
-            # Ao clicar no botão da categoria (ex: LANCHE), abre o modal de lançamento
             if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
                 modal_lancamento_categoria(cat)
 
@@ -754,29 +745,26 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # MELHORIA: Key dinâmica para forçar o fechamento automático
-        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{st.session_state.pop_id_r}"):
+        # O .get(key, 0) evita o TypeError
+        pop_id_r = st.session_state.get('pop_id_r', 0)
+        
+        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{pop_id_r}"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            # MELHORIA: type="primary" para cor verde
             if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
-                # Garante que a lista de receitas exista antes de adicionar
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
-                    # SINCRONIZA COM GOOGLE: Salva a nova fonte na aba Config
                     salvar_configuracoes_nuvem()
+                    # Incrementa para forçar o fechamento
+                    st.session_state['pop_id_r'] = pop_id_r + 1
                     st.toast(f"✅ Fonte '{n_rec}' cadastrada!")
-                    # MELHORIA: Muda a key para fechar o popover
-                    st.session_state.pop_id_r += 1
                     st.rerun()
         
         st.write("") 
-        # Mostra os botões de Receita (apenas se a lista existir)
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
-                # Ao clicar, abre o modal de receita que configuramos no Bloco 7
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
                     modal_receita_categoria(cat_r)
 
@@ -793,6 +781,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
