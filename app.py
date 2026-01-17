@@ -737,7 +737,7 @@ if selecionado == "Cadastros Iniciais":
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
             # Botão Salvar
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
+            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
@@ -761,7 +761,7 @@ if selecionado == "Cadastros Iniciais":
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
             # Botão Salvar
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
+            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
@@ -795,6 +795,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
