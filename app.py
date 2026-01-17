@@ -702,7 +702,11 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # MELHORIA: CSS para forçar o botão a ser VERDE (Sem mudar a estrutura do código)
+    # 1. GARANTE QUE AS VARIÁVEIS DE FECHAMENTO EXISTAM (EVITA ERROS)
+    if 'pop_id_d' not in st.session_state: st.session_state.pop_id_d = 0
+    if 'pop_id_r' not in st.session_state: st.session_state.pop_id_r = 0
+
+    # 2. CSS PARA BOTÃO VERDE (SEM MUDAR A ESTRUTURA)
     st.markdown("""
         <style>
         button[kind="primary"] {
@@ -711,10 +715,6 @@ if selecionado == "Cadastros Iniciais":
         }
         </style>
     """, unsafe_allow_html=True)
-
-    # Inicializa IDs para as chaves dos popovers se não existirem
-    if 'pop_id_d' not in st.session_state: st.session_state.pop_id_d = 0
-    if 'pop_id_r' not in st.session_state: st.session_state.pop_id_r = 0
 
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
@@ -728,7 +728,7 @@ if selecionado == "Cadastros Iniciais":
         st.markdown("### 🔴 Categoria Despesa")
         
         # O Popover cria um menu flutuante para não ocupar espaço na tela
-        # MELHORIA: Key dinâmica para forçar o fechamento
+        # MELHORIA: Key dinâmica para forçar o fechamento automático
         with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{st.session_state.pop_id_d}"):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             # MELHORIA: type="primary" para cor verde
@@ -754,7 +754,7 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # MELHORIA: Key dinâmica para forçar o fechamento
+        # MELHORIA: Key dinâmica para forçar o fechamento automático
         with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{st.session_state.pop_id_r}"):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             # MELHORIA: type="primary" para cor verde
@@ -793,6 +793,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
