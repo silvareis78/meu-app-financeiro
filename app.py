@@ -803,9 +803,9 @@ if selecionado == "Visualizar Lançamentos":
             config_datas = {
                 "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=80),
                 "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=80),
-                "Descrição": st.column_config.TextColumn("Descrição", width=100),
-                "Categoria": st.column_config.TextColumn("Categoria", width=110),
-                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=90),
+                "Descrição": st.column_config.TextColumn("Descrição", width=200),
+                "Categoria": st.column_config.TextColumn("Categoria", width=115),
+                "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
                 "Parcela": st.column_config.TextColumn("Parcela", width=60), # Agora é texto puro
                 "Tipo": st.column_config.TextColumn("Tipo", width=70),
                 "Status": st.column_config.TextColumn("Status", width=70)
@@ -832,6 +832,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
