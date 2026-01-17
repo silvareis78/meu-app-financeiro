@@ -699,67 +699,72 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-    # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
-
+   # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
+    # 1. CSS PARA FORÇAR O VERDE (Apenas nos botões de salvar/concluir)
+    st.markdown("""
+        <style>
+        div[data-testid="stPopover"] button {
+            background-color: #28a745 !important;
+            color: white !important;
+            border: none !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
- 
-
-    # Criamos 3 colunas principais para organizar tudo verticalmente na tela
-    # [1, 1, 1] significa que as 3 colunas têm o mesmo tamanho
+    
     col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
-
 
     # --- COLUNA 1: GESTÃO DE DESPESAS ---
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
-      
-        # O Popover cria um menu flutuante para não ocupar espaço na tela
+        
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            if st.button("Salvar", key="btn_save_desp", use_container_width=True):
+            
+            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
-                    # Adiciona à lista temporária
                     st.session_state.categorias.append(n_cat)
-                    # SALVAMENTO NA NUVEM: Envia a nova lista para o Google Sheets (Aba Config)
                     salvar_configuracoes_nuvem() 
-                    st.success(f"✅ Categoria '{n_cat}' cadastrada!")
-                    st.rerun() # Atualiza a tela para o botão da categoria aparecer
+                    st.toast(f"✅ '{n_cat}' salva!")
+                    st.rerun()
+            
+            # BOTÃO CONCLUIR ADICIONADO AQUI
+            if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
+                st.rerun()
         
-        st.write("") # Pequeno espaço vertical
-
-        # CRIAÇÃO AUTOMÁTICA DE BOTÕES: Para cada categoria na lista, cria um botão
+        st.write("") 
         for cat in st.session_state.categorias:
-            # Ao clicar no botão da categoria (ex: LANCHE), abre o modal de lançamento
             if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}"):
                 modal_lancamento_categoria(cat)
 
-
     # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
-
     with col_rec:
-        st.markdown("### 🟢 Fonte de Receita")  
+        st.markdown("### 🟢 Fonte de Receita")
+        
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            if st.button("Salvar", key="btn_save_rec", use_container_width=True):
-                # Garante que a lista de receitas exista antes de adicionar
+            
+            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
+                
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
-                    # SINCRONIZA COM GOOGLE: Salva a nova fonte na aba Config
                     salvar_configuracoes_nuvem()
-                    st.success(f"✅ Fonte '{n_rec}' cadastrada!")
-
+                    st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
+            
+            # BOTÃO CONCLUIR ADICIONADO AQUI
+            if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
+                st.rerun()
         
         st.write("") 
-        # Mostra os botões de Receita (apenas se a lista existir)
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
-                # Ao clicar, abre o modal de receita que configuramos no Bloco 7
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
                     modal_receita_categoria(cat_r)                
 
@@ -776,6 +781,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
