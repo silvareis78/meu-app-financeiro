@@ -549,7 +549,7 @@ def modal_receita_categoria(fonte_nome):
         st.session_state.cont_receita = 0
         st.rerun()
 
-# --- 8. MODAL DE GERENCIAR CARTÕES E PAGAMENTOS ---
+# --- 8. MODAL DE GERENCIAR CARTÕES E PAGAMENTOS (COM LIMITE DE GASTOS) ---
 
 @st.dialog("💳 Gerenciar Formas de Pagamento") # Cria a janela flutuante para cartões
 def modal_forma_pagamento():
@@ -564,13 +564,13 @@ def modal_forma_pagamento():
         # Campo para o tipo (Ex: Crédito, Débito, PIX)
         tipo_f = st.text_input("Tipo (Ex: Cartão de Crédito)")
         
-        st.info("💡 Para Cartão, coloque os dias de fechamento e vencimento. Para Dinheiro/PIX, deixe 0.")
+        st.info("💡 Para Cartão, preencha fechamento, vencimento e limite. Para Dinheiro/PIX, deixe 0.")
         
-        # Cria duas colunas lado a lado para os números
-        col1, col2 = st.columns(2)
-        # PARA ALTERAR: O intervalo é de 0 a 31 (dias do mês)
-        fech = col1.number_input("Dia Fechamento", 0, 31, 0) # Dia que a fatura "vira"
-        venc = col2.number_input("Dia Vencimento", 0, 31, 0) # Dia que você paga a fatura
+        # Grid para números
+        col1, col2, col3 = st.columns(3)
+        fech = col1.number_input("Fechamento", 0, 31, 0)
+        venc = col2.number_input("Vencimento", 0, 31, 0)
+        limite_cad = col3.number_input("Limite Gasto (R$)", min_value=0.0, step=100.0, value=0.0)
         
         # BOTÃO DE CADASTRO
         if st.form_submit_button("Confirmar Cadastro", use_container_width=True):
@@ -579,55 +579,58 @@ def modal_forma_pagamento():
                 if 'formas_pagamento' not in st.session_state: 
                     st.session_state.formas_pagamento = []
                 
-                # Adiciona o novo cartão à lista na memória
+                # Adiciona o novo cartão à lista na memória com o campo de limite
                 st.session_state.formas_pagamento.append({
-                    "nome": nova_f, "tipo": tipo_f, "fechamento": fech, "vencimento": venc
+                    "nome": nova_f, 
+                    "tipo": tipo_f, 
+                    "fechamento": fech, 
+                    "vencimento": venc,
+                    "limite_sugerido": limite_cad # Novo campo aqui
                 })
                 
                 # --- SINCRONIZAÇÃO COM A NUVEM ---
-                # Salva a lista inteira na aba "Config" do Google Sheets
                 salvar_configuracoes_nuvem()
                 
                 st.success(f"✅ Forma '{nova_f}' cadastrada com sucesso!")
-                st.rerun() # Reinicia para mostrar a nova forma na lista abaixo
+                st.rerun()
 
     # --- PARTE 2: LISTA DE CARTÕES EXISTENTES E EDIÇÃO ---
-    # Só mostra esta parte se já existir algum cartão cadastrado
     if 'formas_pagamento' in st.session_state and st.session_state.formas_pagamento:
         st.markdown("---") # Linha divisória
         st.write("### Formas Cadastradas (Clique para Editar)")
         
-        # Percorre a lista de cartões e cria um 'Expander' (caixa que abre) para cada um
         for i, item in enumerate(st.session_state.formas_pagamento):
             with st.expander(f"⚙️ Editar: {item['nome']}"):
                 
-                # Campos de edição já preenchidos com os dados atuais
                 edit_nome = st.text_input("Nome", value=item['nome'], key=f"edit_n_{i}")
                 edit_tipo = st.text_input("Tipo", value=item['tipo'], key=f"edit_t_{i}")
                 
-                c1, c2 = st.columns(2)
+                c1, c2, c3 = st.columns(3)
                 edit_fech = c1.number_input("Fechamento", 0, 31, value=item['fechamento'], key=f"edit_f_{i}")
                 edit_venc = c2.number_input("Vencimento", 0, 31, value=item['vencimento'], key=f"edit_v_{i}")
                 
-                # Botões de Salvar e Remover lado a lado
+                # Melhoria: Recupera o limite sugerido (se não existir, inicia 0.0)
+                limite_atual = float(item.get('limite_sugerido', 0.0))
+                edit_limite = c3.number_input("Limite (R$)", min_value=0.0, step=100.0, value=limite_atual, key=f"edit_l_{i}")
+                
                 col_btn1, col_btn2 = st.columns(2)
                 
                 # BOTÃO SALVAR ALTERAÇÃO
                 if col_btn1.button("Salvar Alterações", key=f"save_{i}", use_container_width=True):
-                    # Atualiza os dados na memória (Session State)
                     st.session_state.formas_pagamento[i] = {
-                        "nome": edit_nome, "tipo": edit_tipo, "fechamento": edit_fech, "vencimento": edit_venc
+                        "nome": edit_nome, 
+                        "tipo": edit_tipo, 
+                        "fechamento": edit_fech, 
+                        "vencimento": edit_venc,
+                        "limite_sugerido": edit_limite # Novo campo aqui
                     }
-                    # Salva a mudança na planilha do Google
                     salvar_configuracoes_nuvem()
                     st.success("Alterado com sucesso!")
                     st.rerun()
                 
                 # BOTÃO REMOVER CARTÃO
                 if col_btn2.button("Remover", key=f"del_{i}", use_container_width=True):
-                    # Tira o item da lista
                     st.session_state.formas_pagamento.pop(i)
-                    # Atualiza a planilha (removendo o item de lá também)
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
@@ -1012,6 +1015,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
