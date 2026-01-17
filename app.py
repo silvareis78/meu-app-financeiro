@@ -637,11 +637,23 @@ def modal_forma_pagamento():
 
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 
+# CSS para alinhar o texto dos botões da sidebar à esquerda
+st.markdown("""
+    <style>
+        [data-testid="stSidebarNavLink"] {justify-content: flex-start;}
+        [data-testid="stSidebarUserContent"] .stButton button {
+            text-align: left !important;
+            display: flex !important;
+            justify-content: flex-start !important;
+            padding-left: 20px !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # Título que aparece no topo do menu lateral
 st.sidebar.title("MENU PRINCIPAL") 
 
-# BOTÕES DE NAVEGAÇÃO NA BARRA LATERAL
-# use_container_width=True faz o botão ocupar toda a largura da barra lateral
+# BOTÕES DE NAVEGAÇÃO NA BARRA LATERAL (Agora alinhados à esquerda)
 if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
     st.session_state.pagina = "Painel Inicial"
 
@@ -654,66 +666,52 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
-# Garante que a variável 'selecionado' sempre tenha um valor para não dar erro nos IFs
 selecionado = st.session_state.get('pagina', "Painel Inicial")
 
 # --- LÓGICA DA TELA: PAINEL INICIAL ---
 if selecionado == "Painel Inicial":
-    st.markdown("## 🏠 Painel Inicial") # Título da página
-    # Aplica a linha preta grossa definida no CSS
-    st.markdown('<div class="barra-preta-grossa"></div>', unsafe_allow_html=True) 
-
-    # ORGANIZAÇÃO DO CABEÇALHO (FILTROS E CARDS COLORIDOS)
-    # Os números [1.2, 1.2...] definem a largura de cada coluna. 
-    # PARA ALTERAR: Se os cards ficarem apertados, aumente esses números.
-    col_filtro, col_rec, col_desp, col_sal, col_vazio, col_ava = st.columns([1.5, 1.2, 1.2, 1.2, 1.5, 2.5])
-
-    with col_filtro: 
-        # Caixas de seleção para filtrar os dados da planilha
-        # index=datetime.now().month - 1 faria ele abrir sempre no mês atual
-        mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0)
-        ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2) # 2026 como padrão
-
-    with col_rec: 
-        # Card de Receita (Verde Petróleo)
-        st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
-
-    with col_desp: 
-        # Card de Despesa (Vermelho)
-        st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
-
-    with col_sal: 
-        # Card de Saldo (Dourado)
-        st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
-
-    with col_ava: 
-        # Bloco do Avatar e Mensagem de impacto
-        # PARA ALTERAR: O link em 'src' é a foto. Você pode trocar por uma foto sua no Google Drive (link direto).
-        st.markdown(f'''
-            <div class="avatar-container">
-                <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="img-avatar">
-                <div>Opa! Você gastou 49% do recebido em {mes_sel}!</div>
-            </div>
-        ''', unsafe_allow_html=True)
-        # Barra de progresso visual (0.49 significa 49%)
-        st.progress(0.49) 
-
-    # Linha preta com afastamento de 70px (definida no CSS como barra-afastada)
-    st.markdown('<div class="barra-afastada"></div>', unsafe_allow_html=True) 
-
-    # --- SEÇÃO DE DETALHAMENTO (CARDS VERTICAIS) ---
-    st.markdown("### Detalhamento de Despesas")
+    st.markdown("## 🏠 Painel Inicial")
     
-    # Criamos colunas para os cards verticais não ocuparem a tela inteira
-    col_cards, col_espaco = st.columns([1, 2])
-    
-    with col_cards:
-        # Card Laranja (A Pagar)
-        st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
-        # Card Grafite (Prevista)
-        st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
-        # Card Azul (Cartões Específicos)
-        st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+    # --- QUADRO 1: FILTROS E RESUMO PRINCIPAL ---
+    with st.container(border=True):
+        col_f1, col_f2, col_vazio = st.columns([1, 1, 3])
+        with col_f1:
+            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0)
+        with col_f2:
+            ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2)
+        
+        st.markdown("---")
+        
+        c_rec, c_desp, c_sal = st.columns(3)
+        with c_rec:
+            st.markdown('<div class="card receita" style="width:100%">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
+        with c_desp:
+            st.markdown('<div class="card despesa" style="width:100%">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+        with c_sal:
+            st.markdown('<div class="card saldo" style="width:100%">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+
+    # --- QUADRO 2: STATUS DE CONSUMO (AVATAR) ---
+    with st.container(border=True):
+        col_ava_img, col_ava_txt = st.columns([0.5, 5])
+        with col_ava_img:
+            st.markdown('<img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="50">', unsafe_allow_html=True)
+        with col_ava_txt:
+            st.markdown(f"**Opa! Você gastou 49% do recebido em {mes_sel}!**")
+            st.progress(0.49)
+
+    # --- QUADRO 3: DETALHAMENTO DE DESPESAS (LADO A LADO) ---
+    st.markdown("### 📊 Detalhes Financeiros")
+    with st.container(border=True):
+        col_v1, col_v2, col_v3 = st.columns(3)
+        
+        with col_v1:
+            st.markdown('<div class="card-vertical card-pagar"><b>DESPESA A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
+        
+        with col_v2:
+            st.markdown('<div class="card-vertical card-prevista"><b>DESPESA PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
+            
+        with col_v3:
+            st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -1055,6 +1053,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
