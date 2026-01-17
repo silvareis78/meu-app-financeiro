@@ -414,10 +414,16 @@ def modal_lancamento_categoria(categoria_nome):
             detalhes = next((i for i in st.session_state.formas_pagamento if i["nome"] == forma_sel), None)
             lista_itens = []
             
+            # Definindo o Status automático com base na forma de pagamento
+            # Se contiver a palavra "Cartão", o status será "Não Realizado"
+            status_auto = "Não Realizado" if "Cartão" in forma_sel else "Realizado"
+            
             for p in range(int(parcelas)):
                 data_parc = data_l + pd.DateOffset(months=p)
                 venc = calcular_vencimento_real(data_parc.date(), detalhes)
-                txt_parc = f"{p+1}/{int(parcelas)}" if parcelas > 1 else ""
+                
+                # Formata a parcela: 1/1, 1/2, etc. Se for 1 parcela só, fica vazio.
+                txt_parc = f"{p+1}/{int(parcelas)}" if int(parcelas) > 1 else ""
                 
                 lista_itens.append({
                     "Data Compra": data_l.strftime("%d/%m/%Y"),
@@ -427,7 +433,8 @@ def modal_lancamento_categoria(categoria_nome):
                     "Parcela": txt_parc,
                     "Tipo": tipo_desp,
                     "Valor": valor / parcelas,
-                    "Pagamento": forma_sel
+                    "Pagamento": forma_sel,
+                    "Status": status_auto  # Corrigido e fechado corretamente
                 })
             
             salvar_no_google(lista_itens, aba="Dados")
@@ -519,8 +526,7 @@ def modal_receita_categoria(fonte_nome):
                 "Parcela": "",
                 "Tipo": "Receita", # Identificador para os cálculos futuros
                 "Valor": valor,
-                "Pagamento": conta_destino,
-                "Status"
+                "Pagamento": conta_destino              
             }]
             
             # Salva no Google Sheets (Aba Dados)
@@ -830,6 +836,7 @@ if selecionado == "Visualizar Lançamentos":
 
     except Exception as e:
         st.error(f"Erro ao processar os dados: {e}")
+
 
 
 
