@@ -893,73 +893,87 @@ if selecionado == "Cartões":
         df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
         df_config = pd.read_excel(LINK_PLANILHA, sheet_name='Config') 
 
-        if not df_config.empty:
-            # 2. Puxa os nomes da aba Config filtrando apenas o Tipo "Cartão de Crédito"
-            # Ajustado para usar 'nome' e 'tipo' em minúsculo conforme seu exemplo
-            df_cartoes = df_config[df_config['tipo'] == 'Cartão de Crédito']
-            cartoes_oficiais = sorted(df_cartoes['nome'].dropna().unique())
+        if not df_config.empty and 'Detalhes_Pagamento' in df_config.columns:
+            import json
             
-            if len(cartoes_oficiais) == 0:
-                st.warning("Nenhum cartão de crédito localizado na aba Config.")
-            else:
-                # 3. Filtros na Tela
-                col1, col2 = st.columns(2)
-                with col1:
-                    cartao_sel = st.selectbox("Escolha o Cartão:", cartoes_oficiais)
+            # 2. Transformar a coluna Detalhes_Pagamento (JSON) em um novo DataFrame
+            def extrair_json(x):
+                try:
+                    return json.loads(x.replace("'", '"')) # Garante aspas duplas para o JSON
+                except:
+                    return {}
+
+            # Criamos um DataFrame a partir dos dicionários dentro da coluna
+            df_detalhes = pd.DataFrame(df_config['Detalhes_Pagamento'].apply(extrair_json).tolist())
+            
+            # 3. Filtrar apenas Cartão de Crédito
+            if not df_detalhes.empty and 'tipo' in df_detalhes.columns:
+                df_cartoes = df_detalhes[df_detalhes['tipo'] == 'Cartão de Crédito']
+                cartoes_oficiais = sorted(df_cartoes['nome'].dropna().unique())
                 
-                with col2:
-                    # Garantir que Vencimento é data para extrair o mês
-                    df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
-                    df_geral['Mes_Venc'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
-                    meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique())
-                    mes_sel = st.selectbox("Mês da Fatura:", meses_disp)
-
-                # 4. Pegar informações extras do cartão selecionado (Fechamento e Vencimento fixo)
-                info_cartao = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
-                dia_fechamento = info_cartao['fechamento']
-                dia_vencimento = info_cartao['vencimento']
-
-                # 5. Filtrar os lançamentos da aba 'Dados' correspondentes
-                df_fatura = df_geral[
-                    (df_geral['Pagamento'] == cartao_sel) & 
-                    (df_geral['Mes_Venc'] == mes_sel)
-                ].copy()
-
-                # 6. Resumo Visual com infos do cadastro
-                total_fatura = df_fatura['Valor'].sum()
-                
-                c1, c2, c3 = st.columns(3)
-                c1.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
-                c2.metric("Dia de Fechamento", f"Dia {dia_fechamento}")
-                c3.metric("Dia de Vencimento", f"Dia {dia_vencimento}")
-
-                # 7. Tabela de Detalhes
-                st.markdown("### 📝 Itens da Fatura")
-                if not df_fatura.empty:
-                    df_fatura['Vencimento'] = df_fatura['Vencimento'].dt.date
-                    
-                    config_cartao = {
-                        "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=100),
-                        "Descrição": st.column_config.TextColumn("Descrição", width=350),
-                        "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=120),
-                        "Parcela": st.column_config.TextColumn("Parc.", width=70),
-                        "Status": st.column_config.TextColumn("Status", width=110)
-                    }
-
-                    st.dataframe(
-                        df_fatura[["Vencimento", "Descrição", "Valor", "Parcela", "Status"]],
-                        use_container_width=False,
-                        hide_index=True,
-                        column_config=config_cartao,
-                        height=500
-                    )
+                if len(cartoes_oficiais) == 0:
+                    st.warning("Nenhum cartão de crédito localizado nos detalhes.")
                 else:
-                    st.info(f"Sem gastos registrados para {cartao_sel} em {mes_sel}.")
+                    # 4. Filtros na Tela
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        cartao_sel = st.selectbox("Escolha o Cartão:", cartoes_oficiais)
+                    
+                    with col2:
+                        df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
+                        df_geral['Mes_Venc'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
+                        meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique())
+                        mes_sel = st.selectbox("Mês da Fatura:", meses_disp)
+
+                    # 5. Pegar informações extras do cartão selecionado
+                    info_cartao = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
+                    dia_fechamento = info_cartao.get('fechamento', '?')
+                    dia_vencimento = info_cartao.get('vencimento', '?')
+
+                    # 6. Filtrar lançamentos na aba 'Dados'
+                    df_fatura = df_geral[
+                        (df_geral['Pagamento'] == cartao_sel) & 
+                        (df_geral['Mes_Venc'] == mes_sel)
+                    ].copy()
+
+                    # 7. Resumo Visual
+                    total_fatura = df_fatura['Valor'].sum()
+                    
+                    c1, c2, c3 = st.columns(3)
+                    c1.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
+                    c2.metric("Fechamento", f"Dia {dia_fechamento}")
+                    c3.metric("Vencimento", f"Dia {dia_vencimento}")
+
+                    # 8. Tabela de Detalhes
+                    st.markdown("### 📝 Itens da Fatura")
+                    if not df_fatura.empty:
+                        df_fatura['Vencimento_View'] = df_fatura['Vencimento'].dt.date
+                        
+                        config_cartao = {
+                            "Vencimento_View": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=100),
+                            "Descrição": st.column_config.TextColumn("Descrição", width=350),
+                            "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=120),
+                            "Parcela": st.column_config.TextColumn("Parc.", width=70),
+                            "Status": st.column_config.TextColumn("Status", width=110)
+                        }
+
+                        st.dataframe(
+                            df_fatura[["Vencimento_View", "Descrição", "Valor", "Parcela", "Status"]],
+                            use_container_width=False,
+                            hide_index=True,
+                            column_config=config_cartao,
+                            height=500
+                        )
+                    else:
+                        st.info(f"Nenhum gasto para {cartao_sel} em {mes_sel}.")
+            else:
+                st.warning("Coluna 'tipo' não encontrada dentro dos detalhes.")
         else:
-            st.error("A aba 'Config' está vazia.")
+            st.error("Coluna 'Detalhes_Pagamento' não encontrada na aba Config.")
 
     except Exception as e:
-        st.error(f"Erro ao carregar dados: {e}")
+        st.error(f"Erro ao processar dados: {e}")")
+
 
 
 
