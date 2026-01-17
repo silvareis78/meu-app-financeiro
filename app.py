@@ -880,7 +880,7 @@ if selecionado == "Visualizar Lançamentos":
         st.error(f"Erro ao processar os dados: {e}")
 
 
-# --- 12. TELA DE CARTÕES (FILTRO CENTRALIZADO E NOVAS OPÇÕES) ---
+# --- 12. TELA DE CARTÕES (LAYOUT COM QUADROS LADO A LADO) ---
 
 if selecionado == "Cartões":
     st.markdown("## 💳 Painel de Cartões de Crédito")
@@ -900,40 +900,48 @@ if selecionado == "Cartões":
             df_detalhes = pd.DataFrame(df_config['Detalhes_Pagamento'].apply(extrair_json).tolist())
             df_cartoes = df_detalhes[df_detalhes['tipo'] == 'Cartão de Crédito']
 
-            # --- QUADRO 1: FILTROS CENTRALIZADOS ---
-            # Criamos 3 colunas, a do meio (2) será o nosso quadro
-            col_esq, col_central, col_dir = st.columns([1, 4, 1])
-            
-            with col_central:
+            # --- LINHA SUPERIOR: DOIS QUADROS LADO A LADO ---
+            col_esq, col_dir = st.columns(2)
+
+            # QUADRO 1 (ESQUERDA): FILTROS DE BUSCA
+            with col_esq:
                 with st.container(border=True):
                     st.markdown("🔍 **Filtros de Busca**")
                     
-                    # Primeira linha: Cartão e Mês
+                    # Organizando os 3 inputs de forma compacta dentro do quadro
+                    cartao_sel = st.selectbox("Escolha o Cartão:", sorted(df_cartoes['nome'].unique()))
+                    
                     c1, c2 = st.columns(2)
                     with c1:
-                        cartao_sel = st.selectbox("Escolha o Cartão:", sorted(df_cartoes['nome'].unique()))
-                    with c2:
                         df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
                         df_geral['Mes_Venc'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
                         meses_disp = sorted(df_geral['Mes_Venc'].dropna().unique(), reverse=True)
                         mes_sel = st.selectbox("Mês de Fechamento:", meses_disp)
+                    with c2:
+                        tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
                     
-                    # Segunda linha: Tipo de Compra (Novo Combobox)
-                    tipo_compra = st.selectbox("Tipo de Lançamento:", ["Tudo", "À Vista", "Parcelado"])
+                    # Espaçador para garantir que os quadros fiquem com altura similar se o da direita for maior
+                    st.write("") 
 
-            # Processamento de Dados
+            # QUADRO 2 (DIREITA): ESPAÇO PARA SEU NOVO QUADRO
+            with col_dir:
+                with st.container(border=True):
+                    st.markdown("📌 **Novo Quadro**")
+                    st.info("Espaço reservado para o seu novo conteúdo.")
+                    # Você pode inserir aqui os componentes do seu próximo quadro
+                    st.write("Os dois quadros possuem o mesmo tamanho de largura.")
+                    st.write("")
+
+            # --- PROCESSAMENTO DOS DADOS ---
             info = df_cartoes[df_cartoes['nome'] == cartao_sel].iloc[0]
             df_fatura = df_geral[(df_geral['Pagamento'] == cartao_sel) & (df_geral['Mes_Venc'] == mes_sel)].copy()
             
-            # Identificação de parcelados
             mask_parcelado = df_fatura['Parcela'].astype(str).str.contains('/', na=False) & (df_fatura['Parcela'] != '1/1')
             
-            # Totais para o resumo (sempre calculados sobre a fatura cheia)
             total_avista = df_fatura[~mask_parcelado]['Valor'].sum()
             total_parcelado = df_fatura[mask_parcelado]['Valor'].sum()
             total_fatura = df_fatura['Valor'].sum()
 
-            # Aplicar filtro de Tipo de Compra na Tabela
             if tipo_compra == "À Vista":
                 df_exibir = df_fatura[~mask_parcelado]
             elif tipo_compra == "Parcelado":
@@ -941,11 +949,10 @@ if selecionado == "Cartões":
             else:
                 df_exibir = df_fatura
 
-            # Ajuste de números inteiros para as datas
             f_dia = int(info.get('fechamento', 0)) if str(info.get('fechamento')).replace('.','').isdigit() else '?'
             v_dia = int(info.get('vencimento', 0)) if str(info.get('vencimento')).replace('.','').isdigit() else '?'
 
-            # --- QUADRO 2: RESUMO ---
+            # --- QUADRO RESUMO (ABAIXO DOS FILTROS) ---
             with st.container(border=True):
                 col_titulo, col_datas = st.columns([1, 1])
                 with col_titulo:
@@ -964,7 +971,7 @@ if selecionado == "Cartões":
                 with c_v2: st.metric("Total Parcelado", f"R$ {total_parcelado:,.2f}")
                 with c_v3: st.metric("Total da Fatura", f"R$ {total_fatura:,.2f}")
 
-            # --- QUADRO 3: ITENS DA FATURA ---
+            # --- QUADRO ITENS DA FATURA ---
             with st.container(border=True):
                 st.markdown(f"📝 **Itens da Fatura ({tipo_compra})**")
                 if not df_exibir.empty:
