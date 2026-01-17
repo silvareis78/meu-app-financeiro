@@ -649,7 +649,7 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
     st.session_state.pagina = "Visualizar Lançamentos"
 
 if st.sidebar.button("💳 Cartões", use_container_width=True):
-    st.session_state.pagina = "Visualizar Lançamentos"
+    st.session_state.pagina = "Cartões"
 
 # Garante que a variável 'selecionado' sempre tenha um valor para não dar erro nos IFs
 selecionado = st.session_state.get('pagina', "Painel Inicial")
@@ -939,6 +939,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar tela de cartões: {e}")
+
 
 
 
