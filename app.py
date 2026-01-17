@@ -699,13 +699,13 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-   # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
+  # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
     # 1. CSS PARA PINTAR DE VERDE APENAS OS BOTÕES DENTRO DO POPOVER
     st.markdown("""
         <style>
-        /* Isso garante que apenas botões DENTRO do popover fiquem verdes */
+        /* Foca apenas nos botões que estão dentro do corpo do popover */
         div[data-testid="stPopoverBody"] button {
             background-color: #28a745 !important;
             color: white !important;
@@ -733,9 +733,9 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # Botão Concluir com mudança de estado para forçar fechamento
+            # MUDANÇA AQUI: Adicionamos um gatilho no session_state para forçar o fecho
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
-                st.session_state["p_close"] = True # Força o Streamlit a notar mudança
+                st.session_state["fechar_janela"] = True 
                 st.rerun()
         
         st.write("") 
@@ -760,9 +760,9 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # Botão Concluir com mudança de estado para forçar fechamento
+            # MUDANÇA AQUI: Adicionamos um gatilho no session_state para forçar o fecho
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
-                st.session_state["p_close_r"] = True # Força o Streamlit a notar mudança
+                st.session_state["fechar_janela_r"] = True
                 st.rerun()
         
         st.write("") 
@@ -784,6 +784,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
