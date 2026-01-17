@@ -702,13 +702,24 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # CSS PARA FORÇAR O BOTÃO PRIMARY A SER VERDE
+    # CSS ULTRA FORTE: Alvo direto no ID do botão para garantir o VERDE
     st.markdown("""
         <style>
-        div[data-testid="stPopover"] button[kind="primary"] {
+        /* Força verde no botão Salvar Categoria */
+        button[key="btn_save_desp"], 
+        button[key="btn_save_rec"],
+        button[key="btn_close_desp"],
+        button[key="btn_close_rec"] {
             background-color: #28a745 !important;
             color: white !important;
-            border: none !important;
+            border: 2px solid #28a745 !important;
+        }
+        
+        /* Efeito de passar o mouse */
+        button[key="btn_save_desp"]:hover, 
+        button[key="btn_save_rec"]:hover {
+            background-color: #218838 !important;
+            border-color: #1e7e34 !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -785,6 +796,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
