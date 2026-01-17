@@ -702,10 +702,11 @@ if selecionado == "Painel Inicial":
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. CSS PARA BOTÃO VERDE (Injetado diretamente)
+    # 1. CSS PARA FORÇAR O BOTÃO A SER VERDE
     st.markdown("""
         <style>
-        button[kind="primary"] {
+        /* Alvo específico para botões de salvar dentro de popovers */
+        div[data-testid="stPopover"] button[kind="primary"] {
             background-color: #28a745 !important;
             color: white !important;
             border: none !important;
@@ -722,17 +723,15 @@ if selecionado == "Cadastros Iniciais":
     with col_desp:
         st.markdown("### 🔴 Categoria Despesa")
         
-        # O segredo é usar o .get diretamente na key para evitar o TypeError
-        with st.popover("➕ Inserir Categoria", use_container_width=True, key=f"p_d_{st.session_state.get('pop_id_d', 0)}"):
+        # O Popover fecha ao rodar o st.rerun()
+        with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
-                    # Atualiza o contador para fechar o popover
-                    st.session_state['pop_id_d'] = st.session_state.get('pop_id_d', 0) + 1
                     st.toast(f"✅ Categoria '{n_cat}' cadastrada!")
-                    st.rerun()
+                    st.rerun() # O rerun limpa o estado e fecha o popover automaticamente
         
         st.write("") 
         for cat in st.session_state.categorias:
@@ -743,8 +742,7 @@ if selecionado == "Cadastros Iniciais":
     with col_rec:
         st.markdown("### 🟢 Fonte de Receita")
         
-        # O segredo é usar o .get diretamente na key para evitar o TypeError
-        with st.popover("💰 Inserir Fonte", use_container_width=True, key=f"p_r_{st.session_state.get('pop_id_r', 0)}"):
+        with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
                 if 'categorias_receita' not in st.session_state:
@@ -753,10 +751,8 @@ if selecionado == "Cadastros Iniciais":
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
-                    # Atualiza o contador para fechar o popover
-                    st.session_state['pop_id_r'] = st.session_state.get('pop_id_r', 0) + 1
                     st.toast(f"✅ Fonte '{n_rec}' cadastrada!")
-                    st.rerun()
+                    st.rerun() # O rerun limpa o estado e fecha o popover automaticamente
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
@@ -777,6 +773,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
