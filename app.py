@@ -702,12 +702,14 @@ if selecionado == "Painel Inicial":
     # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # CSS PARA FORÇAR O VERDE (Busca botões que contenham as palavras Salvar ou Concluir)
+    # CSS PARA FORÇAR O VERDE NOS BOTÕES
     st.markdown("""
         <style>
+        /* Pinta de verde os botões Salvar e Concluir dentro do popover */
         div[data-testid="stPopover"] button {
             background-color: #28a745 !important;
             color: white !important;
+            border: none !important;
         }
         </style>
     """, unsafe_allow_html=True)
@@ -724,6 +726,7 @@ if selecionado == "Cadastros Iniciais":
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
             
+            # Botão Salvar
             if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
@@ -731,9 +734,8 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_cat}' salva!")
                     st.rerun()
             
-            # O botão Concluir limpa o texto e dá o rerun para fechar
+            # Botão Concluir / Sair (Apenas o rerun agora, sem limpar a variável)
             if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
-                st.session_state["new_cat_desp"] = ""
                 st.rerun()
         
         st.write("") 
@@ -748,6 +750,7 @@ if selecionado == "Cadastros Iniciais":
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
             
+            # Botão Salvar
             if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
@@ -758,16 +761,15 @@ if selecionado == "Cadastros Iniciais":
                     st.toast(f"✅ '{n_rec}' salva!")
                     st.rerun()
             
-            # O botão Concluir limpa o texto e dá o rerun para fechar
+            # Botão Concluir / Sair
             if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
-                st.session_state["new_cat_rec"] = ""
                 st.rerun()
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
             for cat_r in st.session_state.categorias_receita:
                 if st.button(f"🔺 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}"):
-                    modal_receita_categoria(cat_r)                 
+                    modal_receita_categoria(cat_r)                
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
@@ -782,6 +784,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
