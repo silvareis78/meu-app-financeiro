@@ -699,21 +699,9 @@ if selecionado == "Painel Inicial":
         # Card Azul (Cartões Específicos)
         st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
 
-  # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
+ # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS ---
 
 if selecionado == "Cadastros Iniciais":
-    # 1. CSS PARA PINTAR DE VERDE APENAS OS BOTÕES DENTRO DO POPOVER
-    st.markdown("""
-        <style>
-        /* Foca apenas nos botões que estão dentro do corpo do popover */
-        div[data-testid="stPopoverBody"] button {
-            background-color: #28a745 !important;
-            color: white !important;
-            border: none !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
     st.markdown("## ⚙️ Configurações e Cadastros")
     st.markdown("---")
     
@@ -725,18 +713,12 @@ if selecionado == "Cadastros Iniciais":
         
         with st.popover("➕ Inserir Categoria", use_container_width=True):
             n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-            
-            if st.button("Salvar Categoria", key="btn_save_desp", use_container_width=True):
+            if st.button("Salvar", key="btn_save_desp", use_container_width=True, type="primary"):
                 if n_cat and n_cat not in st.session_state.categorias:
                     st.session_state.categorias.append(n_cat)
                     salvar_configuracoes_nuvem() 
-                    st.toast(f"✅ '{n_cat}' salva!")
-                    st.rerun()
-            
-            # MUDANÇA AQUI: Adicionamos um gatilho no session_state para forçar o fecho
-            if st.button("✅ Concluir / Sair", key="btn_close_desp", use_container_width=True):
-                st.session_state["fechar_janela"] = True 
-                st.rerun()
+                    st.success(f"Categoria '{n_cat}' cadastrada!")
+                    st.rerun() 
         
         st.write("") 
         for cat in st.session_state.categorias:
@@ -749,21 +731,15 @@ if selecionado == "Cadastros Iniciais":
         
         with st.popover("💰 Inserir Fonte", use_container_width=True):
             n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-            
-            if st.button("Salvar Fonte", key="btn_save_rec", use_container_width=True):
+            if st.button("Salvar", key="btn_save_rec", use_container_width=True, type="primary"):
                 if 'categorias_receita' not in st.session_state:
                     st.session_state.categorias_receita = []
                 
                 if n_rec and n_rec not in st.session_state.categorias_receita:
                     st.session_state.categorias_receita.append(n_rec)
                     salvar_configuracoes_nuvem()
-                    st.toast(f"✅ '{n_rec}' salva!")
-                    st.rerun()
-            
-            # MUDANÇA AQUI: Adicionamos um gatilho no session_state para forçar o fecho
-            if st.button("✅ Concluir / Sair", key="btn_close_rec", use_container_width=True):
-                st.session_state["fechar_janela_r"] = True
-                st.rerun()
+                    st.success(f"Fonte '{n_rec}' cadastrada!")
+                    st.rerun() 
         
         st.write("") 
         if 'categorias_receita' in st.session_state:
@@ -784,6 +760,7 @@ if selecionado == "Cadastros Iniciais":
             for f in st.session_state.formas_pagamento:
                 # st.caption cria um texto menor e mais discreto
                 st.caption(f"✅ {f['nome']}")
+
 
 
 
