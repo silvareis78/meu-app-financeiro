@@ -598,8 +598,8 @@ with aba1:
     if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
     
-    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
+                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 
     # --- CSS MINIATURA ---
     st.markdown("""
@@ -616,7 +616,7 @@ with aba1:
                 color: white;
                 font-weight: bold;
                 font-size: 15px;
-                width: 90px;
+                width: 45px;
                 height: 35px;
                 display: flex;
                 align-items: center;
@@ -628,7 +628,7 @@ with aba1:
                 color: #333;
                 font-weight: bold;
                 font-size: 15px;
-                width: 160px;
+                width: 45px;
                 height: 35px;
                 display: flex;
                 align-items: center;
@@ -1067,6 +1067,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
