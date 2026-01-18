@@ -601,20 +601,9 @@ with aba1:
     meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
                    "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 
-    # --- CSS MINIATURA ---
+    # --- CSS AJUSTADO ---
     st.markdown("""
         <style>
-            /* ESTE É O CONTAINER QUE VOCÊ QUER DIMINUIR */
-            .meu-container-pequeno {
-                border: 1px solid #ddd;
-                border-radius: 5px;
-                padding: 8px;
-                width: fit-content; /* Alinhado para abraçar o conteúdo */
-                background-color: white;
-                display: block;
-            }
-            
-            /* Estilo das mini caixas */
             .mini-label {
                 background-color: #808080;
                 color: white;
@@ -641,28 +630,27 @@ with aba1:
                 border-left: none;
             }
 
-            /* Setas minimalistas */
+            /* Estilo dos botões para ficarem colados */
             div[data-testid="stColumn"] button {
                 border: none !important;
                 background: transparent !important;
                 color: #008080 !important;
-                font-size: 16px !important;
+                font-size: 18px !important;
+                font-weight: bold !important;
                 padding: 0px !important;
+                width: 100% !important; /* Faz o botão ocupar a coluninha toda */
                 height: 28px !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # Colunas principais: Período bem pequeno, Desempenho maior
     col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5], gap="small")
     
     with col_per:
-        # CORREÇÃO AQUI: Substituído st.container por div HTML
-        st.write('<div class="meu-container-pequeno">', unsafe_allow_html=True)
         st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px; margin-top:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
         
-        # --- LINHA MÊS ---
-        m_c1, m_c2, m_c3 = st.columns([0.05, 0.9, 0.05])
+        # --- LINHA MÊS (Setas coladas: 0.05 para as pontas) ---
+        m_c1, m_c2, m_c3 = st.columns([0.05, 0.45, 0.05])
         with m_c1:
             if st.button("❮", key="m_p"): 
                 st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
@@ -679,8 +667,8 @@ with aba1:
                 st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
                 st.rerun()
 
-        # --- LINHA ANO ---
-        a_c1, a_c2, a_c3 = st.columns([0.05, 0.9, 0.05])
+        # --- LINHA ANO (Setas coladas: 0.05 para as pontas) ---
+        a_c1, a_c2, a_c3 = st.columns([0.05, 0.45, 0.05])
         with a_c1:
             if st.button("❮", key="a_p"): 
                 st.session_state.val_a -= 1
@@ -696,23 +684,18 @@ with aba1:
             if st.button("❯", key="a_n"): 
                 st.session_state.val_a += 1
                 st.rerun()
-        st.write('</div>', unsafe_allow_html=True)
 
     with col_des:
         with st.container(border=True):
             st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px; margin-top:0;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
             st.markdown("<p style='font-size:12px; margin:0;'>Saldo: <b>R$ 5.250,00</b></p>", unsafe_allow_html=True)
             
-            # Barra grossa e discreta
             perc = 65
             st.markdown(f"""
                 <div style="width: 100%; background: #eee; height: 20px; border-radius: 3px; margin-top: 8px; border: 1px solid #ccc; position: relative;">
                     <div style="width: {perc}%; background: #008080; height: 100%; border-radius: 2px; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">
                         {perc}%
                     </div>
-                </div>
-                <div style="display: flex; justify-content: space-between; font-size: 9px; color: #777; font-weight: bold; margin-top: 2px;">
-                    <span>0%</span><span>50%</span><span>100%</span>
                 </div>
             """, unsafe_allow_html=True)
                     
@@ -1071,6 +1054,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
