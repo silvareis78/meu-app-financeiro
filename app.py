@@ -601,31 +601,24 @@ with aba1:
     meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS DE PRECISÃO TOTAL ---
+    # --- CSS REALMENTE UNIFICADO ---
     st.markdown("""
         <style>
-            /* Container que impede o empilhamento vertical */
-            .horizontal-stepper {
+            .linha-stepper {
                 display: flex !important;
-                flex-direction: row !important;
                 align-items: center !important;
-                justify-content: flex-start !important;
                 gap: 0px !important;
-                margin-bottom: 5px !important;
-                white-space: nowrap !important; /* Impede quebra de linha */
+                margin-bottom: 10px !important;
             }
-            
-            /* Seta Verde Água */
             .seta-verde {
                 color: #20B2AA !important;
-                font-size: 24px !important;
+                font-size: 22px !important;
                 font-weight: bold !important;
-                padding: 0 10px !important;
-                cursor: pointer !important;
+                width: 30px;
+                text-align: center;
+                cursor: pointer;
             }
-
-            /* Label Cinza Escuro */
-            .label-cinza {
+            .caixa-label {
                 background-color: #808080 !important;
                 color: white !important;
                 font-weight: bold !important;
@@ -637,9 +630,7 @@ with aba1:
                 justify-content: center !important;
                 border: 1px solid #666 !important;
             }
-
-            /* Valor Bege Claro */
-            .valor-bege {
+            .caixa-valor {
                 background-color: #FDF5E6 !important;
                 color: #333 !important;
                 font-weight: bold !important;
@@ -652,65 +643,65 @@ with aba1:
                 border: 1px solid #BDB76B !important;
                 border-left: none !important;
             }
-
-            /* Botão invisível do Streamlit para capturar o clique */
-            .stButton button {
-                position: absolute !important;
-                opacity: 0 !important;
-                width: 40px !important;
-                height: 30px !important;
-                z-index: 10 !important;
-                border: none !important;
+            /* Botões invisíveis para capturar o clique */
+            .btn-inv {
+                position: absolute;
+                opacity: 0;
+                width: 30px;
+                height: 30px;
+                z-index: 10;
+                cursor: pointer;
             }
-            
-            .btn-wrapper { position: relative; display: flex; align-items: center; justify-content: center; }
+            .wrapper-seta { position: relative; display: flex; align-items: center; justify-content: center; }
         </style>
     """, unsafe_allow_html=True)
 
-    col_periodo, col_desempenho = st.columns([1.2, 2.5])
+    col_per, col_des = st.columns([1.2, 2.5])
 
-    with col_periodo:
+    with col_per:
         with st.container(border=True):
-            st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:15px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:12px; font-weight:bold;'>📍 PERÍODO</p>", unsafe_allow_html=True)
 
-            # --- LINHA MÊS (SETA - LABEL - VALOR - SETA) ---
-            st.write('<div class="horizontal-stepper">', unsafe_allow_html=True)
+            # --- MÊS EM UM ÚNICO BLOCO HTML ---
+            # Aqui eu junto tudo para o Streamlit não quebrar a linha
+            html_mes = f'''
+            <div class="linha-stepper">
+                <div class="wrapper-seta"><span class="seta-verde">❮</span></div>
+                <div class="caixa-label">Mês:</div>
+                <div class="caixa-valor">{meses_lista[st.session_state.idx_m]}</div>
+                <div class="wrapper-seta"><span class="seta-verde">❯</span></div>
+            </div>
+            '''
             
-            # Esquerda
-            st.write('<div class="btn-wrapper"><span class="seta-verde">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m1"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-            st.write('</div>', unsafe_allow_html=True)
+            # Botões de controle posicionados acima do HTML
+            c1, c2, c3, c4 = st.columns([0.15, 0.35, 0.35, 0.15])
+            with c1:
+                if st.button(" ", key="m_prev"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+            with c4:
+                if st.button(" ", key="m_next"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
             
-            # Centro Grudado
-            st.write(f'<div class="label-cinza">Mês:</div><div class="valor-bege">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
-            
-            # Direita
-            st.write('<div class="btn-wrapper"><span class="seta-verde">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m2"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-            st.write('</div>', unsafe_allow_html=True)
-            
-            st.write('</div>', unsafe_allow_html=True)
+            # Renderiza o visual colado logo abaixo dos botões de ação
+            st.markdown(html_mes, unsafe_allow_html=True)
 
-            # --- LINHA ANO (SETA - LABEL - VALOR - SETA) ---
-            st.write('<div class="horizontal-stepper">', unsafe_allow_html=True)
+            # --- ANO EM UM ÚNICO BLOCO HTML ---
+            html_ano = f'''
+            <div class="linha-stepper">
+                <div class="wrapper-seta"><span class="seta-verde">❮</span></div>
+                <div class="caixa-label">Ano:</div>
+                <div class="caixa-valor">{st.session_state.val_a}</div>
+                <div class="wrapper-seta"><span class="seta-verde">❯</span></div>
+            </div>
+            '''
             
-            # Esquerda
-            st.write('<div class="btn-wrapper"><span class="seta-verde">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a1"): st.session_state.val_a -= 1
-            st.write('</div>', unsafe_allow_html=True)
-            
-            # Centro Grudado
-            st.write(f'<div class="label-cinza">Ano:</div><div class="valor-bege">{st.session_state.val_a}</div>', unsafe_allow_html=True)
-            
-            # Direita
-            st.write('<div class="btn-wrapper"><span class="seta-verde">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a2"): st.session_state.val_a += 1
-            st.write('</div>', unsafe_allow_html=True)
-            
-            st.write('</div>', unsafe_allow_html=True)
+            c5, c6, c7, c8 = st.columns([0.15, 0.35, 0.35, 0.15])
+            with c5:
+                if st.button(" ", key="a_prev"): st.session_state.val_a -= 1
+            with c8:
+                if st.button(" ", key="a_next"): st.session_state.val_a += 1
+                
+            st.markdown(html_ano, unsafe_allow_html=True)
 
-    with col_desempenho:
-        # Espaço reservado para o próximo quadro
+    with col_des:
         st.empty()
                     
 with aba2:
@@ -1068,6 +1059,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
