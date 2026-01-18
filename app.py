@@ -634,10 +634,8 @@ def modal_forma_pagamento():
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (BARRA CUSTOMIZADA) ---
 
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (MELHORIA NA BARRA DE DESEMPENHO) ---
-
-# CSS Corretivo para Sidebar, Cards e Alinhamento
 st.markdown("""
     <style>
         /* 1. MENU LATERAL ALINHADO À ESQUERDA */
@@ -648,13 +646,8 @@ st.markdown("""
             width: 100% !important;
             padding-left: 15px !important;
         }
-        [data-testid="stSidebar"] .stButton button p {
-            width: 100%;
-            text-align: left !important;
-            font-weight: 500;
-        }
 
-        /* 2. AJUSTE DE CARDS (PREVENIR OVERFLOW) */
+        /* 2. CARDS E QUADROS */
         .card, .card-vertical {
             width: 100% !important;
             box-sizing: border-box !important;
@@ -663,32 +656,28 @@ st.markdown("""
             border-radius: 8px;
         }
 
-        /* 3. ESTILO PARA MENSAGEM PROFISSIONAL */
-        .status-box {
-            padding: 5px;
-            border-radius: 8px;
+        /* 3. BARRA DE PROGRESSO PERSONALIZADA (MAIS GROSSA) */
+        .progress-container-custom {
+            width: 100%;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            margin-top: 15px;
+            height: 20px; /* ALTURA DA BARRA */
+            position: relative;
         }
-        .status-title {
-            font-size: 0.85rem;
-            font-weight: bold;
-            color: #555;
-            text-transform: uppercase;
-            letter-spacing: 1px;
+        .progress-bar-custom {
+            height: 100%;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #008080, #00b3b3);
+            transition: width 0.5s ease-in-out;
         }
-        .status-value {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: #1E1E1E;
-        }
-        
-        /* Estilo para as marcações da barra */
         .escala-container {
             display: flex;
             justify-content: space-between;
-            font-size: 0.75rem;
-            color: #888;
+            font-size: 0.7rem;
+            color: #666;
             font-weight: bold;
-            margin-top: -10px; /* Aproxima da barra */
+            margin-top: 5px;
             padding: 0 2px;
         }
     </style>
@@ -710,32 +699,26 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-    # --- LINHA 1: FILTROS E MENSAGEM PROFISSIONAL (LADO A LADO) ---
     col_esquerda, col_direita = st.columns([1, 2])
 
     with col_esquerda:
-        with st.container(height=175, border=True):
+        with st.container(height=180, border=True):
             st.markdown("🔍 **Período**")
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_direita:
-        with st.container(height=175, border=True):
-            consumo = 49 # Simulação
+        with st.container(height=180, border=True):
+            consumo = 49 # Valor do consumo
             
             st.markdown(f"""
-                <div class="status-box">
-                    <div class="status-title">Desempenho de Gastos em {mes_sel}</div>
-                    <div class="status-value">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">do orçamento utilizado</span></div>
+                <div style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</div>
+                <div style="font-size: 1.4rem; font-weight: 800;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></div>
+                
+                <div class="progress-container-custom">
+                    <div class="progress-bar-custom" style="width: {consumo}%;"></div>
                 </div>
-            """, unsafe_allow_html=True)
-            
-            # Barra de progresso (Ocupando espaço visual)
-            st.write("") # Espaçador para a barra respirar
-            st.progress(consumo / 100)
-            
-            # Marcações da Escala
-            st.markdown("""
+                
                 <div class="escala-container">
                     <span>0%</span>
                     <span>50%</span>
@@ -743,13 +726,13 @@ if selecionado == "Painel Inicial":
                 </div>
             """, unsafe_allow_html=True)
             
-            st.write("") # Espaçador inferior
+            st.write("") # Espaçador
             if consumo < 50:
-                st.caption("🟢 Excelente! Seu nível de gastos está abaixo da média projetada.")
+                st.caption("🟢 Excelente! Gastos sob controle.")
             elif consumo < 80:
-                st.caption("🟡 Atenção: Você está entrando na margem de segurança do orçamento.")
+                st.caption("🟡 Atenção: Orçamento em nível médio.")
             else:
-                st.caption("🔴 Alerta: Limite orçamentário próximo do esgotamento.")
+                st.caption("🔴 Alerta: Limite próximo do esgotamento.")
 
     # --- LINHA 2: RESUMO FINANCEIRO (KPIs) ---
     with st.container(border=True):
@@ -772,6 +755,7 @@ if selecionado == "Painel Inicial":
             st.markdown('<div class="card-vertical card-prevista"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
         with c3:
             st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+
             
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
@@ -1114,6 +1098,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
