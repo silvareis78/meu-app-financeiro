@@ -231,25 +231,25 @@ st.markdown("""
     .block-container { padding-top: 1.5rem !important; } 
     footer { visibility: hidden; display: none !important; }
     
-    /* Labels Gerais */
-    [data-testid="stWidgetLabel"] p {
-        font-size: 18px !important;
-        font-weight: bold !important;
-        color: #000000 !important;
-    }
-    
-    /* Selectbox Padrão para outras telas */
-    div[data-baseweb="select"] > div {
-        text-align: center !important;
-        height: 38px !important;
+    /* Remove o espaço interno que o container cria e causa scroll */
+    [data-testid="stVerticalBlock"] > div {
+        padding-bottom: 0px !important;
+        padding-top: 0px !important;
     }
 
-    /* Estilo para forçar a altura das caixas no Painel */
-    .caixa-painel div[data-baseweb="select"] > div {
+    /* Ajuste da altura interna da caixa de seleção */
+    div[data-baseweb="select"] > div {
         height: 28px !important;
         min-height: 28px !important;
         line-height: 28px !important;
         font-size: 14px !important;
+    }
+
+    /* Labels de cadastro */
+    [data-testid="stWidgetLabel"] p {
+        font-size: 18px !important;
+        font-weight: bold !important;
+        color: #000000 !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -566,26 +566,22 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-    col_per, col_des = st.columns([0.7, 2.3])
+    col_per, col_des = st.columns([0.8, 2.2])
 
     with col_per:
         with st.container(height=160, border=True):
-            # Título do Quadro
-            st.markdown("<div style='margin-top: -15px; font-weight: bold; font-size: 15px;'>🔍 Período</div>", unsafe_allow_html=True)
+            # Título do quadro
+            st.markdown("<p style='font-weight: bold; font-size: 15px; margin-top: -10px; margin-bottom: 10px;'>🔍 Período</p>", unsafe_allow_html=True)
             
-            # --- BLOCO MÊS ---
-            st.markdown("<div style='font-size: 13px; font-weight: bold; margin-top: 5px;'>Selecione o Mês:</div>", unsafe_allow_html=True)
-            st.markdown('<div class="caixa-painel" style="margin-top: -35px;">', unsafe_allow_html=True)
+            # --- MÊS (Texto em cima, Caixa logo abaixo sem espaço) ---
+            st.markdown("<p style='font-size: 13px; font-weight: bold; margin: 0px;'>Selecione o Mês:</p>", unsafe_allow_html=True)
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
-                                   index=0, key="mes_v_final_1", label_visibility="collapsed")
-            st.markdown('</div>', unsafe_allow_html=True)
+                                   index=0, key="mes_v_definitivo", label_visibility="collapsed")
             
-            # --- BLOCO ANO ---
-            st.markdown("<div style='font-size: 13px; font-weight: bold; margin-top: -5px;'>Selecione o Ano:</div>", unsafe_allow_html=True)
-            st.markdown('<div class="caixa-painel" style="margin-top: -35px;">', unsafe_allow_html=True)
+            # --- ANO (Texto em cima, Caixa logo abaixo sem espaço) ---
+            st.markdown("<p style='font-size: 13px; font-weight: bold; margin: 8px 0px 0px 0px;'>Selecione o Ano:</p>", unsafe_allow_html=True)
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], 
-                                   index=2, key="ano_v_final_1", label_visibility="collapsed")
-            st.markdown('</div>', unsafe_allow_html=True)
+                                   index=2, key="ano_v_definitivo", label_visibility="collapsed")
 
     with col_des:
         with st.container(height=160, border=True):
@@ -597,6 +593,7 @@ if selecionado == "Painel Inicial":
                     <h3 style="margin: 0px;">{consumo}% Utilizado</h3>
                 </div>
             """, unsafe_allow_html=True)
+            
             barra_html = f"""
             <div style="width: 100%; background-color: #E0E0E0; border-radius: 10px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
                 <div style="width: {consumo}%; background-color: {cor_b}; height: 100%;"></div>
@@ -606,19 +603,29 @@ if selecionado == "Painel Inicial":
             </div>
             """
             st.markdown(barra_html, unsafe_allow_html=True)
-            st.markdown(f"<div style='font-size: 0.8rem; margin-top: 5px; color: #2E7D32;'>🟢 Gastos saudáveis para este período.</div>", unsafe_allow_html=True)
+            st.markdown(f"<div style='font-size: 0.8rem; margin-top: 5px; color: #2E7D32;'>🟢 Gastos saudáveis.</div>", unsafe_allow_html=True)
             
     # --- LINHA 2: KPIs ---
     with st.container(border=True):
         st.markdown("**💰 Consolidado Mensal**")
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown(f'<div style="background-color:#008080; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;">RECEITA<br><b style="font-size:1.2rem;">R$ 5.000,00</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="background-color:#008080; color:white; padding:15px; border-radius:8px; text-align:center;">RECEITA<br><b style="font-size:1.2rem;">R$ 5.000,00</b></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown(f'<div style="background-color:#FF4B4B; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;">DESPESA<br><b style="font-size:1.2rem;">R$ 2.450,00</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="background-color:#FF4B4B; color:white; padding:15px; border-radius:8px; text-align:center;">DESPESA<br><b style="font-size:1.2rem;">R$ 2.450,00</b></div>', unsafe_allow_html=True)
         with c3:
-            st.markdown(f'<div style="background-color:#D4AF37; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;">SALDO<br><b style="font-size:1.2rem;">R$ 2.550,00</b></div>', unsafe_allow_html=True)
+            st.markdown(f'<div style="background-color:#D4AF37; color:white; padding:15px; border-radius:8px; text-align:center;">SALDO<br><b style="font-size:1.2rem;">R$ 2.550,00</b></div>', unsafe_allow_html=True)
 
+    # --- LINHA 3: STATUS ---
+    st.markdown("### 📊 Status por Categoria")
+    with st.container(border=True):
+        d1, d2, d3 = st.columns(3)
+        with d1:
+            st.markdown('<div style="background-color:#FF914D; color:white; padding:15px; border-radius:8px; text-align:center;"><b>A PAGAR</b><br>R$ 1.200,00</div>', unsafe_allow_html=True)
+        with d2:
+            st.markdown('<div style="background-color:#666666; color:white; padding:15px; border-radius:8px; text-align:center;"><b>PREVISTA</b><br>R$ 800,00</div>', unsafe_allow_html=True)
+        with d3:
+            st.markdown('<div style="background-color:#007BFF; color:white; padding:15px; border-radius:8px; text-align:center;"><b>NUBANK</b><br>R$ 450,00</div>', unsafe_allow_html=True)
     # --- LINHA 3: STATUS ---
     st.markdown("### 📊 Status por Categoria")
     with st.container(border=True):
@@ -970,6 +977,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
