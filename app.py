@@ -655,7 +655,7 @@ with aba1:
             st.markdown("📍 **Período**")
             
             # --- LINHA DO MÊS ---         
-            c1_m, c2_m, = st.columns([0.6, 4])
+            c1_m, c2_m, = st.columns([0.45, 0.6])
             with c1_m:
                  st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             with c2_m:
@@ -1026,6 +1026,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
