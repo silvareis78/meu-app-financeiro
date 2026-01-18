@@ -628,7 +628,7 @@ with aba1:
                 color: #333;
                 font-weight: bold;
                 font-size: 15px;
-                width: 120px;
+                width: 160px;
                 height: 35px;
                 display: flex;
                 align-items: center;
@@ -1067,6 +1067,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
