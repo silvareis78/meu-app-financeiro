@@ -802,121 +802,10 @@ with aba3:
         st.error(f"Erro ao processar os dados: {e}")
 
 with aba4:
-    # Tudo o que você colocar aqui APARECERÁ NA TELA CARTÕES
+    # --- TELA DE CARTÕES ---
     st.session_state.pagina = "Cartões"
     st.subheader("💳 Gestão de Cartões de Crédito")
-    # Cole aqui o código de cartões
-  
-
-
-# --- TELA DE VISUALIZAÇÃO ---
-
-if selecionado == "Lançamentos":
-    st.markdown("## 📊 Histórico de Lançamentos")
-
-    LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
-
-    try:
-        # Lendo a planilha
-        df_geral = pd.read_excel(LINK_PLANILHA, sheet_name='Dados')
-
-        if not df_geral.empty:
-            # --- 1. FORMATAÇÃO DAS DATAS ---
-            df_geral['Data Compra'] = pd.to_datetime(df_geral['Data Compra'], errors='coerce')
-            df_geral['Vencimento'] = pd.to_datetime(df_geral['Vencimento'], errors='coerce')
-
-            # --- QUADRO ÚNICO PARA FILTROS E TABELA ---
-            with st.container(border=True):
-                st.markdown("### 🔍 Filtros e Lançamentos")
-                
-                # Mantendo a sua disposição original de colunas para os filtros
-                c1, c2, c3, vazio_dir = st.columns([0.6, 0.8, 1.2, 5])
-                
-                with c1:
-                    df_geral['Mes_Filtro'] = df_geral['Vencimento'].dt.strftime('%m/%Y')
-                    meses = sorted(df_geral['Mes_Filtro'].dropna().unique())
-                    mes_sel = st.selectbox("Mês:", ["Todos"] + meses)
-                
-                with c2:
-                    categorias = sorted(df_geral['Categoria'].dropna().unique())
-                    cat_sel = st.selectbox("Categoria:", ["Todas"] + categorias)
-                    
-                with c3:
-                    pagamentos = sorted(df_geral['Pagamento'].dropna().unique())
-                    pag_sel = st.selectbox("Pagamento:", ["Todos"] + pagamentos)
-
-                # Lógica de filtragem (sem alterações)
-                df_display = df_geral.copy()
-                if mes_sel != "Todos":
-                    df_display = df_display[df_display['Mes_Filtro'] == mes_sel]
-                if cat_sel != "Todas":
-                    df_display = df_display[df_display['Categoria'] == cat_sel]
-                if pag_sel != "Todos":
-                    df_display = df_display[df_display['Pagamento'] == pag_sel]
-
-                # Formatação para exibição
-                df_display['Data Compra'] = df_display['Data Compra'].dt.date
-                df_display['Vencimento'] = df_display['Vencimento'].dt.date
-
-                # --- 2. TRATAMENTO DA PARCELA (LÓGICA ORIGINAL) ---
-                if 'Parcela' in df_display.columns:
-                    def limpar_parcela(row):
-                        if str(row.get('Tipo', '')).lower() == 'receita':
-                            return ""
-                        val = row['Parcela']
-                        if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none', '']:
-                            return ""
-                        if isinstance(val, (pd.Timestamp, datetime.date)):
-                            return f"{val.day}/{val.month}"
-                        if str(val).strip() == "None":
-                            return ""
-                        return str(val)
-                    
-                    df_display['Parcela'] = df_display.apply(limpar_parcela, axis=1)
-
-                # Configuração de colunas da tabela
-                config_datas = {
-                    "Data Compra": st.column_config.DateColumn("Data", format="DD/MM/YYYY", width=90),
-                    "Vencimento": st.column_config.DateColumn("Vencimento", format="DD/MM/YYYY", width=90),
-                    "Descrição": st.column_config.TextColumn("Descrição", width=300),
-                    "Categoria": st.column_config.TextColumn("Categoria", width=120),
-                    "Valor": st.column_config.NumberColumn("Valor", format="R$ %.2f", width=100),
-                    "Parcela": st.column_config.TextColumn("Parcela", width=65),
-                    "Pagamento": st.column_config.TextColumn("Pagamento", width=150),
-                    "Tipo": st.column_config.TextColumn("Tipo", width=70),
-                    "Status": st.column_config.TextColumn("Status", width=100)
-                }
-
-                st.markdown("---") # Linha divisória dentro do quadro
-
-                # Abas dentro do quadro único
-                tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
-
-                df_receitas = df_display[df_display['Tipo'] == 'Receita'].copy()
-                df_despesas = df_display[df_display['Tipo'].isin(['Fixa', 'Variável'])].copy()
-                cols_exibir = [c for c in df_display.columns if c != 'Mes_Filtro']
-
-                with tab1:
-                    st.dataframe(df_display[cols_exibir], use_container_width=True, hide_index=True, column_config=config_datas, height=600)
-
-                with tab2:
-                    if not df_despesas.empty:
-                        st.dataframe(df_despesas[cols_exibir], use_container_width=True, hide_index=True, column_config=config_datas, height=600)
-                        st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
-
-                with tab3:
-                    if not df_receitas.empty:
-                        st.dataframe(df_receitas[cols_exibir], use_container_width=True, hide_index=True, column_config=config_datas, height=600)
-                        st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
-
-    except Exception as e:
-        st.error(f"Erro ao processar os dados: {e}")
-
-
-# --- 12. TELA DE CARTÕES (CÓDIGO COMPLETO E CORRIGIDO) ---
-
-if selecionado == "Cartões":
-    st.markdown("## 💳 Painel de Cartões de Crédito")
+    st.markdown("---")
     
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
@@ -1050,6 +939,13 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+  
+
+
+
+
+
+
 
 
 
