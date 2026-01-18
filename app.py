@@ -209,11 +209,12 @@ if 'pagina' not in st.session_state:
 # DICA TÉCNICA: O 'st.session_state.pagina' funciona como um marcador de livro.
 # Ele avisa ao código em qual aba do menu o usuário clicou por último.
         
-# --- 5.CONFIGURAÇÃO DA PÁGINA E ESTILIZAÇÃO (CSS/JS) ---
+# --- 5. CONFIGURAÇÃO DA PÁGINA E ESTILIZAÇÃO (CSS/JS) ---
 st.set_page_config(layout="wide", page_title="App Financeiro") 
 
 st.markdown("""
     <script>
+    // Limpeza visual agressiva (Executa a cada 0.5s)
     setInterval(function() {
         const elements = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu, header');
         elements.forEach(function(el) {
@@ -228,11 +229,11 @@ st.markdown("""
     </script>
 
     <style>
-    /* 1. ESTRUTURA GERAL */
+    /* 1. ESTRUTURA E REGRAS GERAIS */
     .block-container { padding-top: 1.5rem !important; } 
     footer { visibility: hidden; display: none !important; }
     
-    /* 2. CARDS KPI (Receita, Despesa, Saldo) */
+    /* 2. CARDS DE KPI (Receita, Despesa, Saldo) */
     .card {
         padding: 30px 45px !important;
         font-size: 20px !important;
@@ -246,7 +247,7 @@ st.markdown("""
     .despesa { background-color: #B22222; }
     .saldo   { background-color: #DAA520; }
 
-    /* 3. CARDS LATERAIS */
+    /* 3. CARDS LATERAIS / CATEGORIA */
     .card-vertical {
         padding: 12px 20px !important;
         border-radius: 10px !important;
@@ -263,7 +264,7 @@ st.markdown("""
     .card-prevista { background-color: #374151 !important; }
     .card-cartao { background-color: #0747A6 !important; }
 
-    /* 4. LABELS GERAIS */
+    /* 4. LABELS GERAIS (Telas de Cadastro) */
     [data-testid="stWidgetLabel"] p {
         font-size: 18px !important;
         font-weight: bold !important;
@@ -286,37 +287,22 @@ st.markdown("""
         width: 100% !important;
     }
 
-    /* --- AJUSTES EXCLUSIVOS PAINEL INICIAL (FILTROS) --- */
+    /* --- REGRAS DO PAINEL INICIAL (FILTROS) --- */
     
-    .titulo-painel {
-        font-size: 15px !important;
-        font-weight: bold !important;
-        margin-top: -15px !important;
-        margin-bottom: 5px !important;
+    /* Força as caixas a subirem para colar no texto */
+    .painel-container div[data-testid="stSelectbox"] {
+        margin-top: -38px !important;
     }
-
-    .label-painel {
-        font-size: 13px !important;
-        font-weight: bold !important;
-        color: #000000 !important;
-        display: block !important;
-        margin-bottom: 0px !important;
-    }
-
-    /* FORÇANDO A SUBIDA: Mirando no container do widget */
-    .selectbox-painel [data-testid="stSelectbox"] {
-        margin-top: -40px !important;  /* Puxa o componente inteiro para cima */
-    }
-
-    /* Ajuste da altura interna da caixa */
-    .selectbox-painel div[data-baseweb="select"] > div {
+    
+    /* Altura reduzida das caixas no painel */
+    .painel-container div[data-baseweb="select"] > div {
         height: 28px !important;
         min-height: 28px !important;
         font-size: 14px !important;
     }
-
-    /* Elimina espaços vazios entre as linhas do Streamlit */
-    .selectbox-painel [data-testid="stVerticalBlock"] > div {
+    
+    /* Remove espaçamentos automáticos do Streamlit */
+    .painel-container [data-testid="stVerticalBlock"] > div {
         gap: 0px !important;
         padding-top: 0px !important;
         padding-bottom: 0px !important;
@@ -618,6 +604,7 @@ def modal_forma_pagamento():
 
 st.sidebar.title("MENU PRINCIPAL") 
 
+# Botões de Navegação Lateral
 if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
     st.session_state.pagina = "Painel Inicial"
 if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
@@ -627,6 +614,7 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
+# Alinhamento dos botões (Mantendo original)
 st.markdown("""<style> 
     [data-testid="stSidebar"] button {text-align: left !important; justify-content: flex-start !important; display: flex !important;}
 </style>""", unsafe_allow_html=True)
@@ -641,25 +629,27 @@ if selecionado == "Painel Inicial":
 
     with col_per:
         with st.container(height=160, border=True):
-            # Tudo dentro desta DIV segue as regras do item 'Ajustes Exclusivos' no CSS
-            st.markdown('<div class="selectbox-painel">', unsafe_allow_html=True)
+            # Título do Quadro
+            st.markdown("<div style='margin-top: -15px; font-weight: bold; font-size: 15px;'>🔍 Período</div>", unsafe_allow_html=True)
             
-            st.markdown('<p class="titulo-painel">🔍 Período</p>', unsafe_allow_html=True)
+            # Encapsulamento com a classe correta
+            st.markdown("<div class='painel-container'>", unsafe_allow_html=True)
             
-            # Mês
-            st.markdown('<p class="label-painel">Selecione o Mês:</p>', unsafe_allow_html=True)
+            # Bloco Mês
+            st.markdown("<div style='font-size: 13px; font-weight: bold; margin-bottom: 0px; margin-top: 5px;'>Selecione o Mês:</div>", unsafe_allow_html=True)
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
-                                   index=0, key="mes_v9", label_visibility="collapsed")
+                                   index=0, key="mes_final_ok", label_visibility="collapsed")
             
-            # Ano
-            st.markdown('<p class="label-painel" style="margin-top: 5px !important;">Selecione o Ano:</p>', unsafe_allow_html=True)
+            # Bloco Ano
+            st.markdown("<div style='font-size: 13px; font-weight: bold; margin-bottom: 0px; margin-top: -3px;'>Selecione o Ano:</div>", unsafe_allow_html=True)
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], 
-                                   index=2, key="ano_v9", label_visibility="collapsed")
+                                   index=2, key="ano_final_ok", label_visibility="collapsed")
             
-            st.markdown('</div>', unsafe_allow_html=True)
+            st.markdown("</div>", unsafe_allow_html=True)
 
     with col_des:
         with st.container(height=160, border=True):
+            # Mantendo o quadro de desempenho original
             consumo = 49  
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
             st.markdown(f"""
@@ -668,6 +658,7 @@ if selecionado == "Painel Inicial":
                     <h3 style="margin: 0px; padding: 0px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></h3>
                 </div>
             """, unsafe_allow_html=True)
+            
             barra_html = f"""
             <div style="width: 100%; background-color: #E0E0E0; border-radius: 10px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
                 <div style="width: {consumo}%; background-color: {cor_b}; height: 100%;"></div>
@@ -700,7 +691,6 @@ if selecionado == "Painel Inicial":
             st.markdown('<div style="background-color:#666666; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;"><b>PREVISTA</b><br>R$ 800,00</div>', unsafe_allow_html=True)
         with d3:
             st.markdown('<div style="background-color:#007BFF; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;"><b>NUBANK</b><br>R$ 450,00</div>', unsafe_allow_html=True)
-            
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -1042,6 +1032,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
