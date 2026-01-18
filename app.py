@@ -600,186 +600,134 @@ with aba1:
     
     st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
 
-    # --- CSS ULTRA PROFISSIONAL ---
+    # --- CSS MINIMALISTA E ESCALONADO ---
     st.markdown("""
         <style>
+            /* Sobe o conteúdo para encostar no título */
             div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
                 margin-top: -25px !important;
             }
             
-            /* Ajuste Global dos Containers */
+            /* Containers com altura fixa e escala reduzida */
             div[data-testid="stVerticalBlockBorderWrapper"] {
-                padding: 20px !important;
-                min-height: 220px !important;
+                padding: 10px 15px !important;
+                min-height: 150px !important;
                 background: #ffffff !important;
-                border-radius: 15px !important;
-                box-shadow: 0 4px 15px rgba(0,0,0,0.05) !important;
+                border-radius: 8px !important;
                 border: 1px solid #E0E0E0 !important;
             }
 
-            /* Estilo das Labels de Período */
-            .label-cinza {
-                background-color: #F8F9FA;
+            /* Label Cinza Compacta */
+            .label-compacta {
+                background-color: #F0F2F6;
                 color: #444;
-                font-weight: 700;
-                padding: 0px 15px;
-                border-radius: 10px 0px 0px 10px;
-                font-size: 11px;
+                font-weight: bold;
+                padding: 0px 8px;
+                border-radius: 4px 0px 0px 4px;
+                font-size: 10px;
                 display: flex;
                 align-items: center;
-                height: 38px;
+                height: 32px; /* Altura reduzida */
                 border: 1px solid #DCDCDC;
                 border-right: none;
-                text-transform: uppercase;
             }
 
-            /* --- DESIGN DO QUADRO DESEMPENHO (REESTRUTURADO) --- */
-            .header-desempenho {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
-
-            .badge-status {
-                background: rgba(0, 128, 128, 0.1);
-                color: #008080;
-                padding: 4px 12px;
-                border-radius: 20px;
-                font-size: 10px;
-                font-weight: 800;
-                text-transform: uppercase;
-            }
-
-            .valor-principal {
-                font-family: 'Inter', sans-serif;
-                font-size: 34px;
-                font-weight: 900;
-                color: #1A1A1A;
-                letter-spacing: -1px;
-                margin: 0;
-            }
-
-            .label-total {
+            /* Títulos dos Cards */
+            .text-titulo {
                 font-size: 11px;
                 font-weight: 700;
                 color: #888;
-                margin-bottom: 2px;
+                margin-bottom: 8px;
                 text-transform: uppercase;
             }
 
-            /* Barra de Progresso Estilizada (Glow Effect) */
-            .outer-bar {
+            /* Valores em escala menor */
+            .valor-saldo-small {
+                font-size: 20px;
+                font-weight: 800;
+                color: #1A1A1A;
+                line-height: 1;
+            }
+
+            .label-caption {
+                font-size: 9px;
+                color: #AAA;
+                font-weight: 600;
+                margin-bottom: 2px;
+            }
+
+            /* Barra de Progresso Fina */
+            .bar-container-small {
                 width: 100%;
-                background: #F0F2F6;
-                border-radius: 50px;
-                height: 24px;
-                margin-top: 25px;
-                position: relative;
-                box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                background: #F5F5F5;
+                border-radius: 4px;
+                height: 10px;
+                margin-top: 8px;
+                overflow: hidden;
             }
 
-            .inner-bar {
+            .bar-progress-small {
                 height: 100%;
-                background: linear-gradient(90deg, #008080 0%, #00e6e6 100%);
-                border-radius: 50px;
-                box-shadow: 0 4px 10px rgba(0, 128, 128, 0.3);
-                position: relative;
-                transition: width 1s ease;
+                background: #008080;
+                border-radius: 4px;
             }
 
-            .dot-indicator {
-                position: absolute;
-                right: -2px;
-                top: 50%;
-                transform: translateY(-50%);
-                width: 12px;
-                height: 12px;
-                background: white;
-                border-radius: 50%;
-                border: 3px solid #008080;
-            }
-
-            /* Marcadores 0-50-100 */
-            .marker-box {
+            .marker-labels {
                 display: flex;
                 justify-content: space-between;
-                margin-top: 8px;
-                padding: 0 5px;
-            }
-
-            .marker-point {
-                font-size: 10px;
+                font-size: 8px;
+                color: #CCC;
                 font-weight: 700;
-                color: #BBB;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-            }
-
-            .marker-active {
-                color: #008080;
+                margin-top: 2px;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- LAYOUT ---
-    col_per, col_des, col_vazio = st.columns([1.1, 2.5, 0.5]) 
+    # --- LAYOUT DE COLUNAS ---
+    # Reduzi a largura total ocupada pelos quadros para ficar mais centralizado
+    col_per, col_des, col_vazio = st.columns([0.8, 1.4, 1.8]) 
 
-    # QUADRO 1: PERÍODO
+    # --- QUADRO 1: PERÍODO (Escala Reduzida) ---
     with col_per:
         with st.container(border=True):
-            st.markdown('<div style="font-size:12px; font-weight:800; color:#555; margin-bottom:15px;">🗓️ SELEÇÃO DE PERÍODO</div>', unsafe_allow_html=True)
+            st.markdown('<div class="text-titulo">📍 Período</div>', unsafe_allow_html=True)
             
             # Mês
-            c1_m, c2_m = st.columns([0.35, 0.80])
-            with c1_m: st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
-            with c2_m: st.selectbox("Mes", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], label_visibility="collapsed", key="p_mes")
+            c1m, c2m = st.columns([0.4, 1])
+            with c1m: st.markdown('<div class="label-compacta">MÊS</div>', unsafe_allow_html=True)
+            with c2m: st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], label_visibility="collapsed", key="m_p")
             
             # Ano
-            c1_a, c2_a = st.columns([0.35, 0.80])
-            with c1_a: st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
-            with c2_a: st.selectbox("Ano", ["2026", "2027", "2028"], label_visibility="collapsed", key="p_ano")
-            
-            st.markdown('<div style="margin-top: 40px;"></div>', unsafe_allow_html=True)
+            c1a, c2a = st.columns([0.4, 1])
+            with c1a: st.markdown('<div class="label-compacta">ANO</div>', unsafe_allow_html=True)
+            with c2a: st.selectbox("Ano", ["2026", "2027", "2028"], label_visibility="collapsed", key="a_p")
 
-    # QUADRO 2: DESEMPENHO (A VERSÃO SURPRESA 2.0)
+    # --- QUADRO 2: DESEMPENHO (Design Fino e Compacto) ---
     with col_des:
         with st.container(border=True):
-            # Mock de dados
-            receita = 15000.00
-            despesa = 9300.00
-            saldo = receita - despesa
-            percent = min((despesa/receita)*100, 100) if receita > 0 else 0
+            saldo_atual = 4250.00
+            percent_uso = 55.0
             
-            # Cabeçalho do Card
-            st.markdown(f"""
-                <div class="header-desempenho">
-                    <div style="font-size:12px; font-weight:800; color:#555;">📊 SAÚDE FINANCEIRA</div>
-                    <div class="badge-status">Operação Saudável</div>
-                </div>
-            """, unsafe_allow_html=True)
+            st.markdown('<div class="text-titulo">📈 Desempenho</div>', unsafe_allow_html=True)
             
-            c_left, c_right = st.columns([1.5, 1])
-            with c_left:
-                st.markdown('<div class="label-total">Saldo em Conta</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="valor-principal">R$ {saldo:,.2f}</div>', unsafe_allow_html=True)
+            col_info, col_perc = st.columns([1.2, 0.8])
+            with col_info:
+                st.markdown('<div class="label-caption">SALDO ATUAL</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="valor-saldo-small">R$ {saldo_atual:,.2f}</div>', unsafe_allow_html=True)
             
-            with c_right:
-                st.markdown('<div style="text-align:right" class="label-total">Eficiência de Gastos</div>', unsafe_allow_html=True)
-                st.markdown(f'<div style="text-align:right; font-size: 26px; font-weight: 900; color: #008080;">{percent:.1f}%</div>', unsafe_allow_html=True)
+            with col_perc:
+                st.markdown('<div style="text-align:right" class="label-caption">USO DO LIMITE</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="text-align:right; font-size: 16px; font-weight: 800; color: #008080;">{percent_uso}%</div>', unsafe_allow_html=True)
 
-            # Barra de Progresso com Glow e Dot Indicator
+            # Barra fina e profissional
             st.markdown(f"""
-                <div class="outer-bar">
-                    <div class="inner-bar" style="width: {percent}%;">
-                        <div class="dot-indicator"></div>
-                    </div>
+                <div class="bar-container-small">
+                    <div class="bar-progress-small" style="width: {percent_uso}%;"></div>
                 </div>
-                <div class="marker-box">
-                    <div class="marker-point"><span>|</span><span>0%</span></div>
-                    <div class="marker-point {"marker-active" if percent >= 50 else ""}"><span>|</span><span>50%</span></div>
-                    <div class="marker-point {"marker-active" if percent >= 100 else ""}"><span>|</span><span>100%</span></div>
+                <div class="marker-labels">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -1140,6 +1088,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
