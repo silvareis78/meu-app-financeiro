@@ -655,23 +655,25 @@ with aba1:
         with st.container(border=True):
             st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
-            # --- LINHA MÊS ---
-            m_c1, m_c2, m_c3 = st.columns([0.04, 3.5, 0.04])
+            # ---Linha Mês---:
+            m_c1, m_c2, m_c3 = st.columns([0.05, 0.9, 0.05])
+            
             with m_c1:
-                if st.button("❮", key="m_p"): 
-                    st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-                    st.rerun()
+                # Sua seta esquerda (❮)
+                st.button("❮", key="m_p")
+            
             with m_c2:
+                # Centraliza as caixas dentro desta coluna
                 st.markdown(f"""
-                    <div style="display: flex;">
+                    <div style="display: flex; justify-content: center;">
                         <div class="mini-label">Mês:</div>
                         <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
                     </div>
                 """, unsafe_allow_html=True)
+            
             with m_c3:
-                if st.button("❯", key="m_n"): 
-                    st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-                    st.rerun()
+                # Sua seta direita (❯)
+                st.button("❯", key="m_n")
 
             # --- LINHA ANO ---
             a_c1, a_c2, a_c3 = st.columns([0.04, 3.5, 0.04], gap="small")
