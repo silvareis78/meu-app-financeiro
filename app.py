@@ -595,106 +595,124 @@ st.markdown(f"""
 
 with aba1:
     # --- LÓGICA DE ESTADO ---
-    if 'idx_m' not in st.session_state: st.session_state.idx_m = 7  # Agosto
+    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1  # Fevereiro
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
     meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS PARA COLAR TUDO (IGUAL À FOTO) ---
+    # --- CSS PARA FORÇAR A LINHA ÚNICA E GRUDADA ---
     st.markdown("""
         <style>
-            .bloco-stepper {
-                display: flex;
-                align-items: center;
-                justify-content: flex-start;
-                gap: 0px !important; /* ELIMINA TODOS OS ESPAÇOS */
+            .container-stepper {
+                display: flex !important;
+                flex-direction: row !important; /* Força ficar na horizontal */
+                align-items: center !important;
+                justify-content: flex-start !important;
+                gap: 0px !important;
                 margin-bottom: 10px;
+                width: 100%;
             }
-            .seta-clique {
+            .seta-estilo {
                 color: #20B2AA;
-                font-size: 26px;
+                font-size: 24px;
                 font-weight: bold;
                 cursor: pointer;
                 padding: 0 8px;
                 user-select: none;
-                line-height: 32px;
+                background: none;
+                border: none;
             }
-            .label-cinza {
+            .box-label-fixa {
                 background-color: #808080;
                 color: white;
                 font-weight: bold;
-                font-size: 13px;
-                width: 60px;
+                font-size: 12px;
+                width: 55px;
                 height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #666;
             }
-            .valor-bege {
+            .box-valor-fixo {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
-                font-size: 13px;
-                width: 110px;
+                font-size: 12px;
+                width: 100px;
                 height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
-                border-left: none; /* COLA NA LABEL */
+                border-left: none;
             }
-            /* Botão invisível do Streamlit por cima das setas */
+            /* Botão invisível posicionado exatamente sobre a seta */
+            .btn-click {
+                position: relative;
+                width: 35px;
+                height: 32px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
             .stButton button {
-                border: none !important;
+                position: absolute;
+                width: 100% !important;
+                height: 100% !important;
                 background: transparent !important;
                 color: transparent !important;
-                position: absolute;
-                width: 35px !important;
-                height: 32px !important;
+                border: none !important;
                 z-index: 10;
             }
-            .area-btn { position: relative; width: 35px; height: 32px; display: flex; align-items: center; justify-content: center; }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- QUADROS ---
-    col_per, col_des = st.columns([1.1, 2.5])
+    col_periodo, col_desempenho = st.columns([1.2, 2.5])
 
-    with col_per:
+    with col_periodo:
         with st.container(border=True):
-            st.markdown("<p style='font-weight:bold; margin-bottom:15px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:15px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
 
-            # LINHA MÊS (TUDO JUNTO)
-            st.write('<div class="bloco-stepper">', unsafe_allow_html=True)
-            # Seta Esq
-            st.write('<div class="area-btn"><span class="seta-clique">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m_prev"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+            # --- LINHA MÊS: SETA - LABEL - VALOR - SETA ---
+            st.write('<div class="container-stepper">', unsafe_allow_html=True)
+            
+            # Seta Esquerda
+            st.write('<div class="btn-click"><span class="seta-estilo">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m_prev_btn"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
             st.write('</div>', unsafe_allow_html=True)
-            # Centro Colado
-            st.write(f'<div class="label-cinza">Mês:</div><div class="valor-bege">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
-            # Seta Dir
-            st.write('<div class="area-btn"><span class="seta-clique">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m_next"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-            st.write('</div></div>', unsafe_allow_html=True)
-
-            # LINHA ANO (TUDO JUNTO)
-            st.write('<div class="bloco-stepper">', unsafe_allow_html=True)
-            # Seta Esq
-            st.write('<div class="area-btn"><span class="seta-clique">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a_prev"): st.session_state.val_a -= 1
+            
+            # Label e Valor Grudados
+            st.write(f'<div class="box-label-fixa">Mês:</div><div class="box-valor-fixo">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
+            
+            # Seta Direita
+            st.write('<div class="btn-click"><span class="seta-estilo">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m_next_btn"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
             st.write('</div>', unsafe_allow_html=True)
-            # Centro Colado
-            st.write(f'<div class="label-cinza">Ano:</div><div class="valor-bege">{st.session_state.val_a}</div>', unsafe_allow_html=True)
-            # Seta Dir
-            st.write('<div class="area-btn"><span class="seta-clique">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a_next"): st.session_state.val_a += 1
-            st.write('</div></div>', unsafe_allow_html=True)
+            
+            st.write('</div>', unsafe_allow_html=True) # Fecha Container Mês
 
-    with col_des:
-        with st.container(border=True):
-            st.markdown("<p style='font-weight:bold;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
-            # O conteúdo do desempenho virá agora que o período está colado.
+            # --- LINHA ANO: SETA - LABEL - VALOR - SETA ---
+            st.write('<div class="container-stepper">', unsafe_allow_html=True)
+            
+            # Seta Esquerda
+            st.write('<div class="btn-click"><span class="seta-estilo">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a_prev_btn"): st.session_state.val_a -= 1
+            st.write('</div>', unsafe_allow_html=True)
+            
+            # Label e Valor Grudados
+            st.write(f'<div class="box-label-fixa">Ano:</div><div class="box-valor-fixo">{st.session_state.val_a}</div>', unsafe_allow_html=True)
+            
+            # Seta Direita
+            st.write('<div class="btn-click"><span class="seta-estilo">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a_next_btn"): st.session_state.val_a += 1
+            st.write('</div>', unsafe_allow_html=True)
+            
+            st.write('</div>', unsafe_allow_html=True) # Fecha Container Ano
+
+    with col_desempenho:
+        # Espaço para o próximo quadro
+        st.empty()
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1051,6 +1069,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
