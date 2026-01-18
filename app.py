@@ -600,20 +600,22 @@ with aba1:
     
     st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
 
-    # --- CSS AVANÇADO: DESIGN FINO E PROFISSIONAL ---
+    # --- CSS AJUSTADO PARA ALTURAS IGUAIS ---
     st.markdown("""
         <style>
-            /* Sobe o container e remove espaços inúteis */
             div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
                 margin-top: -25px !important;
             }
             
-            /* Ajuste de largura automática para os containers */
+            /* Força os containers a terem a mesma altura mínima */
             div[data-testid="stVerticalBlockBorderWrapper"] {
                 padding: 15px !important;
+                min-height: 195px !important; /* Altura calculada para nivelar os dois */
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
             }
 
-            /* Estilo da Label de Período (Colada) */
             .label-cinza {
                 background-color: #F0F2F6;
                 color: #31333F;
@@ -629,7 +631,6 @@ with aba1:
                 letter-spacing: 0.5px;
             }
 
-            /* --- DESIGN DO QUADRO DESEMPENHO --- */
             .card-titulo {
                 font-size: 14px;
                 font-weight: 700;
@@ -638,52 +639,52 @@ with aba1:
                 display: flex;
                 align-items: center;
                 gap: 8px;
+                text-transform: uppercase;
             }
 
             .valor-grande {
                 font-size: 28px;
                 font-weight: 800;
                 color: #1E1E1E;
-                margin: 5px 0px;
+                margin: 2px 0px;
             }
 
             .sub-info {
-                font-size: 12px;
+                font-size: 11px;
                 color: #888;
-                margin-bottom: 15px;
+                margin-bottom: 5px;
+                font-weight: 600;
             }
 
             .progress-container {
                 width: 100%;
                 background-color: #E0E0E0;
                 border-radius: 12px;
-                height: 35px;
+                height: 32px;
                 position: relative;
                 overflow: hidden;
-                box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+                margin-top: 10px;
             }
 
             .progress-bar {
                 height: 100%;
                 background: linear-gradient(90deg, #008080 0%, #00b3b3 100%);
-                border-radius: 12px;
                 display: flex;
                 align-items: center;
                 justify-content: flex-end;
                 padding-right: 15px;
                 color: white;
                 font-weight: bold;
-                transition: width 0.5s ease-in-out;
+                font-size: 13px;
             }
 
             .markers {
                 display: flex;
                 justify-content: space-between;
-                padding: 5px 2px 0;
-                font-size: 10px;
+                padding: 4px 2px 0;
+                font-size: 9px;
                 color: #AAA;
                 font-weight: bold;
-                text-transform: uppercase;
             }
         </style>
     """, unsafe_allow_html=True)
@@ -691,48 +692,49 @@ with aba1:
     # --- LAYOUT DE COLUNAS ---
     col_per, col_des, col_vazio = st.columns([1.1, 2.5, 0.5]) 
 
-    # QUADRO 1: PERÍODO (Corrigido para usar col_per)
+    # QUADRO 1: PERÍODO
     with col_per:
         with st.container(border=True):
-            st.markdown("📍 **Período**")
+            st.markdown('<div class="card-titulo">📍 Período</div>', unsafe_allow_html=True)
             
-            # --- LINHA DO MÊS ---          
+            # Mês
             c1_m, c2_m = st.columns([0.35, 0.80])
             with c1_m:
                  st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             with c2_m:
                  meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-                 mes_selecionado = st.selectbox("Mes", meses, label_visibility="collapsed", key="sel_mes_painel")
+                 st.selectbox("Mes", meses, label_visibility="collapsed", key="sel_mes_painel")
             
-            # --- LINHA DO ANO ---
+            # Ano
             c1_a, c2_a = st.columns([0.35, 0.80])
             with c1_a:
                 st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
             with c2_a:
                 anos = ["2026", "2027", "2028"]
-                ano_selecionado = st.selectbox("Ano", anos, label_visibility="collapsed", key="sel_ano_painel")
+                st.selectbox("Ano", anos, label_visibility="collapsed", key="sel_ano_painel")
+            
+            # Espaçador para empurrar o fundo e igualar a altura do quadro vizinho
+            st.markdown('<div style="margin-top: 25px;"></div>', unsafe_allow_html=True)
 
-    # --- QUADRO 2: DESEMPENHO MENSAL ---
+    # QUADRO 2: DESEMPENHO MENSAL
     with col_des:
         with st.container(border=True):
-            # Exemplo de valores
             receita_total = 12500.00
             despesa_total = 7800.00
             saldo = receita_total - despesa_total
             porcentagem_gasto = min((despesa_total / receita_total) * 100, 100) if receita_total > 0 else 0
             
-            st.markdown('<div class="card-titulo">📈 DESEMPENHO MENSAL</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-titulo">📈 Desempenho Mensal</div>', unsafe_allow_html=True)
             
             c_txt, c_val = st.columns([1.5, 1])
             with c_txt:
-                st.markdown(f'<div class="sub-info">DISPONIBILIDADE ATUAL (SALDO)</div>', unsafe_allow_html=True)
+                st.markdown('<div class="sub-info">SALDO DISPONÍVEL</div>', unsafe_allow_html=True)
                 st.markdown(f'<div class="valor-grande">R$ {saldo:,.2f}</div>', unsafe_allow_html=True)
             
             with c_val:
-                st.markdown(f'<div style="text-align:right" class="sub-info">LIMITE DE GASTOS UTILIZADO</div>', unsafe_allow_html=True)
+                st.markdown('<div style="text-align:right" class="sub-info">USO DO LIMITE</div>', unsafe_allow_html=True)
                 st.markdown(f'<div style="text-align:right; font-size: 24px; font-weight: 800; color: #008080;">{porcentagem_gasto:.1f}%</div>', unsafe_allow_html=True)
 
-            # Barra de Progresso Robusta
             st.markdown(f"""
                 <div class="progress-container">
                     <div class="progress-bar" style="width: {porcentagem_gasto}%;">
@@ -740,9 +742,9 @@ with aba1:
                     </div>
                 </div>
                 <div class="markers">
-                    <span>0% (Início)</span>
-                    <span>50% (Alerta)</span>
-                    <span>100% (Limite)</span>
+                    <span>0%</span>
+                    <span>50% (ALERTA)</span>
+                    <span>100%</span>
                 </div>
             """, unsafe_allow_html=True)
 
@@ -1103,6 +1105,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
