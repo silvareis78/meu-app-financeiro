@@ -668,30 +668,29 @@ if selecionado == "Painel Inicial":
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
-    with col_des:
+   with col_des:
         with st.container(height=190, border=True):
             consumo = 49  # Valor teste
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
             
-            # HTML da Barra e Título com estilo embutido (Inline)
-            st.markdown(f"""
-                <div style="font-family: sans-serif; width: 100%;">
-                    <div style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</div>
-                    <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 5px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></div>
-                    
-                    <div style="width: 100%; background-color: #E0E0E0; border-radius: 15px; height: 28px; border: 1px solid #CCC; overflow: hidden; margin-top: 10px;">
-                        <div style="width: {consumo}%; background-color: {cor_b}; height: 100%; border-radius: 15px;"></div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; font-weight: bold; color: #444; padding: 0 5px;">
-                        <span>0%</span>
-                        <span style="margin-left: -10px;">50%</span>
-                        <span>100%</span>
-                    </div>
-                </div>
-            """, unsafe_allow_html=True)
+            # Título e Porcentagem
+            st.markdown(f"**Desempenho de Gastos em {mes_sel}**")
+            st.markdown(f"### {consumo}% <span style='font-size: 0.9rem; font-weight: normal; color: #666;'>utilizado</span>", unsafe_allow_html=True)
             
-            st.caption(f"🟢 Seu nível de gastos está saudável para {mes_sel}.")
+            # HTML DA BARRA (Corrigido para renderizar)
+            barra_html = f"""
+            <div style="width: 100%; background-color: #E0E0E0; border-radius: 15px; height: 28px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
+                <div style="width: {consumo}%; background-color: {cor_b}; height: 100%; border-radius: 15px;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 11px; font-weight: bold; color: #444; padding: 0 5px;">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+            </div>
+            """
+            st.markdown(barra_html, unsafe_allow_html=True)
+            
+            st.caption(f"🟢 Seu nível de gastos está saudável.")
 
     # --- LINHA 2: RESUMO FINANCEIRO (KPIs) - CORREÇÃO DE OVERFLOW ---
     with st.container(border=True):
@@ -1058,6 +1057,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
