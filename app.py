@@ -594,149 +594,101 @@ st.markdown(f"""
 # --- 3. CONTEÚDO DE CADA TELA ---
 
 with aba1:
-    # --- TELA PAINEL INICIAL ---
-    st.session_state.pagina = "Painel Inicial"
-    
-    st.markdown("<h3 style='color: #008080; margin-bottom: 5px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
+    # --- INICIALIZAÇÃO DOS ESTADOS (Caso não existam) ---
+    if 'index_mes' not in st.session_state:
+        st.session_state.index_mes = 1  # Janeiro
+    if 'ano_valor' not in st.session_state:
+        st.session_state.ano_valor = 2026
 
-    # --- CSS: PRECISO E DINÂMICO ---
+    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+
+    # --- CSS PARA O DESIGN DA IMAGEM ---
     st.markdown("""
         <style>
-            /* Ajuste de altura e padding dos quadros */
-            div[data-testid="stVerticalBlockBorderWrapper"] {
-                min-height: 165px !important;
-                padding: 15px !important;
-                background-color: #ffffff !important;
+            /* Container do item (Linha) */
+            .stepper-row {
+                display: flex;
+                align-items: center;
+                margin-bottom: 4px;
+                gap: 0px;
             }
-
-            /* Label Cinza e Negrito - Colada na lateral da Combobox */
-            .label-unida {
-                background-color: #E0E0E0;
+            /* Label Escura */
+            .stepper-label {
+                background-color: #7A7A7A;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                width: 60px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #555;
+            }
+            /* Campo de Valor (Bege claro) */
+            .stepper-display {
+                background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
-                padding: 0px 10px;
-                border-radius: 4px 0px 0px 4px;
-                font-size: 11px;
+                font-size: 13px;
+                width: 120px;
+                height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                height: 38px;
-                border: 1px solid #dcdcdc;
+                border: 1px solid #BDB76B;
+                border-left: none;
                 border-right: none;
-                width: 60px;
             }
-
-            /* Container da Barra com Posicionamento para o Indicador */
-            .barra-fundo {
-                width: 100%;
-                background-color: #F0F2F6;
-                height: 25px;
-                border-radius: 4px;
-                margin-top: 20px;
-                border: 1px solid #ddd;
-                position: relative; /* Necessário para o indicador flutuante */
-            }
-
-            .barra-progresso {
-                height: 100%;
-                background-color: #008080;
-                border-radius: 3px 0px 0px 3px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                font-size: 11px;
-                font-weight: bold;
-                transition: width 0.5s ease-in-out;
-            }
-
-            /* Marcador flutuante que segue a barra */
-            .indicador-ponta {
-                position: absolute;
-                top: -18px; /* Fica acima da barra */
-                transform: translateX(-50%);
-                background-color: #008080;
-                color: white;
-                font-size: 10px;
-                padding: 2px 6px;
-                border-radius: 3px;
-                font-weight: bold;
-            }
-            
-            /* Seta do marcador */
-            .indicador-ponta::after {
-                content: "";
-                position: absolute;
-                top: 100%;
-                left: 50%;
-                margin-left: -4px;
-                border-width: 4px;
-                border-style: solid;
-                border-color: #008080 transparent transparent transparent;
-            }
-
-            .indicadores-escala {
-                display: flex;
-                justify-content: space-between;
-                font-size: 10px;
-                font-weight: bold;
-                color: #999;
-                margin-top: 5px;
+            /* Ajuste dos botões nativos do Streamlit para parecerem setas < > */
+            div[data-testid="stButton"] > button {
+                padding: 0px !important;
+                width: 25px !important;
+                height: 30px !important;
+                background-color: transparent !important;
+                border: none !important;
+                color: #20B2AA !important; /* Cor Verde Água das setas */
+                font-size: 20px !important;
+                font-weight: bold !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- LAYOUT ---
-    col_per, col_des, col_vazio = st.columns([1, 1.8, 1])
+    # --- LAYOUT DO QUADRO ---
+    col_quadro, col_vazio = st.columns([1, 2.5])
 
-    # --- QUADRO 1: PERÍODO ---
-    with col_per:
+    with col_quadro:
         with st.container(border=True):
-            st.markdown("**📍 PERÍODO**")
             
-            # Linha Mês
-            c1m, c2m = st.columns([0.4, 1])
-            with c1m:
-                st.markdown('<div class="label-unida">MÊS</div>', unsafe_allow_html=True)
-            with c2m:
-                meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-                st.selectbox("Mês", meses, label_visibility="collapsed", key="mes_v4")
-
-            # Linha Ano
-            c1a, c2a = st.columns([0.4, 1])
-            with c1a:
-                st.markdown('<div class="label-unida">ANO</div>', unsafe_allow_html=True)
-            with c2a:
-                anos = ["2026", "2027", "2028"]
-                st.selectbox("Ano", anos, label_visibility="collapsed", key="ano_v4")
-
-    # --- QUADRO 2: DESEMPENHO MENSAL ---
-    with col_des:
-        with st.container(border=True):
-            saldo_val = 5250.80
-            percent_val = 75 # Este valor moverá o indicador automaticamente
+            # --- SELETOR DE MÊS ---
+            st.write('<div class="stepper-row">', unsafe_allow_html=True)
+            c1, c2, c3, c4 = st.columns([0.2, 0.5, 1, 0.2])
+            with c1:
+                if st.button("❮", key="prev_mes"):
+                    st.session_state.index_mes = (st.session_state.index_mes - 1) % 12
+            with c2:
+                st.markdown('<div class="stepper-label">Mês:</div>', unsafe_allow_html=True)
+            with c3:
+                st.markdown(f'<div class="stepper-display">{meses_lista[st.session_state.index_mes]}</div>', unsafe_allow_html=True)
+            with c4:
+                if st.button("❯", key="next_mes"):
+                    st.session_state.index_mes = (st.session_state.index_mes + 1) % 12
             
-            st.markdown("**📈 DESEMPENHO MENSAL**")
-            st.markdown(f"Saldo Disponível: **R$ {saldo_val:,.2f}**")
-
-            # Barra com Marcador Dinâmico
-            st.markdown(f"""
-                <div class="barra-fundo">
-                    <div class="indicador-ponta" style="left: {percent_val}%;">
-                        {percent_val}%
-                    </div>
-                    <div class="barra-progresso" style="width: {percent_val}%;">
-                    </div>
-                </div>
-                <div class="indicadores-escala">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
-                </div>
-            """, unsafe_allow_html=True)
-
-    st.write("")
-
+            # --- SELETOR DE ANO ---
+            st.write('<div class="stepper-row">', unsafe_allow_html=True)
+            a1, a2, a3, a4 = st.columns([0.2, 0.5, 1, 0.2])
+            with a1:
+                if st.button("❮", key="prev_ano"):
+                    st.session_state.ano_valor -= 1
+            with a2:
+                st.markdown('<div class="stepper-label">Ano:</div>', unsafe_allow_html=True)
+            with a3:
+                st.markdown(f'<div class="stepper-display">{st.session_state.ano_valor}</div>', unsafe_allow_html=True)
+            with a4:
+                if st.button("❯", key="next_ano"):
+                    st.session_state.ano_valor += 1
+                    
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
     st.session_state.pagina = "Cadastros Iniciais"
@@ -1092,6 +1044,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
