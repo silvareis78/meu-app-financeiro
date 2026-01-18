@@ -543,7 +543,6 @@ def modal_forma_pagamento():
                     
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 
-# Criamos o menu de abas no topo da página
 aba1, aba2, aba3, aba4 = st.tabs([
     "📊 PAINEL", 
     "⚙️ CADASTROS", 
@@ -551,38 +550,49 @@ aba1, aba2, aba3, aba4 = st.tabs([
     "💳 CARTÕES"
 ])
 
-# CSS AJUSTADO: Abas juntas no PC e boas no celular
-st.markdown("""
+# CONFIGURAÇÕES DA LINHA (Mude aqui os valores)
+cor_da_linha = "#008080"  # Ex: #008080 (Verde), #000000 (Preto), #CCCCCC (Cinza)
+espessura_da_linha = "3px" # Ex: 1px, 3px, 5px
+
+st.markdown(f"""
     <style>
-        /* Container das abas: Alinha tudo à esquerda e junta os itens */
-        .stTabs [data-baseweb="tab-list"] {
-            gap: 10px !important; /* Espaço entre as abas */
-            justify-content: flex-start !important; /* Traz para perto uma da outra */
-            border-bottom: 2px solid #f0f2f6;
-        }
+        /* 1. ESCONDE A BARRA SUPERIOR (HEADER) */
+        header {{visibility: hidden !important; height: 0px !important;}}
+        
+        /* 2. CONTAINER DAS ABAS */
+        .stTabs [data-baseweb="tab-list"] {{
+            gap: 10px !important; 
+            justify-content: flex-start !important;
+            padding-top: 20px !important;    /* Ajuste aqui para abaixar as abas */
+            padding-bottom: 0px !important;
+        }}
 
-        /* Estiliza cada aba individualmente */
-        .stTabs [data-baseweb="tab"] {
-            height: 40px !important;
+        /* 3. CONFIGURAÇÃO DA LINHA INFERIOR */
+        .stTabs [data-baseweb="tab-border"] {{
+            background-color: {cor_da_linha} !important; /* COR DA LINHA */
+            height: {espessura_da_linha} !important;      /* ESPESSURA DA LINHA */
+        }}
+
+        /* 4. CADA ABA INDIVIDUAL */
+        .stTabs [data-baseweb="tab"] {{
+            height: 45px !important;
             background-color: #f0f2f6 !important;
-            border-radius: 8px 8px 0px 0px !important;
-            padding: 0px 15px !important;
-            font-weight: bold !important;
-            color: #31333F !important;
+            border-radius: 8px 8px 0px 0px !important; /* Arredondado só em cima */
+            padding: 0px 20px !important;
             border: none !important;
-        }
-
-        /* Aba Selecionada: Cor e destaque */
-        .stTabs [aria-selected="true"] {
+        }}
+        
+        /* 5. ABA SELECIONADA */
+        .stTabs [aria-selected="true"] {{
             background-color: #008080 !important;
             color: white !important;
-        }
-        
-        /* Ajuste para o texto dentro da aba não sumir */
-        .stTabs [data-baseweb="tab"] p {
+        }}
+
+        /* 6. TEXTO DAS ABAS */
+        .stTabs [data-baseweb="tab"] p {{
             font-size: 14px !important;
-            margin: 0px !important;
-        }
+            font-weight: bold !important;
+        }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -930,6 +940,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
