@@ -669,7 +669,7 @@ if selecionado == "Painel Inicial":
             
             # --- BLOCO MÊS ---
             st.markdown("<div style='margin-top: 10px; font-size: 0.75rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
-            st.markdown("<div style='margin-top: -18px;'></div>", unsafe_allow_html=True) 
+            st.markdown("<div style='margin-top: -25px;'></div>", unsafe_allow_html=True) 
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, key="mes_filtro", label_visibility="collapsed")
             
             # --- BLOCO ANO (APROXIMADO DA CAIXA ACIMA) ---
@@ -1068,6 +1068,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
