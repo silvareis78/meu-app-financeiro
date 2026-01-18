@@ -668,11 +668,11 @@ if selecionado == "Painel Inicial":
             st.markdown("<div style='margin-top: -5px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
             
             # 2. Descrição do Mês (coloquei margin-top: 5px para afastar do título acima)
-            st.markdown("<div style='margin-top: 10px; font-size: 0.75rem; line-height: 1;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: 5px; font-size: 0.75rem; line-height: 1;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             
             # 3. Espaço entre os blocos
-            st.markdown("<div style='margin-top: 4px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: -4px;'></div>", unsafe_allow_html=True)
             
             # 4. Descrição do Ano
             st.markdown("<div style='margin-top: -1px;'font-size: 0.75rem; line-height: 1;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
@@ -1072,6 +1072,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
