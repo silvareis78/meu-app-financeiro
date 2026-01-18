@@ -616,7 +616,7 @@ with aba1:
                 color: white;
                 font-weight: bold;
                 font-size: 15px;
-                width: 45px;
+                width: 60px;
                 height: 35px;
                 display: flex;
                 align-items: center;
@@ -635,6 +635,8 @@ with aba1:
                 justify-content: center;
                 border: 1px solid #BDB76B;
                 border-left: none;
+                overflow: hidden; /* Impede que o texto empurre a borda */
+                white-space: nowrap; /* Garante que o texto fique em uma linha só */
             }
 
             /* Setas minimalistas */
@@ -1065,6 +1067,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
