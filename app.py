@@ -650,8 +650,7 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # Colunas principais: Período bem pequeno, Desempenho maior
-    col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5])
-
+    col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5], gap="small")
     with col_per:
         with st.container(border=True):
             st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
@@ -675,7 +674,7 @@ with aba1:
                     st.rerun()
 
             # --- LINHA ANO ---
-            a_c1, a_c2, a_c3 = st.columns([0.04, 3.5, 0.04])
+            a_c1, a_c2, a_c3 = st.columns([0.04, 3.5, 0.04], gap="small")
             with a_c1:
                 if st.button("❮", key="a_p"): 
                     st.session_state.val_a -= 1
@@ -1065,6 +1064,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
