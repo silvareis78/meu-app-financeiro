@@ -662,24 +662,23 @@ if selecionado == "Painel Inicial":
 # --- LINHA 1: FILTROS (AJUSTADO) E DESEMPENHO (MANTIDO) ---
     col_per, col_des = st.columns([0.7, 2.3])
 
-    with col_per:
+   with col_per:
         with st.container(height=160, border=True):
-            # 1. Título "Período"
-            st.markdown("<div style='margin-top: -5px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
+            # 1. Título do quadro
+            st.markdown("<div style='margin-top: -10px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
             
-            # 2. BLOCO MÊS
-            st.markdown("<div style='margin-top: 5px; font-size: 0.75rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
-            
-            # --- AJUSTE: Mudei de 15px para -8px para "colar" a caixa na descrição acima ---
-            st.markdown("<div style='margin-top: -8px;'></div>", unsafe_allow_html=True)
+            # --- BLOCO MÊS ---
+            st.markdown("<div style='font-size: 0.75rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
+            # Cola a caixa no texto do mês
+            st.markdown("<div style='margin-top: -18px;'></div>", unsafe_allow_html=True) 
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             
-            # 3. BLOCO ANO (AFASTAMENTO)
-            # Use 8px para dar uma leve separação do bloco de cima
-            st.markdown("<div style='margin-top: 8px; font-size: 0.75rem;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
+            # --- APROXIMAÇÃO DA CAIXA MÊS COM O TEXTO ANO ---
+            # Usei um valor negativo aqui para "puxar" o texto do ano para cima, encostando na caixa anterior
+            st.markdown("<div style='margin-top: -10px; font-size: 0.75rem;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
             
-            # --- AJUSTE: Margem negativa para "colar" a caixa do ano na descrição ---
-            st.markdown("<div style='margin-top: -8px;'></div>", unsafe_allow_html=True)
+            # Cola a caixa no texto do ano
+            st.markdown("<div style='margin-top: -18px;'></div>", unsafe_allow_html=True)
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_des:
@@ -1076,6 +1075,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
