@@ -595,111 +595,110 @@ st.markdown(f"""
 
 with aba1:
     # --- LÓGICA DE NAVEGAÇÃO ---
-    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1  # Janeiro
-    if 'val_a' not in st.session_state: st.session_state.val_a = 2026
+    if 'mes_idx' not in st.session_state: st.session_state.mes_idx = 7 # AGOSTO
+    if 'ano_val' not in st.session_state: st.session_state.ano_val = 2024
 
-    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+    meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+             "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS PARA COLAR OS ELEMENTOS (IGUAL À FOTO) ---
+    # --- CSS PARA COLAR AS CAIXAS (SEM ESPAÇO) ---
     st.markdown("""
         <style>
-            .stepper-wrapper {
+            .bloco-unido {
                 display: flex;
                 align-items: center;
-                justify-content: flex-start;
-                margin-bottom: 5px;
+                justify-content: center;
+                gap: 0px !important; /* Força zero de espaço */
             }
-            /* Label Cinza Escuro */
-            .box-rotulo {
-                background-color: #808080;
+            .caixa-label {
+                background-color: #7A7A7A;
                 color: white;
                 font-weight: bold;
-                font-size: 13px;
-                width: 70px;
+                font-size: 12px;
+                width: 55px;
                 height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 1px solid #666;
+                border: 1px solid #555;
             }
-            /* Display Bege Claro */
-            .box-valor {
+            .caixa-valor {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
-                font-size: 13px;
-                width: 130px;
+                font-size: 12px;
+                width: 100px;
                 height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
-                border-left: none; /* Isso faz grudar na label */
+                border-left: none; /* Cola na label */
             }
-            /* Setas Verdes laterais */
-            .seta-clicavel {
+            .seta-verde {
                 color: #20B2AA;
-                font-size: 22px;
+                font-size: 20px;
                 font-weight: bold;
                 cursor: pointer;
-                padding: 0 10px;
                 user-select: none;
-                text-decoration: none;
             }
-            /* Remove bordas do botão invisível do Streamlit */
-            .stButton button {
-                border: none !important;
+            /* Estilo para alinhar os botões do Streamlit perfeitamente */
+            .stButton > button {
                 background: transparent !important;
-                color: transparent !important;
-                position: absolute;
-                width: 35px !important;
+                border: none !important;
+                padding: 0px !important;
+                color: #20B2AA !important;
+                font-size: 20px !important;
                 height: 30px !important;
-                z-index: 10;
+                width: 25px !important;
             }
-            .btn-container {
-                position: relative;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+            .stButton > button:hover { color: #008080 !important; }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- RENDERIZAÇÃO DO QUADRO ---
-    col_per, col_des = st.columns([1, 2])
+    # --- LAYOUT DO QUADRO ---
+    col_quadro, col_des = st.columns([1, 2.5])
 
-    with col_per:
+    with col_quadro:
         with st.container(border=True):
-            st.markdown("📍 **PERÍODO**")
+            st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:10px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
             # --- LINHA MÊS ---
-            c1, c2, c3, c4 = st.columns([0.1, 0.3, 0.5, 0.1])
-            with c1:
-                st.write('<div class="btn-container"><span class="seta-clicavel">❮</span>', unsafe_allow_html=True)
-                if st.button(" ", key="m_p"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-                st.write('</div>', unsafe_allow_html=True)
-            with c2: st.markdown('<div class="box-rotulo">Mês:</div>', unsafe_allow_html=True)
-            with c3: st.markdown(f'<div class="box-valor">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
-            with c4:
-                st.write('<div class="btn-container"><span class="seta-clicavel">❯</span>', unsafe_allow_html=True)
-                if st.button(" ", key="m_n"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-                st.write('</div>', unsafe_allow_html=True)
+            m1, m2, m3 = st.columns([0.15, 0.7, 0.15])
+            with m1:
+                if st.button("❮", key="m_prev"): st.session_state.mes_idx = (st.session_state.mes_idx - 1) % 12
+            with m2:
+                # HTML UNIDO: Sem espaço entre as DIVs
+                st.markdown(f"""
+                    <div class="bloco-unido">
+                        <div class="caixa-label">Mês:</div>
+                        <div class="caixa-valor">{meses[st.session_state.mes_idx]}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with m3:
+                if st.button("❯", key="m_next"): st.session_state.mes_idx = (st.session_state.mes_idx + 1) % 12
+
+            st.markdown("<div style='margin-top:5px;'></div>", unsafe_allow_html=True)
 
             # --- LINHA ANO ---
-            a1, a2, a3, a4 = st.columns([0.1, 0.3, 0.5, 0.1])
+            a1, a2, a3 = st.columns([0.15, 0.7, 0.15])
             with a1:
-                st.write('<div class="btn-container"><span class="seta-clicavel">❮</span>', unsafe_allow_html=True)
-                if st.button(" ", key="a_p"): st.session_state.val_a -= 1
-                st.write('</div>', unsafe_allow_html=True)
-            with a2: st.markdown('<div class="box-rotulo">Ano:</div>', unsafe_allow_html=True)
-            with a3: st.markdown(f'<div class="box-valor">{st.session_state.val_a}</div>', unsafe_allow_html=True)
-            with a4:
-                st.write('<div class="btn-container"><span class="seta-clicavel">❯</span>', unsafe_allow_html=True)
-                if st.button(" ", key="a_n"): st.session_state.val_a += 1
-                st.write('</div>', unsafe_allow_html=True)
+                if st.button("❮", key="a_prev"): st.session_state.ano_val -= 1
+            with a2:
+                # HTML UNIDO: Sem espaço entre as DIVs
+                st.markdown(f"""
+                    <div class="bloco-unido">
+                        <div class="caixa-label">Ano:</div>
+                        <div class="caixa-valor">{st.session_state.ano_val}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with a3:
+                if st.button("❯", key="a_next"): st.session_state.ano_val += 1
 
-    # O Quadro Desempenho fica aqui ao lado...
+    # --- QUADRO DESEMPENHO (Aguardando ajuste final) ---
+    with col_des:
+        with st.container(border=True):
+             st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:10px;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1056,6 +1055,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
