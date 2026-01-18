@@ -594,20 +594,38 @@ st.markdown(f"""
 # --- 3. CONTEÚDO DE CADA TELA ---
 
 with aba1:
-    # Tudo o que você colocar aqui APARECERÁ NA TELA PAINEL
+    # --- TELA PAINEL INICIAL ---
     st.session_state.pagina = "Painel Inicial"
-    st.markdown("### 🏠 Bem-vindo ao Painel de Controle")
-    # (Aguardando o próximo passo para configurar esta tela)
+    selecionado = "Painel Inicial"
+    
+    # Título personalizado sem linha e com margem ajustada
+    st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
+
+    # CSS Local para subir o conteúdo e encostar no título
+    st.markdown("""
+        <style>
+            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
+                margin-top: -25px !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
     st.session_state.pagina = "Cadastros Iniciais"
-    st.subheader("⚙️ Gerenciamento de Cadastros")
-    st.markdown("---")
+    selecionado = "Cadastros Iniciais"
     
-    # CSS para forçar a barra de rolagem a ser tratada corretamente pelo navegador
+    # Título personalizado conforme solicitado
+    st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>📋 Gerenciamento de Cadastros</h3>", unsafe_allow_html=True)
+    
+    # CSS para forçar a barra de rolagem e subir o conteúdo
     st.markdown("""
         <style>
+            /* Sobe o container para encostar no título */
+            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
+                margin-top: -25px !important;
+            }
+            /* Ajuste de scroll nativo */
             [data-testid="stVerticalBlock"] > div:has(div.stVerticalBlockBorder) > div {
                 overflow-y: auto !important;
             }
@@ -632,18 +650,12 @@ with aba2:
             
             st.markdown("---")
             
-            # Usando height para forçar o scroll nativo do Streamlit
+            # Lista de itens SEM o botão de lixeira
             with st.container(height=250, border=False):
                 for i, cat in enumerate(st.session_state.categorias):
-                    c_item, c_del = st.columns([0.8, 0.2])
-                    with c_item:
-                        if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}_{i}"):
-                            modal_lancamento_categoria(cat)
-                    with c_del:
-                        if st.button("🗑️", key=f"del_d_{cat}_{i}"):
-                            st.session_state.categorias.remove(cat)
-                            salvar_configuracoes_nuvem()
-                            st.rerun()
+                    # O botão agora ocupa a largura total
+                    if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}_{i}"):
+                        modal_lancamento_categoria(cat)
 
     # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
     with col_rec:
@@ -655,7 +667,7 @@ with aba2:
                 if st.button("Salvar", key="btn_save_rec", use_container_width=True):
                     if 'categorias_receita' not in st.session_state:
                         st.session_state.categorias_receita = []
-                    if n_rec and n_rec not in st.session_state.categorias_rece_ita:
+                    if n_rec and n_rec not in st.session_state.categorias_receita:
                         st.session_state.categorias_receita.append(n_rec)
                         salvar_configuracoes_nuvem()
                         st.success(f"Fonte '{n_rec}' cadastrada!")
@@ -663,48 +675,47 @@ with aba2:
             
             st.markdown("---")
             
+            # Lista de itens SEM o botão de lixeira
             with st.container(height=250, border=False):
                 if 'categorias_receita' in st.session_state:
                     for i, cat_r in enumerate(st.session_state.categorias_receita):
-                        c_item_r, c_del_r = st.columns([0.8, 0.2])
-                        with c_item_r:
-                            if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}_{i}"):
-                                modal_receita_categoria(cat_r)
-                        with c_del_r:
-                            if st.button("🗑️", key=f"del_r_{cat_r}_{i}"):
-                                st.session_state.categorias_receita.remove(cat_r)
-                                salvar_configuracoes_nuvem()
-                                st.rerun()
+                        if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}_{i}"):
+                            modal_receita_categoria(cat_r)
 
     # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
     with col_pgto:
         with st.container(border=True):
             st.markdown("### 💳 Forma Pagamento")
             
-            if st.button("⚙️ Criar Pagamento", use_container_width=True):
+            if st.button("➕ Inserir Pagamento", use_container_width=True):
                 modal_forma_pagamento()
             
             st.markdown("---")
             
+            # Lista de itens SEM o botão de lixeira
             with st.container(height=250, border=False):
                 if 'formas_pagamento' in st.session_state:
                     for i, f in enumerate(st.session_state.formas_pagamento):
-                        c_item_f, c_del_f = st.columns([0.8, 0.2])
-                        with c_item_f:
-                            st.caption(f"✅ {f['nome']}")
-                        with c_del_f:
-                            if st.button("🗑️", key=f"del_f_{f['nome']}_{i}"):
-                                st.session_state.formas_pagamento.pop(i)
-                                salvar_configuracoes_nuvem()
-                                st.rerun()
+                        # Apenas a legenda do pagamento, sem opção de deletar
+                        st.caption(f"✅ {f['nome']}")
+                        
                                 
 with aba3:
-   with aba3:
     # --- TELA DE VISUALIZAÇÃO ---
     st.session_state.pagina = "Lançamentos"
     selecionado = "Lançamentos" # Garante que a variável exista para evitar NameError
-    st.subheader("📊 Histórico de Lançamentos")
-    st.markdown("---")
+    
+    # Título personalizado: cor padrão, sem linha e margem reduzida
+    st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>📊 Histórico de Lançamentos</h3>", unsafe_allow_html=True)
+
+    # CSS Local para subir o conteúdo e encostar no título
+    st.markdown("""
+        <style>
+            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
+                margin-top: -25px !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
 
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
@@ -750,7 +761,7 @@ with aba3:
                 df_display['Data Compra'] = df_display['Data Compra'].dt.date
                 df_display['Vencimento'] = df_display['Vencimento'].dt.date
 
-                # --- 2. TRATAMENTO DA PARCELA (CORREÇÃO LEVE PARA EVITAR ERRO) ---
+                # --- 2. TRATAMENTO DA PARCELA ---
                 if 'Parcela' in df_display.columns:
                     def limpar_parcela(row):
                         if str(row.get('Tipo', '')).lower() == 'receita':
@@ -758,7 +769,6 @@ with aba3:
                         val = row['Parcela']
                         if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none', '']:
                             return ""
-                        # Ajustado de 'datetime.date' para 'pd.Timestamp' que o pandas usa
                         if isinstance(val, (pd.Timestamp, pd.Series)):
                             return f"{val.day}/{val.month}"
                         if str(val).strip() == "None":
@@ -780,7 +790,7 @@ with aba3:
                     "Status": st.column_config.TextColumn("Status", width=100)
                 }
 
-                st.markdown("---") # Linha divisória dentro do quadro
+                st.markdown("---") # Linha divisória interna mantida para organizar filtros da tabela
 
                 # Abas dentro do quadro único
                 tab_g, tab_d, tab_r = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
@@ -803,13 +813,25 @@ with aba3:
                         st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
 
     except Exception as e:
-        st.error(f"Erro ao processar os dados: {e}") 
+        st.error(f"Erro ao processar os dados: {e}")
+        
 
 with aba4:
     # --- TELA DE CARTÕES ---
     st.session_state.pagina = "Cartões"
-    st.subheader("💳 Gestão de Cartões de Crédito")
-    st.markdown("---")
+    selecionado = "Cartões"
+    
+    # Título personalizado: cor padrão, ícone mantido e sem linha divisória
+    st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>💳 Gestão de Cartões de Crédito</h3>", unsafe_allow_html=True)
+
+    # CSS Local para subir o conteúdo e encostar no título
+    st.markdown("""
+        <style>
+            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
+                margin-top: -25px !important;
+            }
+        </style>
+    """, unsafe_allow_html=True)
     
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
 
@@ -943,8 +965,6 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
-  
-
 
 
 
