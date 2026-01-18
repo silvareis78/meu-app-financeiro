@@ -656,20 +656,18 @@ with aba1:
             
             # --- LINHA DO MÊS ---
             # Criamos um container flexível manual para garantir o alinhamento lado a lado
-            st.markdown('<div class="flex-container"><div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
-            meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-                     "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+           
             
             # O selectbox é injetado logo após a label via coluna ou ajuste de posição
-            c1_m, c2_m, c_espaco = st.columns([0.45, 1, 2])
+            c1_m, c2_m, = st.columns([0.45, 1])
             with c1_m:
                  st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             with c2_m:
-                mes_selecionado = st.selectbox("Mês", meses, label_visibility="collapsed", key="sel_mes_painel")
-            st.markdown('</div>', unsafe_allow_html=True)
+                 st.markdown('<div class="flex-container"><div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
+            meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
             # --- LINHA DO ANO ---
-            c1_a, c2_a, c_espaco = st.columns([0.45, 1, 2.5])
+            c1_a, c2_a, = st.columns([0.45, 1])
             with c1_a:
                 st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
             with c2_a:
@@ -1033,6 +1031,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
