@@ -543,84 +543,45 @@ def modal_forma_pagamento():
                     
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 
-with st.sidebar:
-    st.markdown("<h2 style='text-align: center; color: #008080;'>MENU</h2>", unsafe_allow_html=True)
+# Criamos o menu de abas no topo da página
+aba1, aba2, aba3, aba4 = st.tabs([
+    "📊 PAINEL", 
+    "⚙️ CADASTROS", 
+    "📋 LANÇAMENTOS", 
+    "💳 CARTÕES"
+])
 
-    # CSS para transformar o rádio em itens de menu profissionais
-    st.markdown("""
-        <style>
-        /* Esconde a bolinha do rádio */
-        [data-testid="stSidebar"] div[role="radiogroup"] input {
-            display: none;
-        }
-        
-        /* Estiliza cada opção do menu */
-        [data-testid="stSidebar"] div[role="radiogroup"] label {
-            background-color: #f0f2f6 !important;
-            border-radius: 10px !important;
-            padding: 12px 15px !important;
-            margin-bottom: 8px !important;
-            border: 1px solid transparent !important;
-            transition: 0.3s;
-            cursor: pointer !important;
-            display: flex !important;
+# CSS para deixar as abas com cara de botões de aplicativo
+st.markdown("""
+    <style>
+        /* Estiliza o container das abas */
+        .stTabs [data-baseweb="tab-list"] {
+            gap: 8px;
+            justify-content: space-around;
         }
 
-        /* Cor quando selecionado */
-        [data-testid="stSidebar"] div[role="radiogroup"] label[data-selected="true"] {
+        /* Estiliza cada aba individualmente */
+        .stTabs [data-baseweb="tab"] {
+            height: 45px;
+            background-color: #f0f2f6;
+            border-radius: 10px 10px 0px 0px;
+            padding: 0px 20px;
+            font-weight: bold;
+            color: #31333F;
+        }
+
+        /* Cor da aba selecionada */
+        .stTabs [aria-selected="true"] {
             background-color: #008080 !important;
             color: white !important;
-            font-weight: bold !important;
         }
+    </style>
+""", unsafe_allow_html=True)
 
-        /* Efeito ao passar o mouse */
-        [data-testid="stSidebar"] div[role="radiogroup"] label:hover {
-            border: 1px solid #008080 !important;
-        }
-        
-        /* Ajuste do texto */
-        [data-testid="stSidebar"] div[role="radiogroup"] label div[data-testid="stMarkdownContainer"] p {
-            font-size: 16px !important;
-            margin: 0 !important;
-        }
-        </style>
-    """, unsafe_allow_html=True)
-
-    # O widget 'radio' é o que melhor funciona para fechar o menu no celular
-    opcoes = {
-        "📊 Painel Inicial": "Painel Inicial",
-        "⚙️ Cadastros Iniciais": "Cadastros Iniciais",
-        "📋 Visualizar Lançamentos": "Lançamentos",
-        "💳 Cartões": "Cartões"
-    }
-
-    # Busca o índice da página atual para manter marcado
-    lista_opcoes = list(opcoes.keys())
-    pagina_atual_nome = st.session_state.get('pagina', "Painel Inicial")
-    # Encontra qual chave corresponde ao valor salvo no session_state
-    indice_padrao = 0
-    for i, nome in enumerate(lista_opcoes):
-        if opcoes[nome] == pagina_atual_nome:
-            indice_padrao = i
-
-    escolha = st.radio(
-        "Navegação",
-        options=lista_opcoes,
-        index=indice_padrao,
-        label_visibility="collapsed"
-    )
-
-    # Atualiza o estado global
-    if st.session_state.get('pagina') != opcoes[escolha]:
-        st.session_state.pagina = opcoes[escolha]
-        st.rerun()
-
-# --- ÁREA DE EXIBIÇÃO ---
-selecionado = st.session_state.get('pagina', "Painel Inicial")
-
-if selecionado == "Painel Inicial":
+# Lógica de exibição baseada na aba selecionada
+with aba1:
+    st.session_state.pagina = "Painel Inicial"
     st.markdown("## 🏠 Painel de Controle")
-    # PRÓXIMO PASSO: Criar as colunas para os filtros (Mês/Ano)
   
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -962,6 +923,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
