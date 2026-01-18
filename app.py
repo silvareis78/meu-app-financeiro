@@ -612,8 +612,8 @@ with aba1:
             /* Ajusta o quadro para envolver apenas o conteúdo (encolher) */
             div[data-testid="stVerticalBlockBorderWrapper"] {
                 width: fit-content !important;
-                min-width: 160px !important;
-                padding-top: 1rem !important;
+                min-width: 50px !important;
+                padding-top: 10rem !important;
             }
 
             /* Container para alinhar Label e Selectbox na mesma linha e altura */
@@ -1026,6 +1026,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
