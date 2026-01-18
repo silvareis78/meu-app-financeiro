@@ -542,60 +542,66 @@ def modal_forma_pagamento():
                     st.rerun()
                     
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
-from streamlit_option_menu import option_menu
 
 with st.sidebar:
-    st.markdown("<h2 style='text-align: center;'>MENU</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center; color: #008080;'>MENU</h2>", unsafe_allow_html=True)
     
-    selecionado = option_menu(
-        menu_title=None, 
-        options=["Painel Inicial", "Cadastros Iniciais", "Lançamentos", "Cartões"],
-        icons=["house", "gear", "list-task", "card-checklist"], 
-        menu_icon="cast", 
-        default_index=0,
-        key='menu_principal', # Adicionado uma chave fixa
-        styles={
-            "container": {"padding": "0!important", "background-color": "transparent"},
-            "icon": {"color": "#008080", "font-size": "20px"}, 
-            "nav-link": {
-                "font-size": "16px", 
-                "text-align": "left", 
-                "margin": "8px", 
-                "font-weight": "400"
-            },
-            "nav-link-selected": {"background-color": "#008080", "font-weight": "600"},
+    # CSS para deixar os botões com cara de menu profissional e alinhados à esquerda
+    st.markdown("""
+        <style>
+        /* Estiliza os botões do sidebar */
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] {
+            display: flex !important;
+            justify-content: flex-start !important; /* Alinha ícone/texto à esquerda */
+            align-items: center !important;
+            width: 100% !important;
+            border-radius: 10px !important;
+            border: none !important;
+            background-color: transparent !important;
+            color: #31333F !important;
+            padding: 10px !important;
+            gap: 10px !important;
+            transition: 0.3s;
         }
-    )
 
-    # Lógica de fechamento forçado para celular
-    if 'pagina' not in st.session_state or st.session_state.pagina != selecionado:
-        st.session_state.pagina = selecionado
+        /* Efeito de destaque no botão da página atual */
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"]:hover {
+            background-color: #e0e4eb !important;
+        }
         
-        # Este script em JS encontra o botão de fechar (X) ou o overlay do sidebar e clica nele
-        st.components.v1.html(
-            """
-            <script>
-                var container = window.parent.document.getElementById("sidebar-column");
-                var button = window.parent.document.querySelector('button[kind="headerNoSpacing"]');
-                if (button) {
-                    button.click();
-                }
-            </script>
-            """,
-            height=0,
-            width=0,
-        )
+        /* Ajuste do texto interno do botão */
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] p {
+            font-size: 16px !important;
+            font-weight: 500 !important;
+            margin: 0 !important;
+        }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Botões nativos (Eles forçam o fechamento no celular ao disparar o rerun)
+    if st.button("📊 Painel Inicial", use_container_width=True):
+        st.session_state.pagina = "Painel Inicial"
+        st.rerun()
+        
+    if st.button("⚙️ Cadastros Iniciais", use_container_width=True):
+        st.session_state.pagina = "Cadastros Iniciais"
+        st.rerun()
+        
+    if st.button("📋 Visualizar Lançamentos", use_container_width=True):
+        st.session_state.pagina = "Visualizar Lançamentos"
+        st.rerun()
+        
+    if st.button("💳 Cartões", use_container_width=True):
+        st.session_state.pagina = "Cartões"
         st.rerun()
 
 # --- ÁREA DE EXIBIÇÃO ---
-# Mantendo o padrão que você já usa nos outros blocos
-pagina_atual = st.session_state.get('pagina', "Painel Inicial")
+selecionado = st.session_state.get('pagina', "Painel Inicial")
 
-if pagina_atual == "Painel Inicial":
+if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
     
-    # --- PRÓXIMO PASSO: AS COLUNAS ---
-    # Aqui vamos começar a montar o layout das caixas que você quer subir.
+    # PRÓXIMO PASSO: Criar as colunas para os filtros (Mês/Ano)
   
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -937,6 +943,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
