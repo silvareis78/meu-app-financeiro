@@ -210,12 +210,10 @@ if 'pagina' not in st.session_state:
 # Ele avisa ao código em qual aba do menu o usuário clicou por último.
         
 # --- 5.CONFIGURAÇÃO DA PÁGINA E ESTILIZAÇÃO (CSS/JS) ---
-# Define a configuração da página
 st.set_page_config(layout="wide", page_title="App Financeiro") 
 
 st.markdown("""
     <script>
-    // Limpeza visual dos botões nativos
     setInterval(function() {
         const elements = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu, header');
         elements.forEach(function(el) {
@@ -230,11 +228,11 @@ st.markdown("""
     </script>
 
     <style>
-    /* 1. ESTRUTURA E FUNDO */
+    /* 1. ESTRUTURA */
     .block-container { padding-top: 1.5rem !important; } 
     footer { visibility: hidden; display: none !important; }
     
-    /* 2. CARDS DE KPI (Receita, Despesa, Saldo) */
+    /* 2. CARDS KPI */
     .card {
         padding: 30px 45px !important;
         font-size: 20px !important;
@@ -248,7 +246,7 @@ st.markdown("""
     .despesa { background-color: #B22222; }
     .saldo   { background-color: #DAA520; }
 
-    /* 3. CARDS LATERAIS (Status por Categoria) */
+    /* 3. CARDS LATERAIS */
     .card-vertical {
         padding: 12px 20px !important;
         border-radius: 10px !important;
@@ -265,20 +263,20 @@ st.markdown("""
     .card-prevista { background-color: #374151 !important; }
     .card-cartao { background-color: #0747A6 !important; }
 
-    /* 4. LABELS GERAIS (Para outras telas) */
+    /* 4. LABELS GERAIS */
     [data-testid="stWidgetLabel"] p {
         font-size: 18px !important;
         font-weight: bold !important;
         color: #000000 !important;
     }
     
-    /* 5. SELECTBOX PADRÃO (Para outras telas) */
+    /* 5. SELECTBOX PADRÃO */
     div[data-baseweb="select"] > div {
         text-align: center !important;
         height: 38px !important;
     }
 
-    /* 6. BOTÃO SALVAR (Formulários) */
+    /* 6. BOTÃO SALVAR */
     div.stFormSubmitButton > button {
         background-color: #2E7D32 !important;
         color: white !important;
@@ -288,37 +286,39 @@ st.markdown("""
         width: 100% !important;
     }
 
-    /* --- 14. EXCLUSIVO: AJUSTES PARA O PAINEL INICIAL (FILTROS) --- */
+    /* --- AJUSTES EXCLUSIVOS PAINEL INICIAL (FILTROS) --- */
     
-    /* Diminui a altura da caixa de seleção no painel inicial */
-    .selectbox-painel div[data-baseweb="select"] > div {
-        height: 28px !important;
-        min-height: 28px !important;
-        line-height: 28px !important;
-        font-size: 14px !important;
-    }
-
-    /* Estilo para a descrição não sumir */
-    .label-painel {
-        font-size: 13px !important;
-        font-weight: bold !important;
-        color: #000000 !important;
-        display: block !important;
-        margin-bottom: 2px !important; /* Pequeno espaço para a caixa subir por cima no Python */
-    }
-
-    /* Título do quadro de Filtros */
+    /* Título do quadro */
     .titulo-painel {
         font-size: 15px !important;
         font-weight: bold !important;
         margin-top: -15px !important;
-        margin-bottom: 8px !important;
+        margin-bottom: 5px !important;
         color: #333 !important;
     }
 
-    /* Remove o espaço entre os elementos dentro da div 'selectbox-painel' */
-    .selectbox-painel [data-testid="stVerticalBlock"] {
-        gap: 0rem !important;
+    /* Texto 'Selecione o Mês/Ano' */
+    .label-painel {
+        font-size: 13px !important;
+        font-weight: bold !important;
+        color: #000000 !important;
+        margin-bottom: -10px !important; /* Aproxima o texto da caixa */
+        display: block !important;
+    }
+
+    /* Caixa de Seleção Ajustada */
+    .selectbox-painel div[data-baseweb="select"] > div {
+        height: 28px !important;
+        min-height: 28px !important;
+        font-size: 14px !important;
+        margin-top: -5px !important; /* Puxa a caixa para cima do texto */
+    }
+
+    /* Remove gaps do Streamlit neste bloco */
+    .selectbox-painel [data-testid="stVerticalBlock"] > div {
+        gap: 0px !important;
+        padding-top: 0px !important;
+        padding-bottom: 0px !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -615,10 +615,8 @@ def modal_forma_pagamento():
                     
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 
-# Título que aparece no topo do menu lateral
 st.sidebar.title("MENU PRINCIPAL") 
 
-# BOTÕES DE NAVEGAÇÃO NA BARRA LATERAL
 if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
     st.session_state.pagina = "Painel Inicial"
 if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
@@ -628,7 +626,6 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
-# CSS para alinhar o botão no sidebar (Mantendo original)
 st.markdown("""<style> 
     [data-testid="stSidebar"] button {text-align: left !important; justify-content: flex-start !important; display: flex !important;}
 </style>""", unsafe_allow_html=True)
@@ -643,56 +640,39 @@ if selecionado == "Painel Inicial":
 
     with col_per:
         with st.container(height=160, border=True):
-            # Container de Estilo para o Painel
+            # Tudo dentro desta DIV segue as regras do item 'Ajustes Exclusivos' no CSS
             st.markdown('<div class="selectbox-painel">', unsafe_allow_html=True)
             
-            # Título do Quadro
             st.markdown('<p class="titulo-painel">🔍 Período</p>', unsafe_allow_html=True)
             
-            # --- BLOCO MÊS ---
+            # Mês
             st.markdown('<p class="label-painel">Selecione o Mês:</p>', unsafe_allow_html=True)
-            # A correção aqui é usar uma margem negativa no próprio selectbox via div para "subir" ele
-            st.markdown('<div style="margin-top: -10px;">', unsafe_allow_html=True)
-            mes_sel = st.selectbox(
-                "Mês", 
-                ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
-                index=0, key="mes_painel_final", label_visibility="collapsed"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
+                                   index=0, key="mes_v9", label_visibility="collapsed")
             
-            # --- BLOCO ANO ---
+            # Ano
             st.markdown('<p class="label-painel" style="margin-top: 5px !important;">Selecione o Ano:</p>', unsafe_allow_html=True)
-            st.markdown('<div style="margin-top: -32px;">', unsafe_allow_html=True)
-            ano_sel = st.selectbox(
-                "Ano", 
-                ["2024", "2025", "2026"], 
-                index=2, key="ano_painel_final", label_visibility="collapsed"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+            ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], 
+                                   index=2, key="ano_v9", label_visibility="collapsed")
             
             st.markdown('</div>', unsafe_allow_html=True)
 
     with col_des:
         with st.container(height=160, border=True):
-            # Quadro de Desempenho Completo
             consumo = 49  
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
-            
             st.markdown(f"""
                 <div style="margin-top: -5px;">
                     <span style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</span>
                     <h3 style="margin: 0px; padding: 0px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></h3>
                 </div>
             """, unsafe_allow_html=True)
-            
             barra_html = f"""
             <div style="width: 100%; background-color: #E0E0E0; border-radius: 10px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
                 <div style="width: {consumo}%; background-color: {cor_b}; height: 100%;"></div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; font-weight: bold; color: #444; padding: 0 5px;">
-                <span>0%</span>
-                <span>50%</span>
-                <span>100%</span>
+                <span>0%</span><span>50%</span><span>100%</span>
             </div>
             """
             st.markdown(barra_html, unsafe_allow_html=True)
@@ -702,7 +682,6 @@ if selecionado == "Painel Inicial":
     with st.container(border=True):
         st.markdown("**💰 Consolidado Mensal**")
         c1, c2, c3 = st.columns(3)
-        
         with c1:
             st.markdown(f'<div style="background-color:#008080; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;">RECEITA<br><b style="font-size:1.2rem;">R$ 5.000,00</b></div>', unsafe_allow_html=True)
         with c2:
@@ -1062,6 +1041,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
