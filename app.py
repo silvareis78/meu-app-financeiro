@@ -601,45 +601,53 @@ with aba1:
     # Título padronizado
     st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
 
-    # CSS para as Labels Cinzas e Quadro Automático
+    # CSS para Labels Cinzas, Alinhamento e Quadro Automático
     st.markdown("""
         <style>
-            /* Sobe o container */
+            /* Sobe o container geral */
             div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
                 margin-top: -25px !important;
             }
             
-            /* Container Flex para alinhar Label e Selectbox na mesma linha */
-            .row-periodo {
-                display: flex;
-                align-items: center;
-                gap: 10px;
-                margin-bottom: 8px;
+            /* Ajusta o quadro para envolver apenas o conteúdo (encolher) */
+            div[data-testid="stVerticalBlockBorderWrapper"] {
+                width: fit-content !important;
+                min-width: 200px !important;
+                padding-top: 1rem !important;
             }
 
-            /* Estilo da Label Cinza (Estilo crachá/tag) */
-            .label-custom {
+            /* Container para alinhar Label e Selectbox na mesma linha e altura */
+            .flex-container {
+                display: flex;
+                align-items: center; /* Centraliza verticalmente */
+                gap: 10px;
+                margin-bottom: 10px;
+                width: 100%;
+            }
+
+            /* Estilo da Label Cinza em Negrito */
+            .label-cinza {
                 background-color: #E0E0E0;
                 color: #333333;
                 font-weight: bold;
-                padding: 4px 10px;
-                border-radius: 5px;
-                font-size: 12px;
-                min-width: 50px;
-                text-align: center;
-                display: inline-block;
+                padding: 6px 12px;
+                border-radius: 6px;
+                font-size: 13px;
+                white-space: nowrap; /* Impede quebra de linha */
+                display: flex;
+                align-items: center;
+                height: 38px; /* Mesma altura padrão da combobox do Streamlit */
             }
-            
-            /* Força o container do Streamlit a ser 'fit-content' (ajuste automático) */
-            [data-testid="stVerticalBlockBorderWrapper"] {
-                width: fit-content !important;
-                min-width: 250px;
+
+            /* Remove espaços extras do Streamlit dentro do flex */
+            .flex-container div {
+                margin-top: 0 !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
     # --- QUADRO DE SELEÇÃO DE PERÍODO ---
-    # Usamos uma coluna estreita para o quadro não ocupar a tela toda
+    # Usamos uma coluna estreita para o quadro ficar no canto esquerdo
     col_filtro, col_vazio = st.columns([1, 3]) 
 
     with col_filtro:
@@ -647,24 +655,24 @@ with aba1:
             st.markdown("📍 **Período**")
             
             # --- LINHA DO MÊS ---
-            # Criamos a label em HTML e o selectbox logo ao lado
-            st.markdown('<div class="row-periodo"><span class="label-custom">MÊS</span>', unsafe_allow_html=True)
+            # Criamos um container flexível manual para garantir o alinhamento lado a lado
+            st.markdown('<div class="flex-container"><div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                      "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-            # O st.selectbox fica logo abaixo do markdown, o CSS 'row-periodo' cuida do alinhamento se necessário, 
-            # mas para garantir precisão no Streamlit, usamos colunas internas:
             
-            c1_mes, c2_mes = st.columns([0.4, 1])
-            with c1_mes:
-                 st.markdown('<div style="margin-top: 5px;"><span class="label-custom">MÊS</span></div>', unsafe_allow_html=True)
-            with c2_mes:
+            # O selectbox é injetado logo após a label via coluna ou ajuste de posição
+            c1_m, c2_m, c_espaco = st.columns([0.45, 1; 2])
+            with c1_m:
+                 st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
+            with c2_m:
                 mes_selecionado = st.selectbox("Mês", meses, label_visibility="collapsed", key="sel_mes_painel")
+            st.markdown('</div>', unsafe_allow_html=True)
 
             # --- LINHA DO ANO ---
-            c1_ano, c2_ano = st.columns([0.4, 3])
-            with c1_ano:
-                st.markdown('<div style="margin-top: 5px;"><span class="label-custom">ANO</span></div>', unsafe_allow_html=True)
-            with c2_ano:
+            c1_a, c2_a, c_espaco = st.columns([0.45, 2.5])
+            with c1_a:
+                st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
+            with c2_a:
                 anos = ["2024", "2025", "2026"]
                 ano_selecionado = st.selectbox("Ano", anos, label_visibility="collapsed", key="sel_ano_painel")
 
@@ -1025,6 +1033,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
