@@ -659,27 +659,20 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-# --- LINHA 1: FILTROS E DESEMPENHO (VERSÃO HTML ÚNICO - ANTI-SCROLL) ---
+# --- LINHA 1: FILTROS E DESEMPENHO (CORREÇÃO DE RENDERIZAÇÃO E ESPAÇAMENTO) ---
     col_per, col_des = st.columns([0.7, 2.3])
 
     with col_per:
         with st.container(height=160, border=True):
-            # Título e descrições agrupados para controle total de espaço
-            st.markdown("""
-                <div style="margin-top: -15px; line-height: 1.1;">
-                    <div style="font-size: 0.9rem; margin-bottom: 8px;">🔍 <b>Período</b></div>
-                    <div style="font-size: 0.75rem;"><b>Selecione o Mês:</b></div>
-                </div>
-            """, unsafe_allow_html=True)
+            # Ajustei para -5px para descer o título "Período"
+            st.markdown("<div style='margin-top: -5px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
             
+            # Desci a descrição e a combo box do Mês
+            st.markdown("<div style='font-size: 0.75rem; margin-top: 5px;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             
-            st.markdown("""
-                <div style="margin-top: 2px; font-size: 0.75rem; line-height: 1.1;">
-                    <b>Selecione o Ano:</b>
-                </div>
-            """, unsafe_allow_html=True)
-            
+            # Espaço entre Mês e Ano reduzido para não dar scroll
+            st.markdown("<div style='font-size: 0.75rem; margin-top: 2px;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_des:
@@ -687,32 +680,30 @@ if selecionado == "Painel Inicial":
             consumo = 49  
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
             
-            # Todo o conteúdo do quadro de desempenho em um único bloco para distribuir espaço
+            # Título e Valor (Renderização Simples)
             st.markdown(f"""
-                <div style="margin-top: -5px; display: flex; flex-direction: column; height: 100%;">
-                    <div style="margin-bottom: 5px;">
-                        <span style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</span>
-                        <div style="font-size: 1.5rem; font-weight: 800; margin-top: -2px;">
-                            {consumo}% <span style="font-size: 0.85rem; font-weight: normal; color: #666;">utilizado</span>
-                        </div>
-                    </div>
-                    
-                    <div style="width: 100%; background-color: #E0E0E0; border-radius: 10px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 2px;">
-                        <div style="width: {consumo}%; background-color: {cor_b}; height: 100%;"></div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; font-weight: bold; color: #444; padding: 0 5px;">
-                        <span>0%</span>
-                        <span>50%</span>
-                        <span>100%</span>
-                    </div>
-                    
-                    <div style="font-size: 0.8rem; margin-top: 10px; color: #2E7D32;">
-                        🟢 Gastos saudáveis para este período.
-                    </div>
+                <div style="margin-top: -5px;">
+                    <span style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</span>
+                    <h3 style="margin: 0px; padding: 0px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></h3>
                 </div>
             """, unsafe_allow_html=True)
-
+            
+            # Barra de Progresso (Código isolado para evitar erro de texto)
+            barra_html = f"""
+            <div style="width: 100%; background-color: #E0E0E0; border-radius: 10px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
+                <div style="width: {consumo}%; background-color: {cor_b}; height: 100%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; font-weight: bold; color: #444; padding: 0 5px;">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+            </div>
+            """
+            st.markdown(barra_html, unsafe_allow_html=True)
+            
+            # Legenda final
+            st.markdown(f"<div style='font-size: 0.8rem; margin-top: 5px; color: #2E7D32;'>🟢 Gastos saudáveis para este período.</div>", unsafe_allow_html=True)
+            
     # --- LINHA 2: RESUMO FINANCEIRO (KPIs) - CORREÇÃO DE OVERFLOW ---
     with st.container(border=True):
         st.markdown("**💰 Consolidado Mensal**")
@@ -1078,6 +1069,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
