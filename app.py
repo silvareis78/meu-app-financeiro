@@ -626,17 +626,6 @@ if selecionado == "Painel Inicial":
             st.markdown('<div style="background-color:#666666; color:white; padding:15px; border-radius:8px; text-align:center;"><b>PREVISTA</b><br>R$ 800,00</div>', unsafe_allow_html=True)
         with d3:
             st.markdown('<div style="background-color:#007BFF; color:white; padding:15px; border-radius:8px; text-align:center;"><b>NUBANK</b><br>R$ 450,00</div>', unsafe_allow_html=True)
-    # --- LINHA 3: STATUS ---
-    st.markdown("### 📊 Status por Categoria")
-    with st.container(border=True):
-        d1, d2, d3 = st.columns(3)
-        with d1:
-            st.markdown('<div style="background-color:#FF914D; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;"><b>A PAGAR</b><br>R$ 1.200,00</div>', unsafe_allow_html=True)
-        with d2:
-            st.markdown('<div style="background-color:#666666; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;"><b>PREVISTA</b><br>R$ 800,00</div>', unsafe_allow_html=True)
-        with d3:
-            st.markdown('<div style="background-color:#007BFF; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;"><b>NUBANK</b><br>R$ 450,00</div>', unsafe_allow_html=True)
-
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
 if selecionado == "Cadastros Iniciais":
@@ -977,6 +966,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
