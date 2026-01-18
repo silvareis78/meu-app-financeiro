@@ -671,9 +671,7 @@ if selecionado == "Painel Inicial":
             st.markdown("<div style='font-size: 0.75rem; margin-bottom: 2px;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
             # Super cola para unir texto e caixa
             st.markdown("<div style='margin-top: -28px;'></div>", unsafe_allow_html=True) 
-            mes_sel = st.selectbox(
-                "Mês", 
-                ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, key="mes_filtro_v3", label_visibility="collapsed")
+            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, key="mes_filtro_v3", label_visibility="collapsed")
             
             # Espaçamento uniforme entre o Mês e o Ano
             st.markdown("<div style='margin-top: 2px;'></div>", unsafe_allow_html=True)
@@ -681,7 +679,8 @@ if selecionado == "Painel Inicial":
             # --- BLOCO ANO ---
             st.markdown("<div style='font-size: 0.75rem; margin-bottom: 2px;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
             # Super cola para unir texto e caixa
-            st.markdown("<div style='margin-top: -28px;'></div>", unsafe_allow_html=True)ano_sel = st.selectbox("Ano", ["2026", "2027", "2028"], index=2, key="ano_filtro_v3", label_visibility="collapsed")
+            st.markdown("<div style='margin-top: -28px;'></div>", unsafe_allow_html=True)
+            ano_sel = st.selectbox("Ano", ["2026", "2027", "2028"], index=2, key="ano_filtro_v3", label_visibility="collapsed")
 
     with col_des:
         with st.container(height=160, border=True):
@@ -1074,6 +1073,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
