@@ -604,10 +604,20 @@ with aba1:
     # --- CSS MINIATURA ---
     st.markdown("""
         <style>
-            /* Reduz o padding do container para encolher o quadro */
-            div[data-testid="stVerticalBlockBorderWrapper"] {
-                padding: 10px !important;
-                min-height: 120px !important;
+            /* O QUADRO EXTERNO (A borda que você quer que diminua) */
+            .quadro-elastico {
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 10px;
+                width: fit-content; /* A MÁGICA: O quadro só ocupa o que o conteúdo pede */
+                background-color: white;
+            }
+            
+            .linha-flex {
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                margin-bottom: 8px;
             }
             
             /* Estilo das mini caixas */
@@ -1067,6 +1077,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
