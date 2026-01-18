@@ -215,131 +215,98 @@ if 'pagina' not in st.session_state:
 st.set_page_config(layout="wide", page_title="App Financeiro") 
 
 st.markdown("""
+    st.markdown("""
     <script>
-    // Esta função esconde botões nativos do Streamlit que poluem o visual (Deploy, MainMenu, etc)
-    function fecharBotoes() {
-        const itensParaEsconder = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu');
-        itensParaEsconder.forEach(el => el.style.display = 'none');
-        const header = document.querySelector('header');
-        if (header) {
-            header.style.backgroundColor = 'transparent'; // Torna o topo invisível
-            header.style.border = 'none';
-        }
-    }
-    
-    // Função que tenta recolher o menu lateral automaticamente em telas menores
-    function recolherMenu() {
-        var v_document = window.parent.document;
-        var botaoFechar = v_document.querySelector('button[kind="headerNoContext"]');
-        var sidebar = v_document.querySelector('[data-testid="stSidebar"]');
-        if (sidebar && sidebar.getAttribute('aria-expanded') === 'true' && botaoFechar) {
-            botaoFechar.click();
-        }
-    }
-    // Executa a limpeza visual a cada meio segundo para garantir que botões novos não apareçam
-    setInterval(fecharBotoes, 500);
+    // Limpeza visual agressiva (Executa a cada 0.5s)
+    setInterval(() => {
+        const elements = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu, header');
+        elements.forEach(el => {
+            if (el.tagName === 'HEADER') {
+                el.style.backgroundColor = 'transparent';
+                el.style.border = 'none';
+            } else {
+                el.style.display = 'none';
+            }
+        });
+    }, 500);
     </script>
 
     <style>
-    /* 1. CONFIGURAÇÃO GERAL DA PÁGINA */
-    /* padding-top: reduz o espaço branco no topo | margin-top: puxa o conteúdo para cima */
-    .block-container { padding-top: 1rem !important; margin-top: -20px !important; } 
-    footer { visibility: hidden; display: none !important; } /* Remove o rodapé original */
-    header { background-color: transparent !important; border: none !important; } /* Remove a barra superior */
+    /* --- 1. ESTRUTURA GLOBAL --- */
+    .block-container { padding-top: 1.5rem !important; } 
     
-    /* 2. CARDS PRINCIPAIS (Receita, Despesa, Saldo) */
+    /* --- 2. CARDS DE VALORES (ESTILO ORIGINAL) --- */
     .card {
-        padding: 30px 45px !important;        /* INTERNO: Mude aqui para engordar ou emagrecer o card */
-        font-size: 20px !important;           /* TEXTO: Tamanho da fonte dos valores */
-        border-radius: 5px;                    /* QUINAS: Aumente para 20px se quiser mais arredondado */
-        color: white !important;               /* COR DO TEXTO: Sempre branco para contraste */
-        font-weight: bold;                     /* ESTILO: Texto em negrito */
-        text-align: center;                    /* ALINHAMENTO: Centraliza o valor no card */
-        line-height: 1.1 !important;           /* ESPAÇAMENTO: Entre linhas do texto */
+        padding: 30px 45px !important;
+        font-size: 20px !important;
+        border-radius: 5px;
+        color: white !important;
+        font-weight: bold;
+        text-align: center;
+        line-height: 1.1 !important;
     }
-    .receita { background-color: #008080; }    /* COR: Verde Petróleo (Receitas) */
-    .despesa { background-color: #B22222; }    /* COR: Vermelho Tijolo (Despesas) */
-    .saldo   { background-color: #DAA520; }    /* COR: Dourado (Saldo Final) */
+    .receita { background-color: #008080; }
+    .despesa { background-color: #B22222; }
+    .saldo   { background-color: #DAA520; }
 
-    /* 3. CORES DOS CARDS VERTICAIS (Detalhamento) */
-    .card-pagar { background-color: #E65100 !important; }    /* Laranja escuro */
-    .card-prevista { background-color: #374151 !important; } /* Cinza grafite */
-    .card-cartao { background-color: #0747A6 !important; }   /* Azul royal */
-
-    /* 4. ESTILO DOS CARDS VERTICAIS */
+    /* --- 3. CARDS LATERAIS/VERTICAIS --- */
     .card-vertical {
-        padding: 12px 20px !important;         /* Tamanho interno */
-        border-radius: 10px !important;        /* Bordas arredondadas */
-        text-align: left !important;           /* Texto alinhado à esquerda */
-        margin-bottom: 10px !important;        /* DISTÂNCIA: Espaço para o card de baixo */
-        width: 350px !important;               /* LARGURA: Tamanho fixo do card lateral */
-        font-size: 20px !important;            
-        font-weight: 900 !important;           
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important; /* Sombra para dar profundidade */
-        display: block !important;             
+        padding: 12px 20px !important;
+        border-radius: 10px !important;
+        margin-bottom: 10px !important;
+        width: 100% !important; /* Mudei para 100% para ser responsivo */
+        max-width: 350px;
+        font-size: 20px !important;
+        font-weight: 900 !important;
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.2) !important;
+        display: block !important;
     }
+    .card-pagar { background-color: #E65100 !important; }
+    .card-prevista { background-color: #374151 !important; }
+    .card-cartao { background-color: #0747A6 !important; }
 
-    /* 5. AVATAR E MENSAGENS DE BOAS-VINDAS */
-    .avatar-container { display: flex; align-items: center; gap: 6px; margin-top: 15px; }
-    .img-avatar { width: 30px !important; height: 30px !important; border-radius: 50% !important; }
-
-    /* 6. BARRAS DIVISÓRIAS (Linhas Pretas) */
-    /* border-bottom: grossura da linha | margin: distância para os outros itens */
-    .barra-preta-grossa { border-bottom: 6px solid #000000 !important; margin-bottom: 20px !important; width: 100% !important; }
-    .barra-afastada { border-bottom: 6px solid #000000 !important; margin-top: 70px !important; width: 100% !important; }
-
-    /* 8. LABELS (Nomes dos campos de digitação como 'Descrição', 'Valor') */
+    /* --- 4. FORMULÁRIOS E LABELS PADRÃO (O QUE VOCÊ JÁ TINHA) --- */
     [data-testid="stWidgetLabel"] p {
-        font-size: 18px !important;            /* Tamanho da letra */
-        font-weight: bold !important;          /* Negrito */
-        color: #000000 !important;             /* Cor preta */
-        white-space: nowrap !important;        /* Não deixa o nome quebrar em duas linhas */
+        font-size: 18px !important;
+        font-weight: bold !important;
+        color: #000000 !important;
     }
     
-    /* 9. LARGURA DOS SELECTBOX (Mês e Ano no Menu) */
-    div[data-testid="stSidebar"] div[data-testid="stSelectbox"] {
-        width: 150px !important;               /* Mude para 200px se quiser que fiquem maiores */
-    }
-
-    /* 10. CAIXAS DE SELEÇÃO (Combobox) */
+    /* Altura padrão para caixas de seleção que não são do painel inicial */
     div[data-baseweb="select"] > div {
-        text-align: center !important;         /* Centraliza o texto escolhido */
-        height: 35px !important;               /* Altura da caixa onde se clica */
+        text-align: center !important;
+        height: 38px !important;
     }
 
-    /* 11. BOTÃO DO MENU MOBILE (3 Barras) */
-    [data-testid="stSidebarCollapsedControl"] {
-        background-color: #000000 !important;  /* Fundo preto para destaque no celular */
-        border-radius: 10px !important;
-        width: 50px !important;
-        height: 50px !important;
-    }
-    [data-testid="stSidebarCollapsedControl"] button { color: white !important; }
-
-    /* 12. CAMPOS DE NÚMERO (Remoção dos sinais de + e -) */
-    div[data-testid="stNumberInputStepDown"], 
-    div[data-testid="stNumberInputStepUp"],
-    button[data-testid="stNumberInputStepDown"],
-    button[data-testid="stNumberInputStepUp"] {
-        display: none !important; /* Esconde os botões laterais de aumentar/diminuir */
+    /* --- 5. ESTILO EXCLUSIVO: PAINEL INICIAL (FILTROS) --- */
+    /* Aqui é onde a mágica acontece sem quebrar o resto */
+    .selectbox-painel div[data-baseweb="select"] > div {
+        height: 30px !important; /* Caixa mais fina */
+        min-height: 30px !important;
     }
 
-    div[data-testid="stNumberInputContainer"] input {
-        padding-right: 10px !important; /* Ajusta o texto dentro da caixa sem os botões */
+    .label-painel {
+        font-size: 14px !important;
+        font-weight: bold !important;
+        margin-bottom: -38px !important; /* "Cola" o texto na caixa */
+        margin-top: 8px !important;
+        display: block;
     }
 
-    /* 13. BOTÃO SALVAR (O botão que fica dentro dos Formulários) */
+    .titulo-painel {
+        font-size: 16px !important;
+        font-weight: bold !important;
+        margin-top: -15px !important;
+    }
+
+    /* --- 6. BOTÃO SALVAR --- */
     div.stFormSubmitButton > button {
-        background-color: #2E7D32 !important;  /* COR: Verde Floresta */
-        color: white !important;               /* Texto branco */
-        font-weight: bold !important;          
-        border-radius: 8px !important;         /* Bordas suavemente arredondadas */
-        height: 3.5rem !important;             /* Altura (grande para facilitar o toque) */
-        width: 100% !important;                /* Ocupa a largura total da coluna */
-        border: none !important;               
-    }
-    div.stFormSubmitButton > button:hover {
-        background-color: #1B5E20 !important;  /* Cor quando passa o mouse (Verde Escuro) */
+        background-color: #2E7D32 !important;
+        color: white !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        height: 3.5rem !important;
+        width: 100% !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -634,7 +601,7 @@ def modal_forma_pagamento():
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO FORÇADA INLINE) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 
 # Título que aparece no topo do menu lateral
 st.sidebar.title("MENU PRINCIPAL") 
@@ -649,7 +616,7 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
-# CSS para tentar alinhar o botão (se o inline falhar no sidebar)
+# CSS para alinhar o botão no sidebar (Mantendo original)
 st.markdown("""<style> 
     [data-testid="stSidebar"] button {text-align: left !important; justify-content: flex-start !important; display: flex !important;}
 </style>""", unsafe_allow_html=True)
@@ -659,32 +626,32 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-# --- LINHA 1: FILTROS E DESEMPENHO ---
+    # --- LINHA 1: FILTROS E DESEMPENHO ---
     col_per, col_des = st.columns([0.7, 2.3])
 
     with col_per:
         with st.container(height=160, border=True):
-            # Título com posição absoluta para fugir do gap do CSS global
-            st.markdown("<div style='margin-top: -15px !important; margin-bottom: 0px !important; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
+            # Usando a classe de estilo exclusiva para o Painel
+            st.markdown('<div class="selectbox-painel">', unsafe_allow_html=True)
+            
+            # Título do quadro usando a classe do CSS limpo
+            st.markdown('<p class="titulo-painel">🔍 Período</p>', unsafe_allow_html=True)
             
             # --- BLOCO MÊS ---
-            st.markdown("<div style='font-size: 0.75rem !important; margin-top: 5px !important;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
-            
-            # Div de correção forçada (mais agressiva)
-            st.markdown("<div style='margin-bottom: -35px !important;'></div>", unsafe_allow_html=True)
-            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, key="mes_filtro_v4", label_visibility="collapsed")
+            st.markdown('<p class="label-painel">Selecione o Mês:</p>', unsafe_allow_html=True)
+            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
+                                   index=0, key="mes_painel_vfinal", label_visibility="collapsed")
             
             # --- BLOCO ANO ---
-            # Pequeno ajuste para o texto do ano não subir demais
-            st.markdown("<div style='font-size: 0.75rem !important; margin-top: 10px !important;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
+            st.markdown('<p class="label-painel">Selecione o Ano:</p>', unsafe_allow_html=True)
+            ano_sel = st.selectbox("Ano", ["2026", "2027", "2028"], 
+                                   index=0, key="ano_painel_vfinal", label_visibility="collapsed")
             
-            # Div de correção forçada (mais agressiva)
-            st.markdown("<div style='margin-bottom: -35px !important;'></div>", unsafe_allow_html=True)
-            ano_sel = st.selectbox("Ano", ["2026", "2027", "2028"], index=2, key="ano_filtro_v4", label_visibility="collapsed")
+            st.markdown('</div>', unsafe_allow_html=True)
 
     with col_des:
         with st.container(height=160, border=True):
-            # Mantendo o quadro de desempenho conforme o ajuste anterior que você aprovou
+            # Mantendo o quadro de desempenho original
             consumo = 49  
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
             
@@ -708,12 +675,11 @@ if selecionado == "Painel Inicial":
             st.markdown(barra_html, unsafe_allow_html=True)
             st.markdown(f"<div style='font-size: 0.8rem; margin-top: 5px; color: #2E7D32;'>🟢 Gastos saudáveis para este período.</div>", unsafe_allow_html=True)
             
-    # --- LINHA 2: RESUMO FINANCEIRO (KPIs) - CORREÇÃO DE OVERFLOW ---
+    # --- LINHA 2: RESUMO FINANCEIRO (KPIs) ---
     with st.container(border=True):
         st.markdown("**💰 Consolidado Mensal**")
         c1, c2, c3 = st.columns(3)
         
-        # Cards com largura travada em 100% e box-sizing
         with c1:
             st.markdown(f'<div style="background-color:#008080; color:white; padding:15px; border-radius:8px; width:100%; box-sizing:border-box; text-align:center;">RECEITA<br><b style="font-size:1.2rem;">R$ 5.000,00</b></div>', unsafe_allow_html=True)
         with c2:
@@ -1073,6 +1039,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
