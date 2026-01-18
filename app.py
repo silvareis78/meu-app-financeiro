@@ -634,11 +634,11 @@ def modal_forma_pagamento():
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (BARRA CUSTOMIZADA) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (BARRA FORÇADA) ---
 
+# CSS para o Menu e Correção de Layout
 st.markdown("""
     <style>
-        /* 1. MENU LATERAL ALINHADO À ESQUERDA */
         [data-testid="stSidebar"] .stButton button {
             display: flex !important;
             justify-content: flex-start !important;
@@ -646,39 +646,12 @@ st.markdown("""
             width: 100% !important;
             padding-left: 15px !important;
         }
-
-        /* 2. CARDS E QUADROS */
         .card, .card-vertical {
             width: 100% !important;
             box-sizing: border-box !important;
             margin: 0px !important; 
             padding: 15px !important;
             border-radius: 8px;
-        }
-
-        /* 3. BARRA DE PROGRESSO PERSONALIZADA (MAIS GROSSA) */
-        .progress-container-custom {
-            width: 100%;
-            background-color: #e0e0e0;
-            border-radius: 10px;
-            margin-top: 15px;
-            height: 20px; /* ALTURA DA BARRA */
-            position: relative;
-        }
-        .progress-bar-custom {
-            height: 100%;
-            border-radius: 10px;
-            background: linear-gradient(90deg, #008080, #00b3b3);
-            transition: width 0.5s ease-in-out;
-        }
-        .escala-container {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: #666;
-            font-weight: bold;
-            margin-top: 5px;
-            padding: 0 2px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -702,37 +675,48 @@ if selecionado == "Painel Inicial":
     col_esquerda, col_direita = st.columns([1, 2])
 
     with col_esquerda:
-        with st.container(height=180, border=True):
+        # Quadro Mês e Ano
+        with st.container(height=190, border=True):
             st.markdown("🔍 **Período**")
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_direita:
-        with st.container(height=180, border=True):
-            consumo = 49 # Valor do consumo
+        # Quadro de Desempenho com Barra Grossa e Escala
+        with st.container(height=190, border=True):
+            consumo = 49  # Valor para teste
             
+            # Definindo a cor da barra dinamicamente
+            cor_barra = "#008080" if consumo < 70 else "#FF4B4B"
+            
+            # HTML COMPLETO DA BARRA (Estilo embutido para não falhar)
             st.markdown(f"""
-                <div style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</div>
-                <div style="font-size: 1.4rem; font-weight: 800;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></div>
-                
-                <div class="progress-container-custom">
-                    <div class="progress-bar-custom" style="width: {consumo}%;"></div>
-                </div>
-                
-                <div class="escala-container">
-                    <span>0%</span>
-                    <span>50%</span>
-                    <span>100%</span>
+                <div style="font-family: sans-serif;">
+                    <div style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 5px;">
+                        Desempenho de Gastos em {mes_sel}
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;">
+                        {consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span>
+                    </div>
+                    
+                    <div style="width: 100%; background-color: #E0E0E0; border-radius: 20px; height: 25px; position: relative; border: 1px solid #CCC;">
+                        <div style="width: {consumo}%; background-color: {cor_barra}; height: 100%; border-radius: 20px; transition: width 0.5s ease-in-out;">
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.75rem; font-weight: bold; color: #444; padding: 0 5px;">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>100%</span>
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
             
-            st.write("") # Espaçador
+            # Mensagem de rodapé do quadro
             if consumo < 50:
                 st.caption("🟢 Excelente! Gastos sob controle.")
-            elif consumo < 80:
-                st.caption("🟡 Atenção: Orçamento em nível médio.")
             else:
-                st.caption("🔴 Alerta: Limite próximo do esgotamento.")
+                st.caption("🟡 Atenção ao limite orçamentário.")
 
     # --- LINHA 2: RESUMO FINANCEIRO (KPIs) ---
     with st.container(border=True):
@@ -755,7 +739,6 @@ if selecionado == "Painel Inicial":
             st.markdown('<div class="card-vertical card-prevista"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
         with c3:
             st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
-
             
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
@@ -1098,6 +1081,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
