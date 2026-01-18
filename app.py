@@ -596,65 +596,70 @@ with aba1:
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS AGRESSIVO PARA MATAR O ESPAÇO ---
+    # --- CSS PARA O QUADRO APARECER E OS TÍTULOS COLAREM ---
     st.markdown("""
         <style>
-            /* 1. O Quadro */
-            .quadro-final {
-                border: 1px solid #ddd;
-                border-radius: 8px;
-                padding: 10px;
-                background-color: #f9f9f9;
-                width: fit-content;
-                display: inline-block;
+            /* 1. LOCALIZA A COLUNA E APLICA O QUADRO DIRETAMENTE */
+            [data-testid="stHorizontalBlock"] > div:nth-child(1) > div:nth-child(1) {
+                border: 1px solid #ccc !important;
+                border-radius: 10px !important;
+                padding: 15px !important;
+                background-color: #fdfdfd !important;
+                width: fit-content !important;
+                box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
             }
             
-            /* 2. Mata o espaço entre qualquer coisa dentro do quadro */
-            .quadro-final [data-testid="stVerticalBlock"] {
+            /* 2. MATA O ESPAÇO ENTRE AS LINHAS */
+            [data-testid="stVerticalBlock"] {
                 gap: 0px !important;
             }
 
-            /* 3. Títulos Grandes, Negrito e COLADOS (margem negativa forte) */
-            .titulo-colado {
-                font-size: 16px !important;
-                font-weight: 800 !important;
-                color: #222;
-                margin-bottom: -25px !important; /* Puxa o botão muito pra cima */
-                position: relative;
-                z-index: 10;
+            /* 3. TÍTULOS GRANDES E EM NEGRITO */
+            .titulo-grosso {
+                font-size: 18px !important;
+                font-weight: 900 !important;
+                color: #111 !important;
+                margin-bottom: -5px !important; /* Ajuste milimétrico para colar */
+                margin-top: 10px !important;
+                display: block;
             }
+            
+            /* Remove margem do primeiro título para não sobrar espaço no topo */
+            .first-title { margin-top: 0px !important; }
 
-            /* 4. Ajuste da altura dos botões para não ocuparem a tela toda */
+            /* Ajusta o espaçamento interno do segmented control */
             div[data-testid="stSegmentedControl"] {
                 margin-top: 0px !important;
-                padding-top: 0px !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # Início do Quadro
-    st.write('<div class="quadro-final">', unsafe_allow_html=True)
-    
-    # ANO
-    st.markdown('<p class="titulo-colado">Ano</p>', unsafe_allow_html=True)
-    st.session_state.ano_ref = st.segmented_control(
-        "a", [2026, 2027, 2028, 2029, 2030], 
-        selection_mode="single", default=st.session_state.ano_ref,
-        label_visibility="collapsed", key="k_ano"
-    )
+    # Criamos a coluna - O quadro vai aparecer em volta dela
+    col_per, _ = st.columns([1, 0.01]) # Coluna quase única para o quadro ser justo
 
-    # Espaço mínimo entre o fim do bloco do ano e o título do mês
-    st.write('<div style="margin-top: 5px;"></div>', unsafe_allow_html=True)
+    with col_per:
+        # Título do Quadro (opcional, se quiser remover é só apagar a linha abaixo)
+        st.markdown("<p style='font-size:10px; color:#888; font-weight:bold; margin-bottom:10px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
 
-    # MÊS
-    st.markdown('<p class="titulo-colado">Mês</p>', unsafe_allow_html=True)
-    st.session_state.mes_ref = st.segmented_control(
-        "m", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
-        selection_mode="single", default=st.session_state.mes_ref,
-        label_visibility="collapsed", key="k_mes"
-    )
+        # SEÇÃO ANO
+        st.markdown('<span class="titulo-grosso first-title">Ano</span>', unsafe_allow_html=True)
+        st.session_state.ano_ref = st.segmented_control(
+            "ano", [2026, 2027, 2028, 2029, 2030], 
+            selection_mode="single", 
+            default=st.session_state.ano_ref,
+            label_visibility="collapsed", 
+            key="v4_ano"
+        )
 
-    st.write('</div>', unsafe_allow_html=True)
+        # SEÇÃO MÊS
+        st.markdown('<span class="titulo-grosso">Mês</span>', unsafe_allow_html=True)
+        st.session_state.mes_ref = st.segmented_control(
+            "mes", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
+            selection_mode="single", 
+            default=st.session_state.mes_ref,
+            label_visibility="collapsed", 
+            key="v4_mes"
+        )
     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1011,6 +1016,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
