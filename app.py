@@ -594,117 +594,107 @@ st.markdown(f"""
 # --- 3. CONTEÚDO DE CADA TELA ---
 
 with aba1:
-    # --- LÓGICA DE NAVEGAÇÃO ---
+    # --- LÓGICA DE ESTADO ---
     if 'idx_m' not in st.session_state: st.session_state.idx_m = 7  # Agosto
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
-
     meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS PARA GRUDAR TUDO (IGUAL À FOTO) ---
+    # --- CSS PARA COLAR TUDO (IGUAL À FOTO) ---
     st.markdown("""
         <style>
-            /* Container flexível para alinhar tudo sem buracos */
-            .stepper-unido {
+            .bloco-stepper {
                 display: flex;
                 align-items: center;
                 justify-content: flex-start;
-                margin-bottom: 4px;
+                gap: 0px !important; /* ELIMINA TODOS OS ESPAÇOS */
+                margin-bottom: 10px;
             }
-            /* Label Cinza Escuro */
-            .label-box {
+            .seta-clique {
+                color: #20B2AA;
+                font-size: 26px;
+                font-weight: bold;
+                cursor: pointer;
+                padding: 0 8px;
+                user-select: none;
+                line-height: 32px;
+            }
+            .label-cinza {
                 background-color: #808080;
                 color: white;
                 font-weight: bold;
                 font-size: 13px;
-                width: 70px;
-                height: 30px;
+                width: 60px;
+                height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #666;
             }
-            /* Display Bege Claro */
-            .valor-box {
+            .valor-bege {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
                 font-size: 13px;
-                width: 130px;
-                height: 30px;
+                width: 110px;
+                height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
-                border-left: none; /* Isso faz as caixas colarem */
+                border-left: none; /* COLA NA LABEL */
             }
-            /* Botões de Seta Estilizados */
-            .btn-seta {
-                background: none;
-                border: none;
-                color: #20B2AA;
-                font-size: 22px;
-                font-weight: bold;
-                cursor: pointer;
-                padding: 0 10px;
-                line-height: 30px;
-            }
-            /* Remove o estilo padrão dos botões invisíveis do Streamlit */
-            .stButton > button {
+            /* Botão invisível do Streamlit por cima das setas */
+            .stButton button {
                 border: none !important;
                 background: transparent !important;
                 color: transparent !important;
                 position: absolute;
-                width: 40px !important;
-                height: 30px !important;
-                z-index: 2;
+                width: 35px !important;
+                height: 32px !important;
+                z-index: 10;
             }
-            .wrapper-controle {
-                position: relative;
-                display: flex;
-                align-items: center;
-            }
+            .area-btn { position: relative; width: 35px; height: 32px; display: flex; align-items: center; justify-content: center; }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- RENDERIZAÇÃO ---
-    col_per, col_des = st.columns([1.2, 2.5])
+    # --- QUADROS ---
+    col_per, col_des = st.columns([1.1, 2.5])
 
     with col_per:
         with st.container(border=True):
-            st.markdown("<p style='font-size:13px; font-weight:bold; margin-bottom:12px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
-            
-            # --- LINHA MÊS ---
-            st.write('<div class="stepper-unido">', unsafe_allow_html=True)
-            # Seta Esquerda
-            st.write('<div class="wrapper-controle"><span class="btn-seta">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m_p"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-            st.write('</div>', unsafe_allow_html=True)
-            # Bloco Colado (Label + Valor)
-            st.write(f'<div class="label-box">Mês:</div><div class="valor-box">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
-            # Seta Direita
-            st.write('<div class="wrapper-controle"><span class="btn-seta">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m_n"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-            st.write('</div>', unsafe_allow_html=True)
-            st.write('</div>', unsafe_allow_html=True)
+            st.markdown("<p style='font-weight:bold; margin-bottom:15px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
 
-            # --- LINHA ANO ---
-            st.write('<div class="stepper-unido">', unsafe_allow_html=True)
-            # Seta Esquerda
-            st.write('<div class="wrapper-controle"><span class="btn-seta">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a_p"): st.session_state.val_a -= 1
+            # LINHA MÊS (TUDO JUNTO)
+            st.write('<div class="bloco-stepper">', unsafe_allow_html=True)
+            # Seta Esq
+            st.write('<div class="area-btn"><span class="seta-clique">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m_prev"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
             st.write('</div>', unsafe_allow_html=True)
-            # Bloco Colado (Label + Valor)
-            st.write(f'<div class="label-box">Ano:</div><div class="valor-box">{st.session_state.val_a}</div>', unsafe_allow_html=True)
-            # Seta Direita
-            st.write('<div class="wrapper-controle"><span class="btn-seta">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a_n"): st.session_state.val_a += 1
+            # Centro Colado
+            st.write(f'<div class="label-cinza">Mês:</div><div class="valor-bege">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
+            # Seta Dir
+            st.write('<div class="area-btn"><span class="seta-clique">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m_next"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+            st.write('</div></div>', unsafe_allow_html=True)
+
+            # LINHA ANO (TUDO JUNTO)
+            st.write('<div class="bloco-stepper">', unsafe_allow_html=True)
+            # Seta Esq
+            st.write('<div class="area-btn"><span class="seta-clique">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a_prev"): st.session_state.val_a -= 1
             st.write('</div>', unsafe_allow_html=True)
-            st.write('</div>', unsafe_allow_html=True)
+            # Centro Colado
+            st.write(f'<div class="label-cinza">Ano:</div><div class="valor-bege">{st.session_state.val_a}</div>', unsafe_allow_html=True)
+            # Seta Dir
+            st.write('<div class="area-btn"><span class="seta-clique">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a_next"): st.session_state.val_a += 1
+            st.write('</div></div>', unsafe_allow_html=True)
 
     with col_des:
-        # Aqui virá o ajuste do quadro desempenho...
-        st.empty()
+        with st.container(border=True):
+            st.markdown("<p style='font-weight:bold;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+            # O conteúdo do desempenho virá agora que o período está colado.
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1061,6 +1051,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
