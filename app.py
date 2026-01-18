@@ -659,7 +659,7 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-    # --- LINHA 1: FILTROS (CURTO) E DESEMPENHO (LONGO) ---
+   # --- LINHA 1: FILTROS (CURTO) E DESEMPENHO (LONGO) ---
     col_per, col_des = st.columns([0.6, 2.4])
 
     with col_per:
@@ -668,7 +668,7 @@ if selecionado == "Painel Inicial":
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
-   with col_des:
+    with col_des:
         with st.container(height=190, border=True):
             consumo = 49  # Valor teste
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
@@ -677,7 +677,7 @@ if selecionado == "Painel Inicial":
             st.markdown(f"**Desempenho de Gastos em {mes_sel}**")
             st.markdown(f"### {consumo}% <span style='font-size: 0.9rem; font-weight: normal; color: #666;'>utilizado</span>", unsafe_allow_html=True)
             
-            # HTML DA BARRA (Corrigido para renderizar)
+            # HTML DA BARRA (Corrigido e Indentado)
             barra_html = f"""
             <div style="width: 100%; background-color: #E0E0E0; border-radius: 15px; height: 28px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
                 <div style="width: {consumo}%; background-color: {cor_b}; height: 100%; border-radius: 15px;"></div>
@@ -689,7 +689,6 @@ if selecionado == "Painel Inicial":
             </div>
             """
             st.markdown(barra_html, unsafe_allow_html=True)
-            
             st.caption(f"🟢 Seu nível de gastos está saudável.")
 
     # --- LINHA 2: RESUMO FINANCEIRO (KPIs) - CORREÇÃO DE OVERFLOW ---
@@ -1057,6 +1056,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
