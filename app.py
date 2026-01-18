@@ -551,36 +551,43 @@ aba1, aba2, aba3, aba4 = st.tabs([
     "💳 CARTÕES"
 ])
 
-# CSS para deixar as abas com cara de botões de aplicativo
+# CSS AJUSTADO: Abas juntas no PC e boas no celular
 st.markdown("""
     <style>
-        /* Estiliza o container das abas */
+        /* Container das abas: Alinha tudo à esquerda e junta os itens */
         .stTabs [data-baseweb="tab-list"] {
-            gap: 8px;
-            justify-content: space-around;
+            gap: 10px !important; /* Espaço entre as abas */
+            justify-content: flex-start !important; /* Traz para perto uma da outra */
+            border-bottom: 2px solid #f0f2f6;
         }
 
         /* Estiliza cada aba individualmente */
         .stTabs [data-baseweb="tab"] {
-            height: 45px;
-            background-color: #f0f2f6;
-            border-radius: 10px 10px 0px 0px;
-            padding: 0px 20px;
-            font-weight: bold;
-            color: #31333F;
+            height: 40px !important;
+            background-color: #f0f2f6 !important;
+            border-radius: 8px 8px 0px 0px !important;
+            padding: 0px 15px !important;
+            font-weight: bold !important;
+            color: #31333F !important;
+            border: none !important;
         }
 
-        /* Cor da aba selecionada */
+        /* Aba Selecionada: Cor e destaque */
         .stTabs [aria-selected="true"] {
             background-color: #008080 !important;
             color: white !important;
         }
+        
+        /* Ajuste para o texto dentro da aba não sumir */
+        .stTabs [data-baseweb="tab"] p {
+            font-size: 14px !important;
+            margin: 0px !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
-# Lógica de exibição baseada na aba selecionada
+# --- LÓGICA DE EXIBIÇÃO ---
 with aba1:
-    st.session_state.pagina = "Painel Inicial"
     st.markdown("## 🏠 Painel de Controle")
   
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
@@ -923,6 +930,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
