@@ -553,6 +553,7 @@ with st.sidebar:
         icons=["house", "gear", "list-task", "card-checklist"], 
         menu_icon="cast", 
         default_index=0,
+        key='menu_principal', # Adicionado uma chave fixa
         styles={
             "container": {"padding": "0!important", "background-color": "transparent"},
             "icon": {"color": "#008080", "font-size": "20px"}, 
@@ -565,16 +566,36 @@ with st.sidebar:
             "nav-link-selected": {"background-color": "#008080", "font-weight": "600"},
         }
     )
-    
-    # O SEGREDO: Se a página mudar, o st.rerun() força o fechamento no celular
+
+    # Lógica de fechamento forçado para celular
     if 'pagina' not in st.session_state or st.session_state.pagina != selecionado:
         st.session_state.pagina = selecionado
+        
+        # Este script em JS encontra o botão de fechar (X) ou o overlay do sidebar e clica nele
+        st.components.v1.html(
+            """
+            <script>
+                var container = window.parent.document.getElementById("sidebar-column");
+                var button = window.parent.document.querySelector('button[kind="headerNoSpacing"]');
+                if (button) {
+                    button.click();
+                }
+            </script>
+            """,
+            height=0,
+            width=0,
+        )
         st.rerun()
 
 # --- ÁREA DE EXIBIÇÃO ---
-if st.session_state.get('pagina') == "Painel Inicial":
+# Mantendo o padrão que você já usa nos outros blocos
+pagina_atual = st.session_state.get('pagina', "Painel Inicial")
+
+if pagina_atual == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
-    # PRÓXIMO PASSO: Definir as colunas do Painel
+    
+    # --- PRÓXIMO PASSO: AS COLUNAS ---
+    # Aqui vamos começar a montar o layout das caixas que você quer subir.
   
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -916,6 +937,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
