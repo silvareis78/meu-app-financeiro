@@ -605,14 +605,14 @@ with aba1:
     st.markdown("""
         <style>
             /* ESTE É O CONTAINER QUE VOCÊ QUER DIMINUIR */
-            .meu-container-pequeno {{
+            .meu-container-pequeno {
                 border: 1px solid #ddd;
                 border-radius: 5px;
                 padding: 8px;
-                width: 80px; /* Aqui controlamos a largura do quadro */
+                width: fit-content; /* Alinhado para abraçar o conteúdo */
                 background-color: white;
                 display: block;
-            }}
+            }
             
             /* Estilo das mini caixas */
             .mini-label {
@@ -655,49 +655,52 @@ with aba1:
 
     # Colunas principais: Período bem pequeno, Desempenho maior
     col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5], gap="small")
+    
     with col_per:
-        with st.container(border=True):
-            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
-            
-            # --- LINHA MÊS ---
-            m_c1, m_c2, m_c3 = st.columns([0.05, 0.9, 0.05])
-            with m_c1:
-                if st.button("❮", key="m_p"): 
-                    st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-                    st.rerun()
-            with m_c2:
-                st.markdown(f"""
-                    <div style="display: flex;">
-                        <div class="mini-label">Mês:</div>
-                        <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
-                    </div>
-                """, unsafe_allow_html=True)
-            with m_c3:
-                if st.button("❯", key="m_n"): 
-                    st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-                    st.rerun()
+        # CORREÇÃO AQUI: Substituído st.container por div HTML
+        st.write('<div class="meu-container-pequeno">', unsafe_allow_html=True)
+        st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px; margin-top:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+        
+        # --- LINHA MÊS ---
+        m_c1, m_c2, m_c3 = st.columns([0.05, 0.9, 0.05])
+        with m_c1:
+            if st.button("❮", key="m_p"): 
+                st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+                st.rerun()
+        with m_c2:
+            st.markdown(f"""
+                <div style="display: flex; justify-content: center;">
+                    <div class="mini-label">Mês:</div>
+                    <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
+                </div>
+            """, unsafe_allow_html=True)
+        with m_c3:
+            if st.button("❯", key="m_n"): 
+                st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+                st.rerun()
 
-            # --- LINHA ANO ---
-            a_c1, a_c2, a_c3 = st.columns([0.2, 0.6, 0.2])
-            with a_c1:
-                if st.button("❮", key="a_p"): 
-                    st.session_state.val_a -= 1
-                    st.rerun()
-            with a_c2:
-                st.markdown(f"""
-                    <div style="display: flex;">
-                        <div class="mini-label">Ano:</div>
-                        <div class="mini-valor">{st.session_state.val_a}</div>
-                    </div>
-                """, unsafe_allow_html=True)
-            with a_c3:
-                if st.button("❯", key="a_n"): 
-                    st.session_state.val_a += 1
-                    st.rerun()
+        # --- LINHA ANO ---
+        a_c1, a_c2, a_c3 = st.columns([0.05, 0.9, 0.05])
+        with a_c1:
+            if st.button("❮", key="a_p"): 
+                st.session_state.val_a -= 1
+                st.rerun()
+        with a_c2:
+            st.markdown(f"""
+                <div style="display: flex; justify-content: center;">
+                    <div class="mini-label">Ano:</div>
+                    <div class="mini-valor">{st.session_state.val_a}</div>
+                </div>
+            """, unsafe_allow_html=True)
+        with a_c3:
+            if st.button("❯", key="a_n"): 
+                st.session_state.val_a += 1
+                st.rerun()
+        st.write('</div>', unsafe_allow_html=True)
 
     with col_des:
         with st.container(border=True):
-            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px; margin-top:0;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
             st.markdown("<p style='font-size:12px; margin:0;'>Saldo: <b>R$ 5.250,00</b></p>", unsafe_allow_html=True)
             
             # Barra grossa e discreta
@@ -1068,6 +1071,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
