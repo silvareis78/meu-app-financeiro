@@ -598,8 +598,8 @@ with aba1:
     if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
     
-    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
-                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
+    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
     # --- CSS MINIATURA ---
     st.markdown("""
@@ -657,7 +657,7 @@ with aba1:
             st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
             # --- LINHA MÊS ---
-            m_c1, m_c2, m_c3 = st.columns([0.2, 0.6, 0.2])
+            m_c1, m_c2, m_c3 = st.columns([0.08, 0.6, 1.92])
             with m_c1:
                 if st.button("❮", key="m_p"): 
                     st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
@@ -1065,6 +1065,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
