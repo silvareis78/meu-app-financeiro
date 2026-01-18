@@ -305,7 +305,7 @@ st.markdown("""
 
     /* FORÇANDO A SUBIDA: Mirando no container do widget */
     .selectbox-painel [data-testid="stSelectbox"] {
-        margin-top: -30px !important;  /* Puxa o componente inteiro para cima */
+        margin-top: -40px !important;  /* Puxa o componente inteiro para cima */
     }
 
     /* Ajuste da altura interna da caixa */
@@ -1042,6 +1042,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
