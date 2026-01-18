@@ -672,7 +672,7 @@ if selecionado == "Painel Inicial":
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             
             # --- AJUSTE AQUI: Diminuí o espaço para juntar o Ano ao Mês ---
-            st.markdown("<div style='margin-top: -8px; font-size: 0.75rem;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: -10px; font-size: 0.75rem;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_des:
@@ -1069,6 +1069,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
