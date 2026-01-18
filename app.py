@@ -595,110 +595,116 @@ st.markdown(f"""
 
 with aba1:
     # --- LÓGICA DE NAVEGAÇÃO ---
-    if 'mes_idx' not in st.session_state: st.session_state.mes_idx = 7 # AGOSTO
-    if 'ano_val' not in st.session_state: st.session_state.ano_val = 2024
+    if 'idx_m' not in st.session_state: st.session_state.idx_m = 7  # Agosto
+    if 'val_a' not in st.session_state: st.session_state.val_a = 2026
 
-    meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-             "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS PARA COLAR AS CAIXAS (SEM ESPAÇO) ---
+    # --- CSS PARA GRUDAR TUDO (IGUAL À FOTO) ---
     st.markdown("""
         <style>
-            .bloco-unido {
+            /* Container flexível para alinhar tudo sem buracos */
+            .stepper-unido {
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                gap: 0px !important; /* Força zero de espaço */
+                justify-content: flex-start;
+                margin-bottom: 4px;
             }
-            .caixa-label {
-                background-color: #7A7A7A;
+            /* Label Cinza Escuro */
+            .label-box {
+                background-color: #808080;
                 color: white;
                 font-weight: bold;
-                font-size: 12px;
-                width: 55px;
+                font-size: 13px;
+                width: 70px;
                 height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 1px solid #555;
+                border: 1px solid #666;
             }
-            .caixa-valor {
+            /* Display Bege Claro */
+            .valor-box {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
-                font-size: 12px;
-                width: 100px;
+                font-size: 13px;
+                width: 130px;
                 height: 30px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
-                border-left: none; /* Cola na label */
+                border-left: none; /* Isso faz as caixas colarem */
             }
-            .seta-verde {
+            /* Botões de Seta Estilizados */
+            .btn-seta {
+                background: none;
+                border: none;
                 color: #20B2AA;
-                font-size: 20px;
+                font-size: 22px;
                 font-weight: bold;
                 cursor: pointer;
-                user-select: none;
+                padding: 0 10px;
+                line-height: 30px;
             }
-            /* Estilo para alinhar os botões do Streamlit perfeitamente */
+            /* Remove o estilo padrão dos botões invisíveis do Streamlit */
             .stButton > button {
-                background: transparent !important;
                 border: none !important;
-                padding: 0px !important;
-                color: #20B2AA !important;
-                font-size: 20px !important;
+                background: transparent !important;
+                color: transparent !important;
+                position: absolute;
+                width: 40px !important;
                 height: 30px !important;
-                width: 25px !important;
+                z-index: 2;
             }
-            .stButton > button:hover { color: #008080 !important; }
+            .wrapper-controle {
+                position: relative;
+                display: flex;
+                align-items: center;
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- LAYOUT DO QUADRO ---
-    col_quadro, col_des = st.columns([1, 2.5])
+    # --- RENDERIZAÇÃO ---
+    col_per, col_des = st.columns([1.2, 2.5])
 
-    with col_quadro:
+    with col_per:
         with st.container(border=True):
-            st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:10px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:13px; font-weight:bold; margin-bottom:12px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
             # --- LINHA MÊS ---
-            m1, m2, m3 = st.columns([0.15, 0.7, 0.15])
-            with m1:
-                if st.button("❮", key="m_prev"): st.session_state.mes_idx = (st.session_state.mes_idx - 1) % 12
-            with m2:
-                # HTML UNIDO: Sem espaço entre as DIVs
-                st.markdown(f"""
-                    <div class="bloco-unido">
-                        <div class="caixa-label">Mês:</div>
-                        <div class="caixa-valor">{meses[st.session_state.mes_idx]}</div>
-                    </div>
-                """, unsafe_allow_html=True)
-            with m3:
-                if st.button("❯", key="m_next"): st.session_state.mes_idx = (st.session_state.mes_idx + 1) % 12
-
-            st.markdown("<div style='margin-top:5px;'></div>", unsafe_allow_html=True)
+            st.write('<div class="stepper-unido">', unsafe_allow_html=True)
+            # Seta Esquerda
+            st.write('<div class="wrapper-controle"><span class="btn-seta">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m_p"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+            st.write('</div>', unsafe_allow_html=True)
+            # Bloco Colado (Label + Valor)
+            st.write(f'<div class="label-box">Mês:</div><div class="valor-box">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
+            # Seta Direita
+            st.write('<div class="wrapper-controle"><span class="btn-seta">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m_n"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+            st.write('</div>', unsafe_allow_html=True)
+            st.write('</div>', unsafe_allow_html=True)
 
             # --- LINHA ANO ---
-            a1, a2, a3 = st.columns([0.15, 0.7, 0.15])
-            with a1:
-                if st.button("❮", key="a_prev"): st.session_state.ano_val -= 1
-            with a2:
-                # HTML UNIDO: Sem espaço entre as DIVs
-                st.markdown(f"""
-                    <div class="bloco-unido">
-                        <div class="caixa-label">Ano:</div>
-                        <div class="caixa-valor">{st.session_state.ano_val}</div>
-                    </div>
-                """, unsafe_allow_html=True)
-            with a3:
-                if st.button("❯", key="a_next"): st.session_state.ano_val += 1
+            st.write('<div class="stepper-unido">', unsafe_allow_html=True)
+            # Seta Esquerda
+            st.write('<div class="wrapper-controle"><span class="btn-seta">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a_p"): st.session_state.val_a -= 1
+            st.write('</div>', unsafe_allow_html=True)
+            # Bloco Colado (Label + Valor)
+            st.write(f'<div class="label-box">Ano:</div><div class="valor-box">{st.session_state.val_a}</div>', unsafe_allow_html=True)
+            # Seta Direita
+            st.write('<div class="wrapper-controle"><span class="btn-seta">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a_n"): st.session_state.val_a += 1
+            st.write('</div>', unsafe_allow_html=True)
+            st.write('</div>', unsafe_allow_html=True)
 
-    # --- QUADRO DESEMPENHO (Aguardando ajuste final) ---
     with col_des:
-        with st.container(border=True):
-             st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:10px;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+        # Aqui virá o ajuste do quadro desempenho...
+        st.empty()
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1055,6 +1061,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
