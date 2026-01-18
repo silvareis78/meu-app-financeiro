@@ -604,11 +604,15 @@ with aba1:
     # --- CSS MINIATURA ---
     st.markdown("""
         <style>
-            /* Reduz o padding do container para encolher o quadro */
-            div[data-testid="stVerticalBlockBorderWrapper"] {
-                padding: 10px !important;
-                min-height: 90px !important;
-            }
+            /* ESTE É O CONTAINER QUE VOCÊ QUER DIMINUIR */
+            .meu-container-pequeno {{
+                border: 1px solid #ddd;
+                border-radius: 5px;
+                padding: 8px;
+                width: 80px; /* Aqui controlamos a largura do quadro */
+                background-color: white;
+                display: block;
+            }}
             
             /* Estilo das mini caixas */
             .mini-label {
@@ -1064,6 +1068,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
