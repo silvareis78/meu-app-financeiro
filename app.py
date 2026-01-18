@@ -595,70 +595,78 @@ st.markdown(f"""
 
 with aba1:
     # --- LÓGICA DE ESTADO ---
-    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 # Fevereiro
+    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
     
-    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
+                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 
-    # --- CSS DISCRETO ---
+    # --- CSS MINIATURA ---
     st.markdown("""
         <style>
-            /* Estilo das caixas de texto */
-            .box-mes-ano {
+            /* Reduz o padding do container para encolher o quadro */
+            div[data-testid="stVerticalBlockBorderWrapper"] {
+                padding: 10px !important;
+                min-height: 120px !important;
+            }
+            
+            /* Estilo das mini caixas */
+            .mini-label {
                 background-color: #808080;
                 color: white;
                 font-weight: bold;
-                font-size: 11px;
-                height: 32px;
+                font-size: 10px;
+                width: 45px;
+                height: 28px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border-radius: 4px 0 0 4px;
+                border: 1px solid #666;
             }
-            .box-valor-ano {
+            .mini-valor {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
-                font-size: 11px;
-                height: 32px;
+                font-size: 10px;
+                width: 60px;
+                height: 28px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
-                border-radius: 0 4px 4px 0;
+                border-left: none;
             }
-            /* Ajuste dos botões para serem apenas as setas */
+
+            /* Setas minimalistas */
             div[data-testid="stColumn"] button {
                 border: none !important;
                 background: transparent !important;
-                color: #20B2AA !important;
-                font-size: 20px !important;
-                font-weight: bold !important;
-                margin-top: -3px !important;
+                color: #008080 !important;
+                font-size: 16px !important;
+                padding: 0px !important;
+                height: 28px !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # Definimos colunas estreitas para o quadro não esticar
-    col_per, col_des = st.columns([0.8, 1.5])
+    # Colunas principais: Período bem pequeno, Desempenho maior
+    col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5])
 
     with col_per:
         with st.container(border=True):
-            st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:10px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
             # --- LINHA MÊS ---
-            # [Seta, Label+Valor, Seta]
-            m_c1, m_c2, m_c3 = st.columns([0.2, 1, 0.2])
+            m_c1, m_c2, m_c3 = st.columns([0.2, 0.6, 0.2])
             with m_c1:
                 if st.button("❮", key="m_p"): 
                     st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
                     st.rerun()
             with m_c2:
                 st.markdown(f"""
-                    <div style="display: flex; width: 100%;">
-                        <div class="box-mes-ano" style="flex: 1;">Mês:</div>
-                        <div class="box-valor-ano" style="flex: 2;">{meses_lista[st.session_state.idx_m]}</div>
+                    <div style="display: flex;">
+                        <div class="mini-label">Mês:</div>
+                        <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
                     </div>
                 """, unsafe_allow_html=True)
             with m_c3:
@@ -667,16 +675,16 @@ with aba1:
                     st.rerun()
 
             # --- LINHA ANO ---
-            a_c1, a_c2, a_c3 = st.columns([0.2, 1, 0.2])
+            a_c1, a_c2, a_c3 = st.columns([0.2, 0.6, 0.2])
             with a_c1:
                 if st.button("❮", key="a_p"): 
                     st.session_state.val_a -= 1
                     st.rerun()
             with a_c2:
                 st.markdown(f"""
-                    <div style="display: flex; width: 100%;">
-                        <div class="box-mes-ano" style="flex: 1;">Ano:</div>
-                        <div class="box-valor-ano" style="flex: 2;">{st.session_state.val_a}</div>
+                    <div style="display: flex;">
+                        <div class="mini-label">Ano:</div>
+                        <div class="mini-valor">{st.session_state.val_a}</div>
                     </div>
                 """, unsafe_allow_html=True)
             with a_c3:
@@ -685,8 +693,22 @@ with aba1:
                     st.rerun()
 
     with col_des:
-        # Aqui ficará o quadro de desempenho com a barra grossa
-        st.empty()
+        with st.container(border=True):
+            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:12px; margin:0;'>Saldo: <b>R$ 5.250,00</b></p>", unsafe_allow_html=True)
+            
+            # Barra grossa e discreta
+            perc = 65
+            st.markdown(f"""
+                <div style="width: 100%; background: #eee; height: 20px; border-radius: 3px; margin-top: 8px; border: 1px solid #ccc; position: relative;">
+                    <div style="width: {perc}%; background: #008080; height: 100%; border-radius: 2px; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">
+                        {perc}%
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 9px; color: #777; font-weight: bold; margin-top: 2px;">
+                    <span>0%</span><span>50%</span><span>100%</span>
+                </div>
+            """, unsafe_allow_html=True)
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1043,6 +1065,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
