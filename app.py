@@ -601,58 +601,70 @@ with aba1:
     meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS REALMENTE UNIFICADO ---
+    # --- CSS PARA SOBREPOSIÇÃO DE BOTÕES ---
     st.markdown("""
         <style>
-            .linha-stepper {
-                display: flex !important;
-                align-items: center !important;
-                gap: 0px !important;
-                margin-bottom: 10px !important;
+            .stepper-container {
+                display: flex;
+                align-items: center;
+                gap: 0px;
+                margin-bottom: 8px;
+                position: relative;
             }
-            .seta-verde {
-                color: #20B2AA !important;
-                font-size: 22px !important;
-                font-weight: bold !important;
-                width: 30px;
+            .seta-visivel {
+                color: #20B2AA;
+                font-size: 22px;
+                font-weight: bold;
+                width: 35px;
                 text-align: center;
-                cursor: pointer;
+                user-select: none;
             }
             .caixa-label {
-                background-color: #808080 !important;
-                color: white !important;
-                font-weight: bold !important;
-                font-size: 12px !important;
-                width: 60px !important;
-                height: 30px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                border: 1px solid #666 !important;
+                background-color: #808080;
+                color: white;
+                font-weight: bold;
+                font-size: 12px;
+                width: 60px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #666;
             }
             .caixa-valor {
-                background-color: #FDF5E6 !important;
-                color: #333 !important;
-                font-weight: bold !important;
-                font-size: 12px !important;
-                width: 110px !important;
-                height: 30px !important;
-                display: flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                border: 1px solid #BDB76B !important;
-                border-left: none !important;
-            }
-            /* Botões invisíveis para capturar o clique */
-            .btn-inv {
-                position: absolute;
-                opacity: 0;
-                width: 30px;
+                background-color: #FDF5E6;
+                color: #333;
+                font-weight: bold;
+                font-size: 12px;
+                width: 110px;
                 height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 1px solid #BDB76B;
+                border-left: none;
+            }
+            /* ESTA É A MÁGICA: Deixa o botão do Streamlit invisível em cima da seta */
+            .wrapper-botao {
+                position: relative;
+                width: 35px;
+                height: 30px;
+            }
+            .stButton > button {
+                position: absolute;
+                top: 0; left: 0;
+                width: 100% !important;
+                height: 100% !important;
+                background: transparent !important;
+                color: transparent !important;
+                border: none !important;
                 z-index: 10;
                 cursor: pointer;
             }
-            .wrapper-seta { position: relative; display: flex; align-items: center; justify-content: center; }
+            .stButton > button:hover {
+                background: transparent !important;
+                border: none !important;
+            }
         </style>
     """, unsafe_allow_html=True)
 
@@ -660,48 +672,42 @@ with aba1:
 
     with col_per:
         with st.container(border=True):
-            st.markdown("<p style='font-size:12px; font-weight:bold;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:12px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
 
-            # --- MÊS EM UM ÚNICO BLOCO HTML ---
-            # Aqui eu junto tudo para o Streamlit não quebrar a linha
-            html_mes = f'''
-            <div class="linha-stepper">
-                <div class="wrapper-seta"><span class="seta-verde">❮</span></div>
-                <div class="caixa-label">Mês:</div>
-                <div class="caixa-valor">{meses_lista[st.session_state.idx_m]}</div>
-                <div class="wrapper-seta"><span class="seta-verde">❯</span></div>
-            </div>
-            '''
-            
-            # Botões de controle posicionados acima do HTML
-            c1, c2, c3, c4 = st.columns([0.15, 0.35, 0.35, 0.15])
-            with c1:
-                if st.button(" ", key="m_prev"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-            with c4:
-                if st.button(" ", key="m_next"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-            
-            # Renderiza o visual colado logo abaixo dos botões de ação
-            st.markdown(html_mes, unsafe_allow_html=True)
+            # --- LINHA MÊS ---
+            st.write('<div class="stepper-container">', unsafe_allow_html=True)
+            # Seta Esq
+            with st.container():
+                st.write('<div class="wrapper-botao"><div class="seta-visivel">❮</div>', unsafe_allow_html=True)
+                if st.button(" ", key="m_p_btn"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+                st.write('</div>', unsafe_allow_html=True)
+            # Label e Valor
+            st.write(f'<div class="caixa-label">Mês:</div><div class="caixa-valor">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
+            # Seta Dir
+            with st.container():
+                st.write('<div class="wrapper-botao"><div class="seta-visivel">❯</div>', unsafe_allow_html=True)
+                if st.button(" ", key="m_n_btn"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+                st.write('</div>', unsafe_allow_html=True)
+            st.write('</div>', unsafe_allow_html=True)
 
-            # --- ANO EM UM ÚNICO BLOCO HTML ---
-            html_ano = f'''
-            <div class="linha-stepper">
-                <div class="wrapper-seta"><span class="seta-verde">❮</span></div>
-                <div class="caixa-label">Ano:</div>
-                <div class="caixa-valor">{st.session_state.val_a}</div>
-                <div class="wrapper-seta"><span class="seta-verde">❯</span></div>
-            </div>
-            '''
-            
-            c5, c6, c7, c8 = st.columns([0.15, 0.35, 0.35, 0.15])
-            with c5:
-                if st.button(" ", key="a_prev"): st.session_state.val_a -= 1
-            with c8:
-                if st.button(" ", key="a_next"): st.session_state.val_a += 1
-                
-            st.markdown(html_ano, unsafe_allow_html=True)
+            # --- LINHA ANO ---
+            st.write('<div class="stepper-container">', unsafe_allow_html=True)
+            # Seta Esq
+            with st.container():
+                st.write('<div class="wrapper-botao"><div class="seta-visivel">❮</div>', unsafe_allow_html=True)
+                if st.button(" ", key="a_p_btn"): st.session_state.val_a -= 1
+                st.write('</div>', unsafe_allow_html=True)
+            # Label e Valor
+            st.write(f'<div class="caixa-label">Ano:</div><div class="caixa-valor">{st.session_state.val_a}</div>', unsafe_allow_html=True)
+            # Seta Dir
+            with st.container():
+                st.write('<div class="wrapper-botao"><div class="seta-visivel">❯</div>', unsafe_allow_html=True)
+                if st.button(" ", key="a_n_btn"): st.session_state.val_a += 1
+                st.write('</div>', unsafe_allow_html=True)
+            st.write('</div>', unsafe_allow_html=True)
 
     with col_des:
+        # Próximo passo: Ajustar o quadro Desempenho
         st.empty()
                     
 with aba2:
@@ -1059,6 +1065,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
