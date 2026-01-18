@@ -631,6 +631,34 @@ with aba1:
             div[data-testid="stSegmentedControl"] {
                 margin-top: 0px !important;
             }
+
+            /* AJUSTES ESPECÍFICOS PARA CELULAR (Telas menores que 768px) */
+            @media (max-width: 768px) {
+            /* 1. Faz o quadro ocupar a largura quase total no celular */
+            [data-testid="stHorizontalBlock"] > div:nth-child(1) > div:nth-child(1) {
+                width: 100% !important;
+                padding: 10px !important;
+            }
+    
+            /* 2. Permite que os meses quebrem em várias linhas para não sumirem */
+            div[data-testid="stSegmentedControl"] > div {
+                flex-wrap: wrap !important;
+                gap: 4px !important;
+            }
+    
+            /* 3. Ajusta o tamanho dos botões no celular para caberem melhor */
+            div[data-testid="stSegmentedControl"] button {
+                flex: 1 1 auto !important; /* Faz os botões crescerem igualmente */
+                min-width: 55px !important; /* Garante que o texto JAN, FEV seja lido */
+                font-size: 10px !important;
+                padding: 5px !important;
+            }
+    
+            /* 4. Aumenta um pouco o espaço entre Ano e Mês no celular para facilitar o toque */
+            .titulo-grosso {
+                margin-top: 15px !important;
+            }
+
         </style>
     """, unsafe_allow_html=True)
 
@@ -1016,6 +1044,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
