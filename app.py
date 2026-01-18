@@ -211,31 +211,32 @@ if 'pagina' not in st.session_state:
         
 # --- 5.CONFIGURAÇÃO DA PÁGINA E ESTILIZAÇÃO (CSS/JS) ---
 
-# Define que o app usará toda a largura da tela e define o nome que aparece na aba do navegador
+# Define que o app usará toda a largura da tela
 st.set_page_config(layout="wide", page_title="App Financeiro") 
 
 st.markdown("""
-    st.markdown("""
     <script>
     // Limpeza visual agressiva (Executa a cada 0.5s)
-    setInterval(() => {
-        const elements = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu, header');
-        elements.forEach(el => {
-            if (el.tagName === 'HEADER') {
-                el.style.backgroundColor = 'transparent';
-                el.style.border = 'none';
-            } else {
-                el.style.display = 'none';
-            }
+    setInterval(function() {
+        const itensParaEsconder = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu');
+        itensParaEsconder.forEach(function(el) {
+            el.style.display = 'none';
         });
+        const header = document.querySelector('header');
+        if (header) {
+            header.style.backgroundColor = 'transparent';
+            header.style.border = 'none';
+        }
     }, 500);
     </script>
 
     <style>
-    /* --- 1. ESTRUTURA GLOBAL --- */
+    /* 1. CONFIGURAÇÃO GERAL DA PÁGINA */
     .block-container { padding-top: 1.5rem !important; } 
+    footer { visibility: hidden; display: none !important; }
+    header { background-color: transparent !important; border: none !important; } 
     
-    /* --- 2. CARDS DE VALORES (ESTILO ORIGINAL) --- */
+    /* 2. CARDS PRINCIPAIS (Receita, Despesa, Saldo) */
     .card {
         padding: 30px 45px !important;
         font-size: 20px !important;
@@ -249,57 +250,58 @@ st.markdown("""
     .despesa { background-color: #B22222; }
     .saldo   { background-color: #DAA520; }
 
-    /* --- 3. CARDS LATERAIS/VERTICAIS --- */
-    .card-vertical {
-        padding: 12px 20px !important;
-        border-radius: 10px !important;
-        margin-bottom: 10px !important;
-        width: 100% !important; /* Mudei para 100% para ser responsivo */
-        max-width: 350px;
-        font-size: 20px !important;
-        font-weight: 900 !important;
-        box-shadow: 4px 4px 10px rgba(0,0,0,0.2) !important;
-        display: block !important;
-    }
+    /* 3. CORES DOS CARDS VERTICAIS */
     .card-pagar { background-color: #E65100 !important; }
     .card-prevista { background-color: #374151 !important; }
     .card-cartao { background-color: #0747A6 !important; }
 
-    /* --- 4. FORMULÁRIOS E LABELS PADRÃO (O QUE VOCÊ JÁ TINHA) --- */
+    /* 4. ESTILO DOS CARDS VERTICAIS */
+    .card-vertical {
+        padding: 12px 20px !important;
+        border-radius: 10px !important;
+        text-align: left !important;
+        margin-bottom: 10px !important;
+        width: 100% !important;
+        max-width: 350px;
+        font-size: 20px !important;
+        font-weight: 900 !important;
+        box-shadow: 4px 4px 10px rgba(0,0,0,0.3) !important;
+        display: block !important;
+    }
+
+    /* 5. AVATAR */
+    .avatar-container { display: flex; align-items: center; gap: 6px; margin-top: 15px; }
+    .img-avatar { width: 30px !important; height: 30px !important; border-radius: 50% !important; }
+
+    /* 6. BARRAS DIVISÓRIAS */
+    .barra-preta-grossa { border-bottom: 6px solid #000000 !important; margin-bottom: 20px !important; width: 100% !important; }
+    .barra-afastada { border-bottom: 6px solid #000000 !important; margin-top: 70px !important; width: 100% !important; }
+
+    /* 8. LABELS GERAIS */
     [data-testid="stWidgetLabel"] p {
         font-size: 18px !important;
         font-weight: bold !important;
         color: #000000 !important;
     }
     
-    /* Altura padrão para caixas de seleção que não são do painel inicial */
+    /* 9. LARGURA SELECTBOX SIDEBAR */
+    div[data-testid="stSidebar"] div[data-testid="stSelectbox"] { width: 150px !important; }
+
+    /* 10. CAIXAS DE SELEÇÃO PADRÃO */
     div[data-baseweb="select"] > div {
         text-align: center !important;
-        height: 38px !important;
+        height: 35px !important;
     }
 
-    /* --- 5. ESTILO EXCLUSIVO: PAINEL INICIAL (FILTROS) --- */
-    /* Aqui é onde a mágica acontece sem quebrar o resto */
-    .selectbox-painel div[data-baseweb="select"] > div {
-        height: 30px !important; /* Caixa mais fina */
-        min-height: 30px !important;
+    /* 11. MENU MOBILE */
+    [data-testid="stSidebarCollapsedControl"] {
+        background-color: #000000 !important;
+        border-radius: 10px !important;
+        width: 50px !important;
+        height: 50px !important;
     }
 
-    .label-painel {
-        font-size: 14px !important;
-        font-weight: bold !important;
-        margin-bottom: -38px !important; /* "Cola" o texto na caixa */
-        margin-top: 8px !important;
-        display: block;
-    }
-
-    .titulo-painel {
-        font-size: 16px !important;
-        font-weight: bold !important;
-        margin-top: -15px !important;
-    }
-
-    /* --- 6. BOTÃO SALVAR --- */
+    /* 13. BOTÃO SALVAR */
     div.stFormSubmitButton > button {
         background-color: #2E7D32 !important;
         color: white !important;
@@ -308,9 +310,30 @@ st.markdown("""
         height: 3.5rem !important;
         width: 100% !important;
     }
+
+    /* --- 14. EXCLUSIVO: AJUSTES PARA O PAINEL INICIAL --- */
+    .selectbox-painel div[data-baseweb="select"] > div {
+        height: 30px !important;
+        min-height: 30px !important;
+    }
+
+    .label-painel {
+        font-size: 14px !important;
+        font-weight: bold !important;
+        color: #000000 !important;
+        margin-bottom: -38px !important; /* Puxa a caixa para cima */
+        margin-top: 8px !important;
+        display: block;
+    }
+
+    .titulo-painel {
+        font-size: 16px !important;
+        font-weight: bold !important;
+        margin-top: -15px !important;
+        margin-bottom: 10px !important;
+    }
     </style>
 """, unsafe_allow_html=True)
-
 # --- 6. MODAL DE LANÇAMENTO (JANELA FLUTUANTE) ---
 
 @st.dialog("🚀 Novo Lançamento")
@@ -1039,6 +1062,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
