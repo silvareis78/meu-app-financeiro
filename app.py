@@ -597,123 +597,85 @@ with aba1:
     # --- LÓGICA DE ESTADO ---
     if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
-    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
+    
+    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
+                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 
-    # --- CSS CRIATIVO: SELETOR ACOPLADO ---
+    # --- CSS PARA DEIXAR O COMBOBOX "MINIMALISTA" ---
     st.markdown("""
         <style>
-            /* Container principal que agrupa a info e os botões */
-            .seletor-container {
-                display: flex;
-                align-items: center;
-                margin-bottom: 10px;
-                background: #f8f9fa;
-                border-radius: 8px;
-                padding: 4px;
-                border: 1px solid #e0e0e0;
-                width: fit-content;
+            /* Diminuir a altura e a fonte dos seletores */
+            div[data-testid="stSelectbox"] label {
+                display: none; /* Esconde o rótulo padrão para economizar espaço */
             }
-
-            /* Parte da Label (Mês/Ano) */
-            .seletor-label {
-                background: #808080;
-                color: white;
+            div[data-testid="stSelectbox"] div[data-baseweb="select"] {
+                height: 32px !important;
+                min-height: 32px !important;
+            }
+            div[data-testid="stSelectbox"] div[role="button"] {
+                padding-top: 0px !important;
+                padding-bottom: 0px !important;
+                font-size: 11px !important;
+                font-weight: bold !important;
+            }
+            
+            /* Quadro de fundo para o conjunto */
+            .area-periodo {
+                background-color: #f1f3f6;
+                padding: 10px;
+                border-radius: 8px;
+                border: 1px solid #ddd;
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+                width: 140px; /* Largura fixa e pequena para o quadro todo */
+            }
+            
+            .rotulo-superior {
                 font-size: 10px;
                 font-weight: bold;
-                padding: 6px 10px;
-                border-radius: 4px 0 0 4px;
-                text-transform: uppercase;
-            }
-
-            /* Parte do Valor */
-            .seletor-valor {
-                background: #FDF5E6;
-                color: #333;
-                font-size: 12px;
-                font-weight: bold;
-                padding: 6px 15px;
-                min-width: 60px;
-                text-align: center;
-                border-top: 1px solid #BDB76B;
-                border-bottom: 1px solid #BDB76B;
-            }
-
-            /* Bloco de comandos (setas) colados à direita */
-            .comandos-setas {
-                display: flex;
-                flex-direction: column; /* Setas uma em cima da outra */
-                gap: 0px;
-                margin-left: 2px;
-            }
-
-            /* Ajuste dos botões do Streamlit para serem mini-setas */
-            .stButton > button {
-                border: 1px solid #ddd !important;
-                background: white !important;
-                color: #008080 !important;
-                font-size: 12px !important;
-                padding: 0px !important;
-                width: 24px !important;
-                height: 15px !important; /* Metade da altura total */
-                line-height: 1 !important;
-                border-radius: 0 4px 4px 0 !important;
-            }
-            .stButton > button:hover {
-                background: #e0f2f1 !important;
-                border-color: #008080 !important;
+                color: #666;
+                margin-bottom: -5px;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    col_per, col_des, _ = st.columns([0.8, 1.2, 1.5])
+    col_per, col_des, _ = st.columns([0.6, 1.4, 1.5])
 
     with col_per:
-        st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 AJUSTE DE PERÍODO</p>", unsafe_allow_html=True)
+        # Criamos um "Card" manual para o período
+        st.write('<div class="area-periodo">', unsafe_allow_html=True)
+        st.markdown("<p style='font-size:11px; font-weight:bold; margin:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
         
-        # --- SELETOR DE MÊS ---
-        c1, c2 = st.columns([0.8, 0.2])
-        with c1:
-            st.markdown(f'''
-                <div class="seletor-container">
-                    <div class="seletor-label">Mês</div>
-                    <div class="seletor-valor">{meses_lista[st.session_state.idx_m]}</div>
-                </div>
-            ''', unsafe_allow_html=True)
-        with c2:
-            # Colocamos as setas coladas verticalmente
-            st.markdown('<div style="margin-left: -35px; margin-top: 4px;">', unsafe_allow_html=True)
-            if st.button("▲", key="m_n"):
-                st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-                st.rerun()
-            if st.button("▼", key="m_p"):
-                st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Seletor de Mês
+        st.write('<span class="rotulo-superior">MÊS</span>', unsafe_allow_html=True)
+        mes_selecionado = st.selectbox(
+            "Mês", meses_lista, 
+            index=st.session_state.idx_m, 
+            key="combo_mes"
+        )
+        # Atualiza o estado se mudar
+        st.session_state.idx_m = meses_lista.index(mes_selecionado)
 
-        # --- SELETOR DE ANO ---
-        c3, c4 = st.columns([0.8, 0.2])
-        with c3:
-            st.markdown(f'''
-                <div class="seletor-container">
-                    <div class="seletor-label">Ano</div>
-                    <div class="seletor-valor">{st.session_state.val_a}</div>
-                </div>
-            ''', unsafe_allow_html=True)
-        with c4:
-            st.markdown('<div style="margin-left: -35px; margin-top: 4px;">', unsafe_allow_html=True)
-            if st.button("▲", key="a_n"):
-                st.session_state.val_a += 1
-                st.rerun()
-            if st.button("▼", key="a_p"):
-                st.session_state.val_a -= 1
-                st.rerun()
-            st.markdown('</div>', unsafe_allow_html=True)
+        # Seletor de Ano
+        st.write('<span class="rotulo-superior">ANO</span>', unsafe_allow_html=True)
+        ano_selecionado = st.selectbox(
+            "Ano", [2024, 2025, 2026, 2027], 
+            index=2, # Corresponde a 2026
+            key="combo_ano"
+        )
+        st.session_state.val_a = ano_selecionado
+        
+        st.write('</div>', unsafe_allow_html=True)
 
     with col_des:
-        # Mantendo seu container de desempenho para referência
+        # Mantendo o container de desempenho para compor o layout
         with st.container(border=True):
-            st.markdown("<p style='font-size:11px; font-weight:bold; margin:0;'>📈 DESEMPENHO</p>", unsafe_allow_html=True)
-            st.info(f"Dados de {meses_lista[st.session_state.idx_m]}/{st.session_state.val_a}")
+            st.markdown("<p style='font-size:11px; font-weight:bold; margin:0;'>📈 RESUMO DE DESEMPENHO</p>", unsafe_allow_html=True)
+            st.write("")
+            c1, c2 = st.columns(2)
+            c1.metric("Saldo", "R$ 5.250,00", "+5%")
+            c2.metric("Mês Ref.", f"{mes_selecionado}/{ano_selecionado}")
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1070,6 +1032,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
