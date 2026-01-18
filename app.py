@@ -659,40 +659,48 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
- # --- LINHA 1: FILTROS E DESEMPENHO (AJUSTE DE SOBREPOSIÇÃO) ---
-    col_per, col_des = st.columns([0.6, 2.4])
+# --- LINHA 1: FILTROS E DESEMPENHO (AJUSTE FINO DE ESPAÇAMENTO) ---
+    col_per, col_des = st.columns([0.7, 2.3])
 
     with col_per:
         with st.container(height=160, border=True):
-            # Título e ícone com espaçamento controlado
-            st.markdown("""
-                <div style="margin-top: -10px; margin-bottom: 5px;">
-                    <span style="font-size: 0.9rem; font-weight: bold;">🔍 Período</span>
-                </div>
-            """, unsafe_allow_html=True)
+            # Título Mês - Margem negativa no topo para aproveitar o espaço
+            st.markdown("<div style='margin-top: -12px; font-size: 0.85rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
+            mes_sel = st.selectbox(
+                "Mês", 
+                ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
+                index=0, 
+                label_visibility="collapsed"
+            )
             
-            # Seletores sem label (o título acima já identifica)
-            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
-            # Pequeno espaço entre os selectboxes
-            st.markdown("<div style='margin-top: 5px;'></div>", unsafe_allow_html=True)
-            ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
+            # Espaço entre os blocos (reduzido para não estourar a altura)
+            st.markdown("<div style='margin-top: 2px;'></div>", unsafe_allow_html=True)
+            
+            # Título Ano
+            st.markdown("<div style='font-size: 0.85rem;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
+            ano_sel = st.selectbox(
+                "Ano", 
+                ["2026", "2027", "2028", "2029", "2030"], 
+                index=2, 
+                label_visibility="collapsed"
+            )
 
     with col_des:
         with st.container(height=160, border=True):
             consumo = 49  
             cor_b = "#008080" if consumo < 75 else "#FF4B4B"
             
-            # Cabeçalho do Desempenho
+            # Cabeçalho Desempenho
             st.markdown(f"""
-                <div style="margin-top: -10px;">
+                <div style="margin-top: -12px;">
                     <span style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</span>
-                    <h3 style="margin: 0px; padding: 0px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span></h3>
+                    <h3 style="margin: 0px; padding: 0px; font-size: 1.4rem;">{consumo}% <span style="font-size: 0.85rem; font-weight: normal; color: #666;">utilizado</span></h3>
                 </div>
             """, unsafe_allow_html=True)
             
             # Barra de Progresso
             barra_html = f"""
-            <div style="width: 100%; background-color: #E0E0E0; border-radius: 15px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
+            <div style="width: 100%; background-color: #E0E0E0; border-radius: 15px; height: 20px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
                 <div style="width: {consumo}%; background-color: {cor_b}; height: 100%; border-radius: 15px;"></div>
             </div>
             <div style="display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; font-weight: bold; color: #444; padding: 0 5px;">
@@ -703,8 +711,8 @@ if selecionado == "Painel Inicial":
             """
             st.markdown(barra_html, unsafe_allow_html=True)
             
-            # Legenda inferior
-            st.markdown(f"<p style='font-size: 12px; margin-top: 5px; color: gray;'>🟢 Gastos saudáveis para este mês.</p>", unsafe_allow_html=True)
+            # Legenda compacta
+            st.markdown(f"<p style='font-size: 11px; margin-top: 3px; color: gray; margin-bottom: 0px;'>🟢 Gastos saudáveis para este período.</p>", unsafe_allow_html=True)
 
     # --- LINHA 2: RESUMO FINANCEIRO (KPIs) - CORREÇÃO DE OVERFLOW ---
     with st.container(border=True):
@@ -1071,6 +1079,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
