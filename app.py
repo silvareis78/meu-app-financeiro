@@ -661,7 +661,7 @@ with aba1:
                 mes_selecionado = st.selectbox("Mês", meses, label_visibility="collapsed", key="sel_mes_painel")
 
             # --- LINHA DO ANO ---
-            c1_ano, c2_ano = st.columns([0.4, 1])
+            c1_ano, c2_ano = st.columns([0.4, 3])
             with c1_ano:
                 st.markdown('<div style="margin-top: 5px;"><span class="label-custom">ANO</span></div>', unsafe_allow_html=True)
             with c2_ano:
@@ -1025,6 +1025,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
