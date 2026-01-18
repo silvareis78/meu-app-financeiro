@@ -648,7 +648,7 @@ with aba1:
 
     # --- QUADRO DE SELEÇÃO DE PERÍODO ---
     # Usamos uma coluna estreita para o quadro ficar no canto esquerdo
-    col_filtro, col_vazio = st.columns([0.6, 4.5]) 
+    col_filtro, col_vazio = st.columns([0.8, 3]) 
 
     with col_filtro:
         with st.container(border=True):
@@ -1026,6 +1026,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
