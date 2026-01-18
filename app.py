@@ -555,17 +555,30 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
-# CSS para alinhar Ícone e Texto à esquerda
+# CSS REVISADO: Alinhamento forçado à esquerda
 st.markdown("""
     <style>
-        /* Alinha o conteúdo do botão do sidebar à esquerda */
+        /* 1. Alinha o container do botão */
+        [data-testid="stSidebarNav"] button, 
         [data-testid="stSidebar"] button {
-            text-align: left !important;
-            justify-content: flex-start !important;
             display: flex !important;
-            align-items: center !important;
-            gap: 10px !important; /* Espaço entre o ícone e o texto */
-            padding-left: 15px !important;
+            justify-content: flex-start !important; /* Move para a esquerda */
+            text-align: left !important;
+            padding-left: 10px !important;
+        }
+
+        /* 2. Alinha o texto/ícone que fica dentro do botão */
+        [data-testid="stSidebar"] button div[data-testid="stMarkdownContainer"] p {
+            text-align: left !important;
+            display: flex !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
+        }
+        
+        /* 3. Garante que o span interno não centralize */
+        [data-testid="stSidebar"] button span {
+            display: flex !important;
+            justify-content: flex-start !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -916,6 +929,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
