@@ -672,7 +672,7 @@ if selecionado == "Painel Inicial":
             mes_sel = st.selectbox("Mês", ["JANEIRO", "..."], index=0, label_visibility="collapsed")
             
             # 3. Espaço entre os blocos
-            st.markdown("<div style='margin-top: 4px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: 8px;'></div>", unsafe_allow_html=True)
             
             # 4. Descrição do Ano
             st.markdown("<div style='font-size: 0.75rem; line-height: 1;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
@@ -1072,6 +1072,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
