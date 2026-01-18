@@ -597,96 +597,115 @@ with aba1:
     # --- LÓGICA DE ESTADO ---
     if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
-    
-    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
-                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
+    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 
-    # --- CSS AJUSTADO ---
+    # --- CSS CRIATIVO: O CONTROLADOR ÚNICO ---
     st.markdown("""
         <style>
-            .mini-label {
-                background-color: #808080;
-                color: white;
-                font-weight: bold;
-                font-size: 10px;
-                width: 45px;
-                height: 28px;
+            /* Container do seletor estilo 'Pill' (Pílula) */
+            .control-pill {
                 display: flex;
                 align-items: center;
-                justify-content: center;
-                border: 1px solid #666;
+                background-color: #f0f2F6;
+                border-radius: 50px;
+                padding: 5px 15px;
+                width: fit-content;
+                border: 1px solid #ddd;
+                gap: 10px;
             }
-            .mini-valor {
-                background-color: #FDF5E6;
-                color: #333;
+            
+            .label-pill {
+                font-size: 11px;
                 font-weight: bold;
-                font-size: 10px;
-                width: 60px;
-                height: 28px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid #BDB76B;
-                border-left: none;
+                color: #555;
+                text-transform: uppercase;
             }
 
-            /* Estilo dos botões para ficarem colados */
-            div[data-testid="stColumn"] button {
+            .value-pill {
+                background-color: #008080;
+                color: white;
+                padding: 2px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: bold;
+                min-width: 50px;
+                text-align: center;
+            }
+
+            /* Estilizando os botões do Streamlit para agirem como ícones */
+            .stButton > button {
                 border: none !important;
                 background: transparent !important;
                 color: #008080 !important;
-                font-size: 18px !important;
-                font-weight: bold !important;
-                padding: 0px !important;
-                width: 100% !important; /* Faz o botão ocupar a coluninha toda */
-                height: 28px !important;
+                padding: 0 !important;
+                font-size: 20px !important;
+                line-height: 1 !important;
+                transition: transform 0.2s;
+            }
+            .stButton > button:hover {
+                transform: scale(1.2);
+                background: transparent !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5], gap="small")
-    
-    with col_per:
-        st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px; margin-top:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+    # Layout de topo
+    col1, col2 = st.columns([1, 1.5])
+
+    with col1:
+        st.write("### 📅 Período")
         
-        # --- LINHA MÊS (Setas coladas: 0.05 para as pontas) ---
-        m_c1, m_c2, m_c3 = st.columns([0.1, 0.45, 0.1])
-        with m_c1:
-            if st.button("❮", key="m_p"): 
+        # --- SELETOR DE MÊS ESTILO PILL ---
+        # Criamos uma linha para o Mês
+        m1, m2, m3 = st.columns([0.1, 0.4, 0.1])
+        with m1:
+            if st.button("❮", key="m_p"):
                 st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
                 st.rerun()
-        with m_c2:
+        with m2:
             st.markdown(f"""
-                <div style="display: flex; justify-content: center;">
-                    <div class="mini-label">Mês:</div>
-                    <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
+                <div class="control-pill">
+                    <span class="label-pill">Mês</span>
+                    <span class="value-pill">{meses_lista[st.session_state.idx_m]}</span>
                 </div>
             """, unsafe_allow_html=True)
-        with m_c3:
-            if st.button("❯", key="m_n"): 
+        with m3:
+            if st.button("❯", key="m_n"):
                 st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
                 st.rerun()
 
-        # --- LINHA ANO (Setas coladas: 0.05 para as pontas) ---
-        a_c1, a_c2, a_c3 = st.columns([0.05, 0.45, 0.05])
-        with a_c1:
-            if st.button("❮", key="a_p"): 
+        st.write("") # Espaçador
+
+        # --- SELETOR DE ANO ESTILO PILL ---
+        a1, a2, a3 = st.columns([0.1, 0.4, 0.1])
+        with a1:
+            if st.button("❮", key="a_p"):
                 st.session_state.val_a -= 1
                 st.rerun()
-        with a_c2:
+        with a2:
             st.markdown(f"""
-                <div style="display: flex; justify-content: center;">
-                    <div class="mini-label">Ano:</div>
-                    <div class="mini-valor">{st.session_state.val_a}</div>
+                <div class="control-pill">
+                    <span class="label-pill">Ano</span>
+                    <span class="value-pill">{st.session_state.val_a}</span>
                 </div>
             """, unsafe_allow_html=True)
-        with a_c3:
-            if st.button("❯", key="a_n"): 
+        with a3:
+            if st.button("❯", key="a_n"):
                 st.session_state.val_a += 1
                 st.rerun()
 
- 
-            """, unsafe_allow_html=True)
+    with col2:
+        # Exemplo de como ficariam as Receitas e Despesas nesse novo estilo
+        st.write("### 💰 Resumo")
+        st.info(f"Visualizando dados de **{meses_lista[st.session_state.idx_m]} / {st.session_state.val_a}**")
+        
+        # Um card de saldo moderno
+        st.markdown(f"""
+            <div style="background: linear-gradient(135deg, #008080 0%, #004d4d 100%); padding: 20px; border-radius: 15px; color: white;">
+                <p style="margin:0; font-size: 14px; opacity: 0.8;">Saldo Disponível</p>
+                <h2 style="margin:0; color: white;">R$ 5.250,00</h2>
+            </div>
+        """, unsafe_allow_html=True)
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1043,6 +1062,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
