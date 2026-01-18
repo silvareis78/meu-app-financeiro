@@ -665,7 +665,7 @@ if selecionado == "Painel Inicial":
     with col_per:
         with st.container(height=160, border=True):
             # Título do quadro um pouco mais para baixo como pediu antes
-            st.markdown("<div style='margin-top: -5px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: -10px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
             
             # BLOCO MÊS
             st.markdown("<div style='font-size: 0.75rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
@@ -1069,6 +1069,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
