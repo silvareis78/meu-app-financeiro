@@ -591,74 +591,67 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. CONTEÚDO DE CADA TELA ---
-
 with aba1:
     # --- LÓGICA DE ESTADO ---
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS PARA ESPAÇAMENTO JUSTO E RÓTULOS MAIORES ---
+    # --- CSS AGRESSIVO PARA MATAR O ESPAÇO ---
     st.markdown("""
         <style>
-            /* Quadro ultra justo */
-            .quadro-compacto {
+            /* 1. O Quadro */
+            .quadro-final {
                 border: 1px solid #ddd;
                 border-radius: 8px;
-                padding: 12px;
+                padding: 10px;
                 background-color: #f9f9f9;
                 width: fit-content;
                 display: inline-block;
             }
             
-            /* Remove o espaço vertical padrão do Streamlit entre os elementos */
-            .quadro-compacto [data-testid="stVerticalBlock"] {
-                gap: 0rem !important;
+            /* 2. Mata o espaço entre qualquer coisa dentro do quadro */
+            .quadro-final [data-testid="stVerticalBlock"] {
+                gap: 0px !important;
             }
 
-            /* Estilo dos Rótulos: Maior e Negrito */
-            .label-periodo {
-                font-size: 13px; /* Aumentado */
-                font-weight: bold; /* Negrito */
-                color: #333;
-                margin-bottom: -10px; /* Aproxima o menu de abas */
-                margin-top: 8px;
+            /* 3. Títulos Grandes, Negrito e COLADOS (margem negativa forte) */
+            .titulo-colado {
+                font-size: 16px !important;
+                font-weight: 800 !important;
+                color: #222;
+                margin-bottom: -25px !important; /* Puxa o botão muito pra cima */
+                position: relative;
+                z-index: 10;
             }
-            .label-periodo:first-child { margin-top: 0; }
 
-            /* Ajuste de altura das abas para ficar proporcional */
-            div[data-testid="stSegmentedControl"] button {
-                padding: 4px 10px !important;
-                min-height: 32px !important;
+            /* 4. Ajuste da altura dos botões para não ocuparem a tela toda */
+            div[data-testid="stSegmentedControl"] {
+                margin-top: 0px !important;
+                padding-top: 0px !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
     # Início do Quadro
-    st.write('<div class="quadro-compacto">', unsafe_allow_html=True)
+    st.write('<div class="quadro-final">', unsafe_allow_html=True)
     
-    st.markdown("<p style='font-size:11px; color: #888; margin: 0 0 10px 0;'>📍 PERÍODO DE CONSULTA</p>", unsafe_allow_html=True)
-
-    # 1. ANO EM CIMA
-    st.write('<div class="label-periodo">Ano</div>', unsafe_allow_html=True)
-    anos_lista = [2026, 2027, 2028, 2029, 2030]
+    # ANO
+    st.markdown('<p class="titulo-colado">Ano</p>', unsafe_allow_html=True)
     st.session_state.ano_ref = st.segmented_control(
-        "ano_sel", anos_lista, 
-        selection_mode="single", 
-        default=st.session_state.ano_ref,
-        label_visibility="collapsed",
-        key="ctrl_ano_v3"
+        "a", [2026, 2027, 2028, 2029, 2030], 
+        selection_mode="single", default=st.session_state.ano_ref,
+        label_visibility="collapsed", key="k_ano"
     )
 
-    # 2. MÊS ABAIXO
-    st.write('<div class="label-periodo">Mês</div>', unsafe_allow_html=True)
-    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
+    # Espaço mínimo entre o fim do bloco do ano e o título do mês
+    st.write('<div style="margin-top: 5px;"></div>', unsafe_allow_html=True)
+
+    # MÊS
+    st.markdown('<p class="titulo-colado">Mês</p>', unsafe_allow_html=True)
     st.session_state.mes_ref = st.segmented_control(
-        "mes_sel", meses_lista, 
-        selection_mode="single", 
-        default=st.session_state.mes_ref,
-        label_visibility="collapsed",
-        key="ctrl_mes_v3"
+        "m", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
+        selection_mode="single", default=st.session_state.mes_ref,
+        label_visibility="collapsed", key="k_mes"
     )
 
     st.write('</div>', unsafe_allow_html=True)
@@ -1018,6 +1011,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
