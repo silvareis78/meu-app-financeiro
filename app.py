@@ -594,114 +594,121 @@ st.markdown(f"""
 # --- 3. CONTEÚDO DE CADA TELA ---
 
 with aba1:
-    # --- 1. CONTROLES DE AJUSTE (Mude os números aqui) ---
-    LARGURA_BOX_VALOR = 90  # Aumente para meses longos, diminua para meses curtos
-    LARGURA_BOX_LABEL = 50  # Tamanho da parte cinza ("Mês:", "Ano:")
-    ALTURA_GERAL = 30       # Altura de todas as caixas e botões
-    FONTE_TAMANHO = 11      # Tamanho da letra
-    
     # --- LÓGICA DE ESTADO ---
     if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
-    meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-                   "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+    
+    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
+                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
 
-    # --- 2. CSS DINÂMICO (Usa as variáveis acima) ---
-    st.markdown(f"""
+    # --- CSS MINIATURA ---
+    st.markdown("""
         <style>
-            .quadro-ajustavel {{
-                border: 1px solid #ddd;
-                border-radius: 4px;
-                padding: 12px;
-                width: fit-content; /* Quadro abraça o conteúdo */
-                background-color: white;
-            }}
-            .linha-stepper {{
-                display: flex;
-                align-items: center;
-                margin-bottom: 6px;
-            }}
-            .caixa-cinza {{
+            /* Reduz o padding do container para encolher o quadro */
+            div[data-testid="stVerticalBlockBorderWrapper"] {
+                padding: 10px !important;
+                min-height: 120px !important;
+            }
+            
+            /* Estilo das mini caixas */
+            .mini-label {
                 background-color: #808080;
                 color: white;
                 font-weight: bold;
-                font-size: {FONTE_TAMANHO}px;
-                width: {LARGURA_BOX_LABEL}px;
-                height: {ALTURA_GERAL}px;
+                font-size: 10px;
+                width: 45px;
+                height: 28px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #666;
-            }}
-            .caixa-bege {{
+            }
+            .mini-valor {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
-                font-size: {FONTE_TAMANHO}px;
-                width: {LARGURA_BOX_VALOR}px;
-                height: {ALTURA_GERAL}px;
+                font-size: 10px;
+                width: 60px;
+                height: 28px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
                 border-left: none;
-            }}
-            /* Estilo das setas */
-            .btn-seta {{
-                color: #20B2AA;
-                font-size: 18px;
-                font-weight: bold;
-                cursor: pointer;
-                padding: 0 10px;
-                line-height: {ALTURA_GERAL}px;
-            }}
-            /* Sobreposição de botões do Streamlit */
-            .stButton > button {{
+            }
+
+            /* Setas minimalistas */
+            div[data-testid="stColumn"] button {
                 border: none !important;
                 background: transparent !important;
-                color: transparent !important;
-                width: 35px !important;
-                height: {ALTURA_GERAL}px !important;
-                position: absolute;
-                z-index: 10;
-            }}
+                color: #008080 !important;
+                font-size: 16px !important;
+                padding: 0px !important;
+                height: 28px !important;
+            }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- 3. RENDERIZAÇÃO DO QUADRO ---
-    st.write('<div class="quadro-ajustavel">', unsafe_allow_html=True)
-    st.markdown(f"<p style='font-size:{FONTE_TAMANHO}px; font-weight:bold; margin-top:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+    # Colunas principais: Período bem pequeno, Desempenho maior
+    col_per, col_des, col_vazio = st.columns([0.6, 1.4, 1.5])
 
-    # Função auxiliar para não repetir código
-    def render_linha(label, valor, key_prefix):
-        st.write('<div class="linha-stepper">', unsafe_allow_html=True)
-        
-        # Seta Esquerda
-        st.write(f'<div style="position:relative; width:35px;"><span class="btn-seta">❮</span>', unsafe_allow_html=True)
-        if st.button(" ", key=f"{key_prefix}_p"):
-            if key_prefix == "m": st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
-            else: st.session_state.val_a -= 1
-            st.rerun()
-        st.write('</div>', unsafe_allow_html=True)
+    with col_per:
+        with st.container(border=True):
+            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            
+            # --- LINHA MÊS ---
+            m_c1, m_c2, m_c3 = st.columns([0.02, 0.6, 0.18])
+            with m_c1:
+                if st.button("❮", key="m_p"): 
+                    st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+                    st.rerun()
+            with m_c2:
+                st.markdown(f"""
+                    <div style="display: flex;">
+                        <div class="mini-label">Mês:</div>
+                        <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with m_c3:
+                if st.button("❯", key="m_n"): 
+                    st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+                    st.rerun()
 
-        # Caixas Coladas
-        st.write(f'<div class="caixa-cinza">{label}</div><div class="caixa-bege">{valor}</div>', unsafe_allow_html=True)
+            # --- LINHA ANO ---
+            a_c1, a_c2, a_c3 = st.columns([0.2, 0.6, 0.2])
+            with a_c1:
+                if st.button("❮", key="a_p"): 
+                    st.session_state.val_a -= 1
+                    st.rerun()
+            with a_c2:
+                st.markdown(f"""
+                    <div style="display: flex;">
+                        <div class="mini-label">Ano:</div>
+                        <div class="mini-valor">{st.session_state.val_a}</div>
+                    </div>
+                """, unsafe_allow_html=True)
+            with a_c3:
+                if st.button("❯", key="a_n"): 
+                    st.session_state.val_a += 1
+                    st.rerun()
 
-        # Seta Direita
-        st.write(f'<div style="position:relative; width:35px;"><span class="btn-seta">❯</span>', unsafe_allow_html=True)
-        if st.button(" ", key=f"{key_prefix}_n"):
-            if key_prefix == "m": st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
-            else: st.session_state.val_a += 1
-            st.rerun()
-        st.write('</div>', unsafe_allow_html=True)
-        
-        st.write('</div>', unsafe_allow_html=True)
-
-    # Desenha as linhas usando os ajustes
-    render_linha("Mês:", meses_lista[st.session_state.idx_m], "m")
-    render_linha("Ano:", st.session_state.val_a, "a")
-
-    st.write('</div>', unsafe_allow_html=True)
+    with col_des:
+        with st.container(border=True):
+            st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+            st.markdown("<p style='font-size:12px; margin:0;'>Saldo: <b>R$ 5.250,00</b></p>", unsafe_allow_html=True)
+            
+            # Barra grossa e discreta
+            perc = 65
+            st.markdown(f"""
+                <div style="width: 100%; background: #eee; height: 20px; border-radius: 3px; margin-top: 8px; border: 1px solid #ccc; position: relative;">
+                    <div style="width: {perc}%; background: #008080; height: 100%; border-radius: 2px; display: flex; align-items: center; justify-content: center; color: white; font-size: 10px; font-weight: bold;">
+                        {perc}%
+                    </div>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 9px; color: #777; font-weight: bold; margin-top: 2px;">
+                    <span>0%</span><span>50%</span><span>100%</span>
+                </div>
+            """, unsafe_allow_html=True)
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1058,6 +1065,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
