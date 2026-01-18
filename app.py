@@ -542,89 +542,39 @@ def modal_forma_pagamento():
                     st.rerun()
                     
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
+from streamlit_option_menu import option_menu
 
-# 1. Estilização do Menu Lateral (Visual Profissional)
-st.sidebar.markdown("""
-    <style>
-        /* Container do Menu */
-        .menu-container {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        
-        /* Estilo dos "Botões" de Link */
-        .menu-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 15px;
-            background-color: #f0f2f6;
-            color: #31333F !important;
-            border-radius: 10px;
-            text-decoration: none !important;
-            font-weight: 500;
-            transition: background-color 0.3s;
-            border: 1px solid transparent;
-        }
-        
-        /* Efeito de passar o mouse */
-        .menu-item:hover {
-            background-color: #e0e4eb;
-            border: 1px solid #008080;
-        }
-        
-        /* Ícone */
-        .menu-icon {
-            margin-right: 12px;
-            font-size: 1.2rem;
-        }
-        
-        /* Ajuste para Celular: Toque mais fácil */
-        @media (max-width: 768px) {
-            .menu-item {
-                padding: 15px 20px;
-                font-size: 1.1rem;
-            }
-        }
-    </style>
-""", unsafe_allow_html=True)
-
-st.sidebar.title("MENU PRINCIPAL")
-
-# 2. Criando o Menu com HTML (Garante alinhamento à esquerda)
+# Cria o menu na barra lateral
 with st.sidebar:
-    st.markdown("""
-        <div class="menu-container">
-            <a href="?page=Painel+Inicial" class="menu-item" target="_self">
-                <span class="menu-icon">📊</span> Painel Inicial
-            </a>
-            <a href="?page=Cadastros+Iniciais" class="menu-item" target="_self">
-                <span class="menu-icon">⚙️</span> Cadastros Iniciais
-            </a>
-            <a href="?page=Visualizar+Lancamentos" class="menu-item" target="_self">
-                <span class="menu-icon">📋</span> Visualizar Lançamentos
-            </a>
-            <a href="?page=Cartoes" class="menu-item" target="_self">
-                <span class="menu-icon">💳</span> Cartões
-            </a>
-        </div>
-    """, unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>MENU</h2>", unsafe_allow_html=True)
+    
+    # O componente detecta o clique e o Streamlit fecha o sidebar no celular
+    selecionado = option_menu(
+        menu_title=None, 
+        options=["Painel Inicial", "Cadastros Iniciais", "Visualizar Lançamentos", "Cartões"],
+        icons=["house", "gear", "list-task", "card-checklist"], 
+        menu_icon="cast", 
+        default_index=0,
+        styles={
+            "container": {"padding": "0!important", "background-color": "transparent"},
+            "icon": {"color": "#008080", "font-size": "20px"}, 
+            "nav-link": {
+                "font-size": "16px", 
+                "text-align": "left", 
+                "margin": "8px", 
+                "font-weight": "400"
+            },
+            "nav-link-selected": {"background-color": "#008080", "font-weight": "600"},
+        }
+    )
+    
+    # Atualiza a página no seu sistema original
+    st.session_state.pagina = selecionado
 
-# 3. Lógica de Navegação baseada na URL ou Session State
-# Para simplificar e manter sua lógica atual:
-query_params = st.query_params
-if "page" in query_params:
-    st.session_state.pagina = query_params["page"].replace("+", " ")
-else:
-    if 'pagina' not in st.session_state:
-        st.session_state.pagina = "Painel Inicial"
-
-selecionado = st.session_state.pagina
-
-# --- RENDERIZAÇÃO DA PÁGINA ---
-if selecionado == "Painel Inicial":
+# --- RENDERIZAÇÃO ---
+if st.session_state.pagina == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
-
+    # PRÓXIMO PASSO: Vamos montar os quadros aqui?
   
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -966,6 +916,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
