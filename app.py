@@ -665,10 +665,10 @@ if selecionado == "Painel Inicial":
     with col_per:
         with st.container(height=160, border=True):
             # 1. Título do quadro
-            st.markdown("<div style='margin-top: -10px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: 20px; margin-bottom: 5px; font-size: 0.9rem;'>🔍 <b>Período</b></div>", unsafe_allow_html=True)
             
             # --- BLOCO MÊS ---
-            st.markdown("<div style='margin-top: 8px; font-size: 0.75rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: 8px; margin-bottom: 0px; font-size: 0.75rem;'><b>Selecione o Mês:</b></div>", unsafe_allow_html=True)
             st.markdown("<div style='margin-top:-8px;'></div>", unsafe_allow_html=True) 
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, key="mes_filtro", label_visibility="collapsed")
             
@@ -1068,6 +1068,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
