@@ -594,100 +594,147 @@ st.markdown(f"""
 # --- 3. CONTEÚDO DE CADA TELA ---
 
 with aba1:
-    # --- INICIALIZAÇÃO DOS ESTADOS (Caso não existam) ---
-    if 'index_mes' not in st.session_state:
-        st.session_state.index_mes = 1  # Janeiro
-    if 'ano_valor' not in st.session_state:
-        st.session_state.ano_valor = 2026
+    # --- LÓGICA DE NAVEGAÇÃO ---
+    if 'idx_mes' not in st.session_state:
+        st.session_state.idx_mes = 1  # Janeiro
+    if 'ano_val' not in st.session_state:
+        st.session_state.ano_val = 2026
 
     meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS PARA O DESIGN DA IMAGEM ---
+    # --- CSS PARA COLAR TUDO (IGUAL À FOTO) ---
     st.markdown("""
         <style>
-            /* Container do item (Linha) */
-            .stepper-row {
-                display: flex;
-                align-items: center;
-                margin-bottom: 4px;
-                gap: 0px;
+            /* Remove espaços do container do Streamlit */
+            [data-testid="stVerticalBlock"] > div:has(.stepper-container) {
+                gap: 0px !important;
             }
-            /* Label Escura */
-            .stepper-label {
-                background-color: #7A7A7A;
+
+            .stepper-table {
+                border-collapse: collapse;
+                margin-bottom: 2px;
+            }
+
+            .stepper-table td {
+                padding: 0 !important;
+                border: none !important;
+                vertical-align: middle;
+            }
+
+            /* Setas Laterais */
+            .seta-btn {
+                color: #20B2AA;
+                font-size: 22px;
+                font-weight: bold;
+                cursor: pointer;
+                padding: 0 5px;
+                user-select: none;
+            }
+
+            /* Label Cinza Escuro */
+            .label-box {
+                background-color: #808080;
                 color: white;
                 font-weight: bold;
-                font-size: 12px;
-                width: 60px;
-                height: 30px;
+                font-size: 13px;
+                width: 70px;
+                height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                border: 1px solid #555;
+                border: 1px solid #666;
             }
-            /* Campo de Valor (Bege claro) */
-            .stepper-display {
+
+            /* Display Bege Claro */
+            .display-box {
                 background-color: #FDF5E6;
                 color: #333;
                 font-weight: bold;
                 font-size: 13px;
-                width: 120px;
-                height: 30px;
+                width: 130px;
+                height: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
                 border: 1px solid #BDB76B;
                 border-left: none;
-                border-right: none;
             }
-            /* Ajuste dos botões nativos do Streamlit para parecerem setas < > */
-            div[data-testid="stButton"] > button {
-                padding: 0px !important;
-                width: 25px !important;
-                height: 30px !important;
-                background-color: transparent !important;
+
+            /* Ajuste para os botões do Streamlit ficarem invisíveis sobre as setas */
+            .stButton > button {
                 border: none !important;
-                color: #20B2AA !important; /* Cor Verde Água das setas */
-                font-size: 20px !important;
-                font-weight: bold !important;
+                background: transparent !important;
+                color: transparent !important;
+                position: absolute;
+                width: 30px !important;
+                height: 32px !important;
+                z-index: 2;
             }
+            
+            .pos-rel { position: relative; width: 30px; height: 32px; display: flex; align-items: center; justify-content: center; }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- LAYOUT DO QUADRO ---
-    col_quadro, col_vazio = st.columns([1, 2.5])
+    # --- RENDERIZAÇÃO DO QUADRO PERÍODO ---
+    col_quadro, col_desempenho = st.columns([1.2, 2.5])
 
     with col_quadro:
         with st.container(border=True):
+            st.markdown("<p style='margin-bottom:10px; font-weight:bold;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
-            # --- SELETOR DE MÊS ---
-            st.write('<div class="stepper-row">', unsafe_allow_html=True)
-            c1, c2, c3, c4 = st.columns([0.2, 0.5, 1, 0.2])
-            with c1:
-                if st.button("❮", key="prev_mes"):
-                    st.session_state.index_mes = (st.session_state.index_mes - 1) % 12
-            with c2:
-                st.markdown('<div class="stepper-label">Mês:</div>', unsafe_allow_html=True)
-            with c3:
-                st.markdown(f'<div class="stepper-display">{meses_lista[st.session_state.index_mes]}</div>', unsafe_allow_html=True)
-            with c4:
-                if st.button("❯", key="next_mes"):
-                    st.session_state.index_mes = (st.session_state.index_mes + 1) % 12
+            # --- LINHA MÊS ---
+            c_m1, c_m2, c_m3, c_m4 = st.columns([0.15, 0.3, 0.5, 0.15])
+            with c_m1:
+                st.markdown('<div class="pos-rel"><span class="seta-btn">❮</span>', unsafe_allow_html=True)
+                if st.button(" ", key="m_prev"): st.session_state.idx_mes = (st.session_state.idx_mes - 1) % 12
+                st.markdown('</div>', unsafe_allow_html=True)
+            with c_m2:
+                st.markdown('<div class="label-box">Mês:</div>', unsafe_allow_html=True)
+            with c_m3:
+                st.markdown(f'<div class="display-box">{meses_lista[st.session_state.idx_mes]}</div>', unsafe_allow_html=True)
+            with c_m4:
+                st.markdown('<div class="pos-rel"><span class="seta-btn">❯</span>', unsafe_allow_html=True)
+                if st.button("  ", key="m_next"): st.session_state.idx_mes = (st.session_state.idx_mes + 1) % 12
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            # --- LINHA ANO ---
+            c_a1, c_a2, c_a3, c_a4 = st.columns([0.15, 0.3, 0.5, 0.15])
+            with c_a1:
+                st.markdown('<div class="pos-rel"><span class="seta-btn">❮</span>', unsafe_allow_html=True)
+                if st.button("   ", key="a_prev"): st.session_state.ano_val -= 1
+                st.markdown('</div>', unsafe_allow_html=True)
+            with c_a2:
+                st.markdown('<div class="label-box">Ano:</div>', unsafe_allow_html=True)
+            with c_a3:
+                st.markdown(f'<div class="display-box">{st.session_state.ano_val}</div>', unsafe_allow_html=True)
+            with c_a4:
+                st.markdown('<div class="pos-rel"><span class="seta-btn">❯</span>', unsafe_allow_html=True)
+                if st.button("    ", key="a_next"): st.session_state.ano_val += 1
+                st.markdown('</div>', unsafe_allow_html=True)
+
+    # --- QUADRO DESEMPENHO (ALINHADO) ---
+    with col_desempenho:
+        with st.container(border=True):
+            st.markdown("<p style='margin-bottom:10px; font-weight:bold;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+            st.write(f"Saldo: **R$ 5.250,00**")
             
-            # --- SELETOR DE ANO ---
-            st.write('<div class="stepper-row">', unsafe_allow_html=True)
-            a1, a2, a3, a4 = st.columns([0.2, 0.5, 1, 0.2])
-            with a1:
-                if st.button("❮", key="prev_ano"):
-                    st.session_state.ano_valor -= 1
-            with a2:
-                st.markdown('<div class="stepper-label">Ano:</div>', unsafe_allow_html=True)
-            with a3:
-                st.markdown(f'<div class="stepper-display">{st.session_state.ano_valor}</div>', unsafe_allow_html=True)
-            with a4:
-                if st.button("❯", key="next_ano"):
-                    st.session_state.ano_valor += 1
+            # Barra Grossa e Escala conforme o esperado
+            percent = 65
+            st.markdown(f"""
+                <div style="position: relative; margin-top: 20px;">
+                    <div style="position: absolute; left: {percent}%; top: -18px; transform: translateX(-50%); 
+                                background: #008080; color: white; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold;">
+                        {percent}%
+                    </div>
+                    <div style="width: 100%; background: #F0F2F6; height: 25px; border-radius: 4px; border: 1px solid #ddd;">
+                        <div style="width: {percent}%; background: #008080; height: 100%; border-radius: 3px;"></div>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: bold; color: #999; margin-top: 5px;">
+                        <span>0%</span><span>50%</span><span>100%</span>
+                    </div>
+                </div>
+            """, unsafe_allow_html=True)
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1044,6 +1091,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
