@@ -634,7 +634,7 @@ def modal_forma_pagamento():
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO ALINHADA E PROFISSIONAL) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (PROPORÇÃO AJUSTADA) ---
 
 # CSS Corretivo para Sidebar, Cards e Alinhamento
 st.markdown("""
@@ -679,6 +679,31 @@ st.markdown("""
             font-weight: 800;
             color: #1E1E1E;
         }
+        
+        /* Barra de progresso customizada robusta */
+        .progress-bg {
+            width: 100%;
+            background-color: #E0E0E0;
+            border-radius: 20px;
+            height: 25px;
+            margin-top: 10px;
+            position: relative;
+            border: 1px solid #CCC;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 20px;
+            transition: width 0.6s ease-in-out;
+        }
+        .escala-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            color: #666;
+            padding: 0 5px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -698,18 +723,18 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-    # --- LINHA 1: FILTROS E MENSAGEM PROFISSIONAL (LADO A LADO) ---
-    col_esquerda, col_direita = st.columns([1, 2])
+    # --- LINHA 1: FILTROS (MENOR) E DESEMPENHO (MAIOR) ---
+    # Ajustei de [1, 2] para [0.6, 2.4] para encolher o Período
+    col_período, col_desempenho = st.columns([0.6, 2.4])
 
-    with col_esquerda:
-        with st.container(height=160, border=True):
+    with col_período:
+        with st.container(height=180, border=True):
             st.markdown("🔍 **Período**")
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
-    with col_direita:
-        with st.container(height=160, border=True):
-            # Lógica de cor baseada no consumo (surpresa interativa)
+    with col_desempenho:
+        with st.container(height=180, border=True):
             consumo = 49 # Simulação
             cor_status = "#008080" if consumo < 70 else "#D4AF37" if consumo < 90 else "#FF4B4B"
             
@@ -717,15 +742,23 @@ if selecionado == "Painel Inicial":
                 <div class="status-box">
                     <div class="status-title">Desempenho de Gastos em {mes_sel}</div>
                     <div class="status-value">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">do orçamento utilizado</span></div>
+                    
+                    <div class="progress-bg">
+                        <div class="progress-fill" style="width: {consumo}%; background-color: {cor_status};"></div>
+                    </div>
+                    
+                    <div class="escala-container">
+                        <span>0%</span>
+                        <span>50%</span>
+                        <span>100%</span>
+                    </div>
                 </div>
             """, unsafe_allow_html=True)
-            
-            st.progress(consumo / 100)
             
             if consumo < 50:
                 st.caption("🟢 Excelente! Seu nível de gastos está abaixo da média projetada.")
             elif consumo < 80:
-                st.caption("🟡 Atenção: Você está entrando na margem de segurança do orçamento.")
+                st.caption("🟡 Atenção: Orçamento na margem de segurança.")
             else:
                 st.caption("🔴 Alerta: Limite orçamentário próximo do esgotamento.")
 
@@ -1092,6 +1125,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
