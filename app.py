@@ -311,7 +311,7 @@ st.markdown("""
         height: 28px !important;
         min-height: 28px !important;
         font-size: 14px !important;
-        margin-top: -5px !important; /* Puxa a caixa para cima do texto */
+        margin-top: -15px !important; /* Puxa a caixa para cima do texto */
     }
 
     /* Remove gaps do Streamlit neste bloco */
@@ -1041,6 +1041,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
