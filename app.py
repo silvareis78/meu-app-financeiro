@@ -634,17 +634,50 @@ def modal_forma_pagamento():
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO BLINDADA) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO ALINHADA E PROFISSIONAL) ---
 
-# CSS para o Menu e Correção de Layout
+# CSS Corretivo para Sidebar, Cards e Alinhamento
 st.markdown("""
     <style>
+        /* 1. MENU LATERAL ALINHADO À ESQUERDA */
         [data-testid="stSidebar"] .stButton button {
             display: flex !important;
             justify-content: flex-start !important;
             text-align: left !important;
             width: 100% !important;
             padding-left: 15px !important;
+        }
+        [data-testid="stSidebar"] .stButton button p {
+            width: 100%;
+            text-align: left !important;
+            font-weight: 500;
+        }
+
+        /* 2. AJUSTE DE CARDS (PREVENIR OVERFLOW) */
+        .card, .card-vertical {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            margin: 0px !important; 
+            padding: 15px !important;
+            border-radius: 8px;
+        }
+
+        /* 3. ESTILO PARA MENSAGEM PROFISSIONAL */
+        .status-box {
+            padding: 5px;
+            border-radius: 8px;
+        }
+        .status-title {
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #555;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .status-value {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: #1E1E1E;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -665,70 +698,58 @@ selecionado = st.session_state.get('pagina', "Painel Inicial")
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
+    # --- LINHA 1: FILTROS E MENSAGEM PROFISSIONAL (LADO A LADO) ---
     col_esquerda, col_direita = st.columns([1, 2])
 
     with col_esquerda:
-        with st.container(height=200, border=True):
+        with st.container(height=160, border=True):
             st.markdown("🔍 **Período**")
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_direita:
-        with st.container(height=200, border=True):
-            consumo = 49  # Valor para teste
-            cor_barra = "#008080" if consumo < 70 else "#FF4B4B"
+        with st.container(height=160, border=True):
+            # Lógica de cor baseada no consumo (surpresa interativa)
+            consumo = 49 # Simulação
+            cor_status = "#008080" if consumo < 70 else "#D4AF37" if consumo < 90 else "#FF4B4B"
             
-            # --- TÍTULO E VALOR ---
             st.markdown(f"""
-                <div style="font-family: sans-serif;">
-                    <div style="font-size: 0.8rem; font-weight: bold; color: #666; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</div>
-                    <div style="font-size: 1.6rem; font-weight: 800; margin-top: 5px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #888;">utilizado</span></div>
+                <div class="status-box">
+                    <div class="status-title">Desempenho de Gastos em {mes_sel}</div>
+                    <div class="status-value">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">do orçamento utilizado</span></div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # --- BARRA DE PROGRESSO GROSSA (FORÇADA) ---
-            # Criamos o fundo cinza e o preenchimento colorido
-            st.markdown(f"""
-                <div style="width: 100%; background-color: #E0E0E0; border-radius: 50px; height: 30px; margin-top: 10px; border: 1px solid #CCC; overflow: hidden;">
-                    <div style="width: {consumo}%; background-color: {cor_barra}; height: 100%; border-radius: 50px; transition: width 0.8s ease-in-out;"></div>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            # --- MARCAÇÕES 0% - 50% - 100% ---
-            # Usamos colunas do próprio Streamlit para garantir que fiquem no lugar certo abaixo da barra
-            m1, m2, m3 = st.columns([1, 1, 1])
-            m1.markdown("<p style='font-size: 11px; font-weight: bold; color: #444; margin-top: -5px;'>0%</p>", unsafe_allow_html=True)
-            m2.markdown("<p style='font-size: 11px; font-weight: bold; color: #444; text-align: center; margin-top: -5px;'>50%</p>", unsafe_allow_html=True)
-            m3.markdown("<p style='font-size: 11px; font-weight: bold; color: #444; text-align: right; margin-top: -5px;'>100%</p>", unsafe_allow_html=True)
+            st.progress(consumo / 100)
             
             if consumo < 50:
-                st.caption("🟢 Excelente! Gastos dentro do planejado.")
+                st.caption("🟢 Excelente! Seu nível de gastos está abaixo da média projetada.")
             elif consumo < 80:
-                st.caption("🟡 Atenção: Orçamento em nível médio.")
+                st.caption("🟡 Atenção: Você está entrando na margem de segurança do orçamento.")
             else:
-                st.caption("🔴 Alerta: Limite próximo do esgotamento.")
-                
-    # --- LINHA 2: RESUMO FINANCEIRO (COM CORREÇÃO DE LARGURA) ---
+                st.caption("🔴 Alerta: Limite orçamentário próximo do esgotamento.")
+
+    # --- LINHA 2: RESUMO FINANCEIRO (KPIs) ---
     with st.container(border=True):
         st.markdown("**💰 Consolidado Mensal**")
         c_rec, c_desp, c_sal = st.columns(3)
         with c_rec:
-            st.markdown('<div class="card receita" style="width:100%; box-sizing: border-box; padding:15px; border-radius:8px; background-color:#008080; color:white;">RECEITA<br><b>R$ 5.000,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
         with c_desp:
-            st.markdown('<div class="card despesa" style="width:100%; box-sizing: border-box; padding:15px; border-radius:8px; background-color:#FF4B4B; color:white;">DESPESA<br><b>R$ 2.450,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
         with c_sal:
-            st.markdown('<div class="card saldo" style="width:100%; box-sizing: border-box; padding:15px; border-radius:8px; background-color:#D4AF37; color:white;">SALDO<br><b>R$ 2.550,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
 
     # --- LINHA 3: STATUS DETALHADO ---
     st.markdown("### 📊 Status por Categoria")
     with st.container(border=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown('<div class="card-vertical" style="width:100%; padding:15px; background-color:#FF914D; color:white; border-radius:8px;"><b>A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical card-pagar"><b>A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown('<div class="card-vertical" style="width:100%; padding:15px; background-color:#666; color:white; border-radius:8px;"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical card-prevista"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
         with c3:
-            st.markdown('<div class="card-vertical" style="width:100%; padding:15px; background-color:#007BFF; color:white; border-radius:8px;"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
             
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
@@ -1071,6 +1092,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
