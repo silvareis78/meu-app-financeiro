@@ -612,7 +612,7 @@ with aba1:
             /* Ajusta o quadro para envolver apenas o conteúdo (encolher) */
             div[data-testid="stVerticalBlockBorderWrapper"] {
                 width: fit-content !important;
-                min-width: 200px !important;
+                min-width: 160px !important;
                 padding-top: 1rem !important;
             }
 
@@ -1026,6 +1026,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
