@@ -600,7 +600,7 @@ with aba1:
     # (Aguardando o próximo passo para configurar esta tela)
 
 with aba2:
-    # Tudo o que você colocar aqui APARECERÁ NA TELA CADASTROS
+    # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
     st.session_state.pagina = "Cadastros Iniciais"
     st.subheader("⚙️ Gerenciamento de Cadastros")
     st.markdown("---")
@@ -709,104 +709,7 @@ with aba4:
     st.subheader("💳 Gestão de Cartões de Crédito")
     # Cole aqui o código de cartões
   
-# --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
-if selecionado == "Cadastros Iniciais":
-    st.markdown("## ⚙️ Configurações e Cadastros")
-    st.markdown("---")
-    
-    # CSS para forçar a barra de rolagem a ser tratada corretamente pelo navegador
-    st.markdown("""
-        <style>
-            [data-testid="stVerticalBlock"] > div:has(div.stVerticalBlockBorder) > div {
-                overflow-y: auto !important;
-            }
-        </style>
-    """, unsafe_allow_html=True)
-    
-    col_desp, col_rec, col_pgto = st.columns([1, 1, 1])
-
-    # --- COLUNA 1: GESTÃO DE DESPESAS ---
-    with col_desp:
-        with st.container(border=True):
-            st.markdown("### 🔻 Categoria Despesa")
-            
-            with st.popover("➕ Inserir Categoria", use_container_width=True):
-                n_cat = st.text_input("Nome (Ex: Casa)", key="new_cat_desp")
-                if st.button("Salvar", key="btn_save_desp", use_container_width=True):
-                    if n_cat and n_cat not in st.session_state.categorias:
-                        st.session_state.categorias.append(n_cat)
-                        salvar_configuracoes_nuvem() 
-                        st.success(f"Categoria '{n_cat}' cadastrada!")
-                        st.rerun() 
-            
-            st.markdown("---")
-            
-            # Usando height para forçar o scroll nativo do Streamlit
-            with st.container(height=250, border=False):
-                for i, cat in enumerate(st.session_state.categorias):
-                    c_item, c_del = st.columns([0.8, 0.2])
-                    with c_item:
-                        if st.button(f"🔻 {cat.upper()}", use_container_width=True, key=f"btn_d_{cat}_{i}"):
-                            modal_lancamento_categoria(cat)
-                    with c_del:
-                        if st.button("🗑️", key=f"del_d_{cat}_{i}"):
-                            st.session_state.categorias.remove(cat)
-                            salvar_configuracoes_nuvem()
-                            st.rerun()
-
-    # --- COLUNA 2: GESTÃO DE RECEITAS (GANHOS) ---
-    with col_rec:
-        with st.container(border=True):
-            st.markdown("### 💹 Fonte de Receita")
-            
-            with st.popover("💰 Inserir Fonte", use_container_width=True):
-                n_rec = st.text_input("Nome (Ex: Salário)", key="new_cat_rec")
-                if st.button("Salvar", key="btn_save_rec", use_container_width=True):
-                    if 'categorias_receita' not in st.session_state:
-                        st.session_state.categorias_receita = []
-                    if n_rec and n_rec not in st.session_state.categorias_rece_ita:
-                        st.session_state.categorias_receita.append(n_rec)
-                        salvar_configuracoes_nuvem()
-                        st.success(f"Fonte '{n_rec}' cadastrada!")
-                        st.rerun() 
-            
-            st.markdown("---")
-            
-            with st.container(height=250, border=False):
-                if 'categorias_receita' in st.session_state:
-                    for i, cat_r in enumerate(st.session_state.categorias_receita):
-                        c_item_r, c_del_r = st.columns([0.8, 0.2])
-                        with c_item_r:
-                            if st.button(f"💹 {cat_r.upper()}", use_container_width=True, key=f"btn_r_{cat_r}_{i}"):
-                                modal_receita_categoria(cat_r)
-                        with c_del_r:
-                            if st.button("🗑️", key=f"del_r_{cat_r}_{i}"):
-                                st.session_state.categorias_receita.remove(cat_r)
-                                salvar_configuracoes_nuvem()
-                                st.rerun()
-
-    # --- COLUNA 3: GESTÃO DE PAGAMENTOS E CARTÕES ---
-    with col_pgto:
-        with st.container(border=True):
-            st.markdown("### 💳 Forma Pagamento")
-            
-            if st.button("⚙️ Criar Pagamento", use_container_width=True):
-                modal_forma_pagamento()
-            
-            st.markdown("---")
-            
-            with st.container(height=250, border=False):
-                if 'formas_pagamento' in st.session_state:
-                    for i, f in enumerate(st.session_state.formas_pagamento):
-                        c_item_f, c_del_f = st.columns([0.8, 0.2])
-                        with c_item_f:
-                            st.caption(f"✅ {f['nome']}")
-                        with c_del_f:
-                            if st.button("🗑️", key=f"del_f_{f['nome']}_{i}"):
-                                st.session_state.formas_pagamento.pop(i)
-                                salvar_configuracoes_nuvem()
-                                st.rerun()
 
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW EM UM QUADRO ÚNICO) ---
 
@@ -1049,6 +952,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
