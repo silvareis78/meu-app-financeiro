@@ -596,98 +596,175 @@ with aba1:
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS PARA O QUADRO APARECER E OS TÍTULOS COLAREM ---
+    # --- CSS: QUADROS, BARRA E CORES ---
     st.markdown("""
         <style>
-            /* 1. LOCALIZA A COLUNA E APLICA O QUADRO DIRETAMENTE */
-            [data-testid="stHorizontalBlock"] > div:nth-child(1) > div:nth-child(1) {
+            /* 1. CONTAINER DOS QUADROS */
+            [data-testid="stHorizontalBlock"] {
+                gap: 15px !important;
+                align-items: stretch; /* Garante mesma altura */
+            }
+
+            /* Estilização Geral dos Quadros */
+            .quadro-base {
                 border: 1px solid #ccc !important;
                 border-radius: 10px !important;
                 padding: 15px !important;
                 background-color: #fdfdfd !important;
-                width: fit-content !important;
                 box-shadow: 2px 2px 5px rgba(0,0,0,0.05);
-            }
-            
-            /* 2. MATA O ESPAÇO ENTRE AS LINHAS */
-            [data-testid="stVerticalBlock"] {
-                gap: 0px !important;
+                height: 100%;
             }
 
-            /* 3. TÍTULOS GRANDES E EM NEGRITO */
+            /* 2. TÍTULOS E TEXTOS */
             .titulo-grosso {
                 font-size: 18px !important;
                 font-weight: 900 !important;
                 color: #111 !important;
-                margin-bottom: -5px !important; /* Ajuste milimétrico para colar */
-                margin-top: 10px !important;
+                margin-bottom: -5px !important;
+                margin-top: 5px !important;
                 display: block;
             }
-            
-            /* Remove margem do primeiro título para não sobrar espaço no topo */
             .first-title { margin-top: 0px !important; }
 
-            /* Ajusta o espaçamento interno do segmented control */
-            div[data-testid="stSegmentedControl"] {
-                margin-top: 0px !important;
+            .sub-info {
+                font-size: 11px;
+                color: #888;
+                font-weight: bold;
+                text-transform: uppercase;
+                margin-bottom: 5px;
             }
 
-            /* AJUSTES ESPECÍFICOS PARA CELULAR (Telas menores que 768px) */
+            /* 3. BARRA DE PROGRESSO CUSTOMIZADA */
+            .barra-bg {
+                background: #e0e0e0;
+                border-radius: 10px;
+                height: 22px;
+                width: 100%;
+                position: relative;
+                margin-top: 10px;
+                border: 1px solid #ddd;
+            }
+            .barra-fill {
+                height: 100%;
+                border-radius: 8px;
+                transition: width 0.5s ease-in-out;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding-right: 10px;
+                color: white;
+                font-size: 11px;
+                font-weight: bold;
+            }
+
+            /* 4. ESCALA 0-50-100 */
+            .escala-container {
+                display: flex;
+                justify-content: space-between;
+                font-size: 10px;
+                font-weight: bold;
+                color: #999;
+                margin-top: 4px;
+                padding: 0 2px;
+            }
+
+            /* 5. MENSAGEM DE META */
+            .meta-msg {
+                font-size: 12px;
+                font-weight: bold;
+                margin-top: 10px;
+                padding: 5px 10px;
+                border-radius: 5px;
+                text-align: center;
+            }
+
+            /* AJUSTE PARA CELULAR */
             @media (max-width: 768px) {
-            /* 1. Faz o quadro ocupar a largura quase total no celular */
-            [data-testid="stHorizontalBlock"] > div:nth-child(1) > div:nth-child(1) {
-                width: 100% !important;
-                padding: 10px !important;
+                div[data-testid="stSegmentedControl"] > div { flex-wrap: wrap !important; }
+                div[data-testid="stSegmentedControl"] button { min-width: 50px !important; font-size: 10px !important; }
             }
-    
-            /* 2. Permite que os meses quebrem em várias linhas para não sumirem */
-            div[data-testid="stSegmentedControl"] > div {
-                flex-wrap: wrap !important;
-                gap: 4px !important;
-            }
-    
-            /* 3. Ajusta o tamanho dos botões no celular para caberem melhor */
-            div[data-testid="stSegmentedControl"] button {
-                flex: 1 1 auto !important; /* Faz os botões crescerem igualmente */
-                min-width: 55px !important; /* Garante que o texto JAN, FEV seja lido */
-                font-size: 10px !important;
-                padding: 5px !important;
-            }
-    
-            /* 4. Aumenta um pouco o espaço entre Ano e Mês no celular para facilitar o toque */
-            .titulo-grosso {
-                margin-top: 15px !important;
-            }
-
         </style>
     """, unsafe_allow_html=True)
 
-    # Criamos a coluna - O quadro vai aparecer em volta dela
-    col_per, _ = st.columns([1, 0.01]) # Coluna quase única para o quadro ser justo
+    # --- LAYOUT EM COLUNAS ---
+    # col_per recebe largura fixa (ajustada pelo conteúdo), col_des ocupa o resto
+    col_per, col_des = st.columns([1.1, 2.0])
 
     with col_per:
-        # Título do Quadro (opcional, se quiser remover é só apagar a linha abaixo)
-        st.markdown("<p style='font-size:10px; color:#888; font-weight:bold; margin-bottom:10px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
-
-        # SEÇÃO ANO
+        st.markdown('<div class="quadro-base">', unsafe_allow_html=True)
+        st.markdown("<p class='sub-info'>📍 PERÍODO</p>", unsafe_allow_html=True)
+        
         st.markdown('<span class="titulo-grosso first-title">Ano</span>', unsafe_allow_html=True)
         st.session_state.ano_ref = st.segmented_control(
             "ano", [2026, 2027, 2028, 2029, 2030], 
-            selection_mode="single", 
-            default=st.session_state.ano_ref,
-            label_visibility="collapsed", 
-            key="v4_ano"
+            selection_mode="single", default=st.session_state.ano_ref,
+            label_visibility="collapsed", key="v5_ano"
         )
 
-        # SEÇÃO MÊS
         st.markdown('<span class="titulo-grosso">Mês</span>', unsafe_allow_html=True)
         st.session_state.mes_ref = st.segmented_control(
             "mes", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
-            selection_mode="single", 
-            default=st.session_state.mes_ref,
-            label_visibility="collapsed", 
-            key="v4_mes"
+            selection_mode="single", default=st.session_state.mes_ref,
+            label_visibility="collapsed", key="v5_mes"
         )
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col_des:
+        st.markdown('<div class="quadro-base">', unsafe_allow_html=True)
+        st.markdown("<p class='sub-info'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+        
+        # Simulação de Dados
+        gasto_atual = 4250.00
+        orcamento = 5000.00
+        percentual = min((gasto_atual / orcamento) * 100, 100)
+        comparacao_mes_ant = -5.2  # Exemplo: gastou 5.2% a menos que mês passado
+
+        # Definição de cor da barra e mensagem
+        if percentual <= 50:
+            cor_barra = "linear-gradient(90deg, #2ecc71, #27ae60)" # Verde
+            msg = "✅ Excelente! Você está dentro da meta."
+            cor_msg = "#d4edda"
+            txt_cor = "#155724"
+        elif percentual <= 85:
+            cor_barra = "linear-gradient(90deg, #f1c40f, #f39c12)" # Amarelo
+            msg = "⚠️ Atenção: Gastos aproximando do limite."
+            cor_msg = "#fff3cd"
+            txt_cor = "#856404"
+        else:
+            cor_barra = "linear-gradient(90deg, #e74c3c, #c0392b)" # Vermelho
+            msg = "🚨 Alerta: Meta ultrapassada ou crítica!"
+            cor_msg = "#f8d7da"
+            txt_cor = "#721c24"
+
+        # Exibição dos Valores
+        v1, v2 = st.columns(2)
+        with v1:
+            st.markdown(f'<span class="titulo-grosso first-title">R$ {gasto_atual:,.2f}</span>', unsafe_allow_html=True)
+            st.markdown(f"<p style='font-size:12px; color:#555;'>Gasto em {st.session_state.mes_ref}</p>", unsafe_allow_html=True)
+        with v2:
+            cor_comp = "#2ecc71" if comparacao_mes_ant < 0 else "#e74c3c"
+            sinal = "" if comparacao_mes_ant < 0 else "+"
+            st.markdown(f'<p style="text-align:right; font-size:18px; font-weight:bold; color:{cor_comp}; margin:0;">{sinal}{comparacao_mes_ant}%</p>', unsafe_allow_html=True)
+            st.markdown('<p style="text-align:right; font-size:11px; color:#888;">vs. mês anterior</p>', unsafe_allow_html=True)
+
+        # Barra de Progresso com Escala
+        st.markdown(f"""
+            <div class="barra-bg">
+                <div class="barra-fill" style="width: {percentual}%; background: {cor_barra};">
+                    {int(percentual)}%
+                </div>
+            </div>
+            <div class="escala-container">
+                <span>0%</span>
+                <span>50%</span>
+                <span>100%</span>
+            </div>
+        """, unsafe_allow_html=True)
+
+        # Mensagem de Feedback
+        st.markdown(f'<div class="meta-msg" style="background:{cor_msg}; color:{txt_cor};">{msg}</div>', unsafe_allow_html=True)
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1044,6 +1121,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
