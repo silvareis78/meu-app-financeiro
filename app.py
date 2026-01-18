@@ -661,7 +661,7 @@ with aba1:
                      "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
             
             # O selectbox é injetado logo após a label via coluna ou ajuste de posição
-            c1_m, c2_m, c_espaco = st.columns([0.45, 1; 2])
+            c1_m, c2_m, c_espaco = st.columns([0.45, 1, 2])
             with c1_m:
                  st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             with c2_m:
@@ -669,7 +669,7 @@ with aba1:
             st.markdown('</div>', unsafe_allow_html=True)
 
             # --- LINHA DO ANO ---
-            c1_a, c2_a, c_espaco = st.columns([0.45, 2.5])
+            c1_a, c2_a, c_espaco = st.columns([0.45, 1, 2.5])
             with c1_a:
                 st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
             with c2_a:
@@ -1033,6 +1033,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
