@@ -543,48 +543,85 @@ def modal_forma_pagamento():
                     
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 
-st.sidebar.title("MENU PRINCIPAL") 
-
-# Botões de Navegação
-if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
-    st.session_state.pagina = "Painel Inicial"
-if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
-    st.session_state.pagina = "Cadastros Iniciais"
-if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
-    st.session_state.pagina = "Visualizar Lançamentos"
-if st.sidebar.button("💳 Cartões", use_container_width=True):
-    st.session_state.pagina = "Cartões"
-
-# CSS DEFINITIVO: Alinhamento à esquerda forçando o flex-child
-st.markdown("""
+# 1. Estilização do Menu Lateral (Visual Profissional)
+st.sidebar.markdown("""
     <style>
-        /* Alinha o botão e remove o centro automático */
-        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] {
-            display: flex !important;
-            justify-content: flex-start !important;
-            align-items: center !important;
-            width: 100% !important;
-            border: none !important; /* Opcional: remove borda se desejar */
-            padding-left: 10px !important;
+        /* Container do Menu */
+        .menu-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-
-        /* Alinha o texto que fica dentro do botão */
-        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] div {
-            display: flex !important;
-            justify-content: flex-start !important;
-            text-align: left !important;
+        
+        /* Estilo dos "Botões" de Link */
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background-color: #f0f2f6;
+            color: #31333F !important;
+            border-radius: 10px;
+            text-decoration: none !important;
+            font-weight: 500;
+            transition: background-color 0.3s;
+            border: 1px solid transparent;
         }
-
-        /* Garante que o parágrafo do Markdown não centralize */
-        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] p {
-            margin: 0 !important;
-            text-align: left !important;
+        
+        /* Efeito de passar o mouse */
+        .menu-item:hover {
+            background-color: #e0e4eb;
+            border: 1px solid #008080;
+        }
+        
+        /* Ícone */
+        .menu-icon {
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+        
+        /* Ajuste para Celular: Toque mais fácil */
+        @media (max-width: 768px) {
+            .menu-item {
+                padding: 15px 20px;
+                font-size: 1.1rem;
+            }
         }
     </style>
 """, unsafe_allow_html=True)
 
-selecionado = st.session_state.get('pagina', "Painel Inicial")
+st.sidebar.title("MENU PRINCIPAL")
 
+# 2. Criando o Menu com HTML (Garante alinhamento à esquerda)
+with st.sidebar:
+    st.markdown("""
+        <div class="menu-container">
+            <a href="?page=Painel+Inicial" class="menu-item" target="_self">
+                <span class="menu-icon">📊</span> Painel Inicial
+            </a>
+            <a href="?page=Cadastros+Iniciais" class="menu-item" target="_self">
+                <span class="menu-icon">⚙️</span> Cadastros Iniciais
+            </a>
+            <a href="?page=Visualizar+Lancamentos" class="menu-item" target="_self">
+                <span class="menu-icon">📋</span> Visualizar Lançamentos
+            </a>
+            <a href="?page=Cartoes" class="menu-item" target="_self">
+                <span class="menu-icon">💳</span> Cartões
+            </a>
+        </div>
+    """, unsafe_allow_html=True)
+
+# 3. Lógica de Navegação baseada na URL ou Session State
+# Para simplificar e manter sua lógica atual:
+query_params = st.query_params
+if "page" in query_params:
+    st.session_state.pagina = query_params["page"].replace("+", " ")
+else:
+    if 'pagina' not in st.session_state:
+        st.session_state.pagina = "Painel Inicial"
+
+selecionado = st.session_state.pagina
+
+# --- RENDERIZAÇÃO DA PÁGINA ---
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
@@ -929,6 +966,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
