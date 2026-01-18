@@ -544,14 +544,12 @@ def modal_forma_pagamento():
 # --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL ---
 from streamlit_option_menu import option_menu
 
-# Cria o menu na barra lateral
 with st.sidebar:
     st.markdown("<h2 style='text-align: center;'>MENU</h2>", unsafe_allow_html=True)
     
-    # O componente detecta o clique e o Streamlit fecha o sidebar no celular
     selecionado = option_menu(
         menu_title=None, 
-        options=["Painel Inicial", "Cadastros Iniciais", "Visualizar Lançamentos", "Cartões"],
+        options=["Painel Inicial", "Cadastros Iniciais", "Lançamentos", "Cartões"],
         icons=["house", "gear", "list-task", "card-checklist"], 
         menu_icon="cast", 
         default_index=0,
@@ -568,13 +566,15 @@ with st.sidebar:
         }
     )
     
-    # Atualiza a página no seu sistema original
-    st.session_state.pagina = selecionado
+    # O SEGREDO: Se a página mudar, o st.rerun() força o fechamento no celular
+    if 'pagina' not in st.session_state or st.session_state.pagina != selecionado:
+        st.session_state.pagina = selecionado
+        st.rerun()
 
-# --- RENDERIZAÇÃO ---
-if st.session_state.pagina == "Painel Inicial":
+# --- ÁREA DE EXIBIÇÃO ---
+if st.session_state.get('pagina') == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
-    # PRÓXIMO PASSO: Vamos montar os quadros aqui?
+    # PRÓXIMO PASSO: Definir as colunas do Painel
   
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
@@ -677,7 +677,7 @@ if selecionado == "Cadastros Iniciais":
 
 # --- 11. TELA DE VISUALIZAÇÃO (LISTVIEW EM UM QUADRO ÚNICO) ---
 
-if selecionado == "Visualizar Lançamentos":
+if selecionado == "Lançamentos":
     st.markdown("## 📊 Histórico de Lançamentos")
 
     LINK_PLANILHA = "https://docs.google.com/spreadsheets/d/1PyE9M6KLjJDtIDuCO5DCCTTcz-jsVr3Gj3Cv9yrxPE0/export?format=xlsx"
@@ -916,6 +916,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
