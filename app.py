@@ -595,76 +595,75 @@ st.markdown(f"""
 
 with aba1:
     # --- LÓGICA DE ESTADO ---
-    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1  # Fevereiro
+    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 # Fevereiro
     if 'val_a' not in st.session_state: st.session_state.val_a = 2026
+    
     meses_lista = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
                    "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
 
-    # --- CSS PARA FORÇAR A LINHA ÚNICA E GRUDADA ---
+    # --- CSS DE PRECISÃO TOTAL ---
     st.markdown("""
         <style>
-            .container-stepper {
+            /* Container que impede o empilhamento vertical */
+            .horizontal-stepper {
                 display: flex !important;
-                flex-direction: row !important; /* Força ficar na horizontal */
+                flex-direction: row !important;
                 align-items: center !important;
                 justify-content: flex-start !important;
                 gap: 0px !important;
-                margin-bottom: 10px;
-                width: 100%;
+                margin-bottom: 5px !important;
+                white-space: nowrap !important; /* Impede quebra de linha */
             }
-            .seta-estilo {
-                color: #20B2AA;
-                font-size: 24px;
-                font-weight: bold;
-                cursor: pointer;
-                padding: 0 8px;
-                user-select: none;
-                background: none;
-                border: none;
+            
+            /* Seta Verde Água */
+            .seta-verde {
+                color: #20B2AA !important;
+                font-size: 24px !important;
+                font-weight: bold !important;
+                padding: 0 10px !important;
+                cursor: pointer !important;
             }
-            .box-label-fixa {
-                background-color: #808080;
-                color: white;
-                font-weight: bold;
-                font-size: 12px;
-                width: 55px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid #666;
+
+            /* Label Cinza Escuro */
+            .label-cinza {
+                background-color: #808080 !important;
+                color: white !important;
+                font-weight: bold !important;
+                font-size: 12px !important;
+                width: 60px !important;
+                height: 30px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border: 1px solid #666 !important;
             }
-            .box-valor-fixo {
-                background-color: #FDF5E6;
-                color: #333;
-                font-weight: bold;
-                font-size: 12px;
-                width: 100px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                border: 1px solid #BDB76B;
-                border-left: none;
+
+            /* Valor Bege Claro */
+            .valor-bege {
+                background-color: #FDF5E6 !important;
+                color: #333 !important;
+                font-weight: bold !important;
+                font-size: 12px !important;
+                width: 110px !important;
+                height: 30px !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+                border: 1px solid #BDB76B !important;
+                border-left: none !important;
             }
-            /* Botão invisível posicionado exatamente sobre a seta */
-            .btn-click {
-                position: relative;
-                width: 35px;
-                height: 32px;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-            }
+
+            /* Botão invisível do Streamlit para capturar o clique */
             .stButton button {
-                position: absolute;
-                width: 100% !important;
-                height: 100% !important;
-                background: transparent !important;
-                color: transparent !important;
+                position: absolute !important;
+                opacity: 0 !important;
+                width: 40px !important;
+                height: 30px !important;
+                z-index: 10 !important;
                 border: none !important;
-                z-index: 10;
             }
+            
+            .btn-wrapper { position: relative; display: flex; align-items: center; justify-content: center; }
         </style>
     """, unsafe_allow_html=True)
 
@@ -674,44 +673,44 @@ with aba1:
         with st.container(border=True):
             st.markdown("<p style='font-size:12px; font-weight:bold; margin-bottom:15px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
 
-            # --- LINHA MÊS: SETA - LABEL - VALOR - SETA ---
-            st.write('<div class="container-stepper">', unsafe_allow_html=True)
+            # --- LINHA MÊS (SETA - LABEL - VALOR - SETA) ---
+            st.write('<div class="horizontal-stepper">', unsafe_allow_html=True)
             
-            # Seta Esquerda
-            st.write('<div class="btn-click"><span class="seta-estilo">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m_prev_btn"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+            # Esquerda
+            st.write('<div class="btn-wrapper"><span class="seta-verde">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m1"): st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
             st.write('</div>', unsafe_allow_html=True)
             
-            # Label e Valor Grudados
-            st.write(f'<div class="box-label-fixa">Mês:</div><div class="box-valor-fixo">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
+            # Centro Grudado
+            st.write(f'<div class="label-cinza">Mês:</div><div class="valor-bege">{meses_lista[st.session_state.idx_m]}</div>', unsafe_allow_html=True)
             
-            # Seta Direita
-            st.write('<div class="btn-click"><span class="seta-estilo">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="m_next_btn"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+            # Direita
+            st.write('<div class="btn-wrapper"><span class="seta-verde">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="m2"): st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
             st.write('</div>', unsafe_allow_html=True)
             
-            st.write('</div>', unsafe_allow_html=True) # Fecha Container Mês
+            st.write('</div>', unsafe_allow_html=True)
 
-            # --- LINHA ANO: SETA - LABEL - VALOR - SETA ---
-            st.write('<div class="container-stepper">', unsafe_allow_html=True)
+            # --- LINHA ANO (SETA - LABEL - VALOR - SETA) ---
+            st.write('<div class="horizontal-stepper">', unsafe_allow_html=True)
             
-            # Seta Esquerda
-            st.write('<div class="btn-click"><span class="seta-estilo">❮</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a_prev_btn"): st.session_state.val_a -= 1
+            # Esquerda
+            st.write('<div class="btn-wrapper"><span class="seta-verde">❮</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a1"): st.session_state.val_a -= 1
             st.write('</div>', unsafe_allow_html=True)
             
-            # Label e Valor Grudados
-            st.write(f'<div class="box-label-fixa">Ano:</div><div class="box-valor-fixo">{st.session_state.val_a}</div>', unsafe_allow_html=True)
+            # Centro Grudado
+            st.write(f'<div class="label-cinza">Ano:</div><div class="valor-bege">{st.session_state.val_a}</div>', unsafe_allow_html=True)
             
-            # Seta Direita
-            st.write('<div class="btn-click"><span class="seta-estilo">❯</span>', unsafe_allow_html=True)
-            if st.button(" ", key="a_next_btn"): st.session_state.val_a += 1
+            # Direita
+            st.write('<div class="btn-wrapper"><span class="seta-verde">❯</span>', unsafe_allow_html=True)
+            if st.button(" ", key="a2"): st.session_state.val_a += 1
             st.write('</div>', unsafe_allow_html=True)
             
-            st.write('</div>', unsafe_allow_html=True) # Fecha Container Ano
+            st.write('</div>', unsafe_allow_html=True)
 
     with col_desempenho:
-        # Espaço para o próximo quadro
+        # Espaço reservado para o próximo quadro
         st.empty()
                     
 with aba2:
@@ -1069,6 +1068,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
