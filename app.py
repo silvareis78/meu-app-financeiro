@@ -607,7 +607,7 @@ with aba1:
             /* Reduz o padding do container para encolher o quadro */
             div[data-testid="stVerticalBlockBorderWrapper"] {
                 padding: 10px !important;
-                min-height: 120px !important;
+                min-height: 90px !important;
             }
             
             /* Estilo das mini caixas */
@@ -1065,6 +1065,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
