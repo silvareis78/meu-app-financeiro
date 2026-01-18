@@ -655,28 +655,26 @@ with aba1:
         with st.container(border=True):
             st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
-            # ---Linha Mês---:
+            # --- LINHA MÊS ---
             m_c1, m_c2, m_c3 = st.columns([0.05, 0.9, 0.05])
-            
             with m_c1:
-                # Sua seta esquerda (❮)
-                st.button("❮", key="m_p")
-            
+                if st.button("❮", key="m_p"): 
+                    st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
+                    st.rerun()
             with m_c2:
-                # Centraliza as caixas dentro desta coluna
                 st.markdown(f"""
-                    <div style="display: flex; justify-content: center;">
+                    <div style="display: flex;">
                         <div class="mini-label">Mês:</div>
                         <div class="mini-valor">{meses_lista[st.session_state.idx_m]}</div>
                     </div>
                 """, unsafe_allow_html=True)
-            
             with m_c3:
-                # Sua seta direita (❯)
-                st.button("❯", key="m_n")
+                if st.button("❯", key="m_n"): 
+                    st.session_state.idx_m = (st.session_state.idx_m + 1) % 12
+                    st.rerun()
 
             # --- LINHA ANO ---
-            a_c1, a_c2, a_c3 = st.columns([0.04, 3.5, 0.04], gap="small")
+            a_c1, a_c2, a_c3 = st.columns([0.2, 0.6, 0.2])
             with a_c1:
                 if st.button("❮", key="a_p"): 
                     st.session_state.val_a -= 1
@@ -1066,6 +1064,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
