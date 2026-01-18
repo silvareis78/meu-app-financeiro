@@ -293,7 +293,7 @@ st.markdown("""
         font-size: 15px !important;
         font-weight: bold !important;
         margin-top: -35px !important;
-        margin-bottom: 3px !important;
+        margin-bottom: 1px !important;
         color: #333 !important;
     }
 
@@ -1041,6 +1041,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
