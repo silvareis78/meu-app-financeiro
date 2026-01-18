@@ -209,11 +209,12 @@ if 'pagina' not in st.session_state:
 # DICA TÉCNICA: O 'st.session_state.pagina' funciona como um marcador de livro.
 # Ele avisa ao código em qual aba do menu o usuário clicou por último.
         
-# --- 5. CONFIGURAÇÃO DA PÁGINA E ESTILIZAÇÃO (CSS/JS) ---
+# --- 5. CONFIGURAÇÃO DA PÁGINA E ESTILIZAÇÃO GLOBAL (CSS/JS) ---
 st.set_page_config(layout="wide", page_title="App Financeiro") 
 
 st.markdown("""
     <script>
+    // Limpeza visual global
     setInterval(function() {
         const elements = document.querySelectorAll('.stActionButton, .stDeployButton, footer, #MainMenu, header');
         elements.forEach(function(el) {
@@ -228,28 +229,24 @@ st.markdown("""
     </script>
 
     <style>
+    /* Estilos que valem para o APP INTEIRO */
     .block-container { padding-top: 1.5rem !important; } 
-    footer { visibility: hidden; display: none !important; }
     
-    /* Remove o espaço interno que o container cria e causa scroll */
-    [data-testid="stVerticalBlock"] > div {
-        padding-bottom: 0px !important;
-        padding-top: 0px !important;
-    }
-
-    /* Ajuste da altura interna da caixa de seleção */
-    div[data-baseweb="select"] > div {
-        height: 28px !important;
-        min-height: 28px !important;
-        line-height: 28px !important;
-        font-size: 14px !important;
-    }
-
-    /* Labels de cadastro */
+    /* Labels das telas de cadastro */
     [data-testid="stWidgetLabel"] p {
         font-size: 18px !important;
         font-weight: bold !important;
         color: #000000 !important;
+    }
+    
+    /* Botão Salvar Padrão */
+    div.stFormSubmitButton > button {
+        background-color: #2E7D32 !important;
+        color: white !important;
+        font-weight: bold !important;
+        border-radius: 8px !important;
+        height: 3.5rem !important;
+        width: 100% !important;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -548,6 +545,7 @@ def modal_forma_pagamento():
 
 st.sidebar.title("MENU PRINCIPAL") 
 
+# Botões de Navegação
 if st.sidebar.button("📊 Painel Inicial", use_container_width=True):
     st.session_state.pagina = "Painel Inicial"
 if st.sidebar.button("⚙️ Cadastros Iniciais", use_container_width=True):
@@ -557,75 +555,27 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
-st.markdown("""<style> 
-    [data-testid="stSidebar"] button {text-align: left !important; justify-content: flex-start !important; display: flex !important;}
-</style>""", unsafe_allow_html=True)
+# CSS para alinhar Ícone e Texto à esquerda
+st.markdown("""
+    <style>
+        /* Alinha o conteúdo do botão do sidebar à esquerda */
+        [data-testid="stSidebar"] button {
+            text-align: left !important;
+            justify-content: flex-start !important;
+            display: flex !important;
+            align-items: center !important;
+            gap: 10px !important; /* Espaço entre o ícone e o texto */
+            padding-left: 15px !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
 
 selecionado = st.session_state.get('pagina', "Painel Inicial")
 
 if selecionado == "Painel Inicial":
     st.markdown("## 🏠 Painel de Controle")
 
-    col_per, col_des = st.columns([0.8, 2.2])
-
-    with col_per:
-        with st.container(height=160, border=True):
-            # Título do quadro
-            st.markdown("<p style='font-weight: bold; font-size: 15px; margin-top: -10px; margin-bottom: 10px;'>🔍 Período</p>", unsafe_allow_html=True)
-            
-            # --- MÊS (Texto em cima, Caixa logo abaixo sem espaço) ---
-            st.markdown("<p style='font-size: 13px; font-weight: bold; margin: 0px;'>Selecione o Mês:</p>", unsafe_allow_html=True)
-            mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
-                                   index=0, key="mes_v_definitivo", label_visibility="collapsed")
-            
-            # --- ANO (Texto em cima, Caixa logo abaixo sem espaço) ---
-            st.markdown("<p style='font-size: 13px; font-weight: bold; margin: 8px 0px 0px 0px;'>Selecione o Ano:</p>", unsafe_allow_html=True)
-            ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], 
-                                   index=2, key="ano_v_definitivo", label_visibility="collapsed")
-
-    with col_des:
-        with st.container(height=160, border=True):
-            consumo = 49  
-            cor_b = "#008080" if consumo < 75 else "#FF4B4B"
-            st.markdown(f"""
-                <div style="margin-top: -5px;">
-                    <span style="font-size: 0.85rem; font-weight: bold; color: #555;">DESEMPENHO EM {mes_sel}</span>
-                    <h3 style="margin: 0px;">{consumo}% Utilizado</h3>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            barra_html = f"""
-            <div style="width: 100%; background-color: #E0E0E0; border-radius: 10px; height: 22px; border: 1px solid #CCC; overflow: hidden; margin-top: 5px;">
-                <div style="width: {consumo}%; background-color: {cor_b}; height: 100%;"></div>
-            </div>
-            <div style="display: flex; justify-content: space-between; margin-top: 2px; font-size: 10px; font-weight: bold; color: #444; padding: 0 5px;">
-                <span>0%</span><span>50%</span><span>100%</span>
-            </div>
-            """
-            st.markdown(barra_html, unsafe_allow_html=True)
-            st.markdown(f"<div style='font-size: 0.8rem; margin-top: 5px; color: #2E7D32;'>🟢 Gastos saudáveis.</div>", unsafe_allow_html=True)
-            
-    # --- LINHA 2: KPIs ---
-    with st.container(border=True):
-        st.markdown("**💰 Consolidado Mensal**")
-        c1, c2, c3 = st.columns(3)
-        with c1:
-            st.markdown(f'<div style="background-color:#008080; color:white; padding:15px; border-radius:8px; text-align:center;">RECEITA<br><b style="font-size:1.2rem;">R$ 5.000,00</b></div>', unsafe_allow_html=True)
-        with c2:
-            st.markdown(f'<div style="background-color:#FF4B4B; color:white; padding:15px; border-radius:8px; text-align:center;">DESPESA<br><b style="font-size:1.2rem;">R$ 2.450,00</b></div>', unsafe_allow_html=True)
-        with c3:
-            st.markdown(f'<div style="background-color:#D4AF37; color:white; padding:15px; border-radius:8px; text-align:center;">SALDO<br><b style="font-size:1.2rem;">R$ 2.550,00</b></div>', unsafe_allow_html=True)
-
-    # --- LINHA 3: STATUS ---
-    st.markdown("### 📊 Status por Categoria")
-    with st.container(border=True):
-        d1, d2, d3 = st.columns(3)
-        with d1:
-            st.markdown('<div style="background-color:#FF914D; color:white; padding:15px; border-radius:8px; text-align:center;"><b>A PAGAR</b><br>R$ 1.200,00</div>', unsafe_allow_html=True)
-        with d2:
-            st.markdown('<div style="background-color:#666666; color:white; padding:15px; border-radius:8px; text-align:center;"><b>PREVISTA</b><br>R$ 800,00</div>', unsafe_allow_html=True)
-        with d3:
-            st.markdown('<div style="background-color:#007BFF; color:white; padding:15px; border-radius:8px; text-align:center;"><b>NUBANK</b><br>R$ 450,00</div>', unsafe_allow_html=True)
+  
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
 
 if selecionado == "Cadastros Iniciais":
@@ -966,6 +916,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
