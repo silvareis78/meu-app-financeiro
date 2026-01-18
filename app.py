@@ -652,7 +652,7 @@ if selecionado == "Painel Inicial":
             # --- BLOCO MÊS ---
             st.markdown('<p class="label-painel">Selecione o Mês:</p>', unsafe_allow_html=True)
             # A correção aqui é usar uma margem negativa no próprio selectbox via div para "subir" ele
-            st.markdown('<div style="margin-top: -32px;">', unsafe_allow_html=True)
+            st.markdown('<div style="margin-top: -10px;">', unsafe_allow_html=True)
             mes_sel = st.selectbox(
                 "Mês", 
                 ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], 
@@ -1062,6 +1062,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
