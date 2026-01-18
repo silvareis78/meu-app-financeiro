@@ -596,105 +596,99 @@ with aba1:
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS REFORMULADO (BLINDADO) ---
+    # --- CSS DEFINITIVO PARA AJUSTE DE ESPAÇO ---
     st.markdown("""
         <style>
-            /* 1. Forçar os meses a ficarem em uma linha única e compacta */
-            div[data-testid="stSegmentedControl"] button {
-                padding: 2px 6px !important;
-                min-height: 28px !important;
-                font-size: 10px !important; /* Diminuído para caber tudo */
+            /* 1. FORÇAR MESES EM UMA LINHA E DIMINUIR BOTÕES */
+            div[data-testid="stSegmentedControl"] > div {
+                flex-wrap: nowrap !important; /* Impede quebra de linha */
+                gap: 2px !important; /* Espaço mínimo entre botões */
             }
             
-            /* 2. Ajustar os títulos para ficarem colados */
+            div[data-testid="stSegmentedControl"] button {
+                padding: 1px 4px !important; /* Padding mínimo */
+                min-height: 25px !important;
+                min-width: 32px !important; /* Largura mínima pequena para caber todos */
+                font-size: 9px !important; /* Fonte menor para garantir encaixe */
+            }
+
+            /* 2. AJUSTE DE ALTURA DOS CONTAINERS */
+            div[data-testid="stVerticalBlockBorderWrapper"] > div {
+                min-height: 190px !important; /* Força altura igual e suficiente */
+            }
+
+            /* 3. TÍTULOS E TEXTOS */
             .titulo-grosso {
                 font-size: 16px !important;
                 font-weight: 900 !important;
                 color: #111 !important;
-                margin-top: 5px !important;
+                margin-top: 2px !important;
                 margin-bottom: -10px !important;
                 display: block;
             }
 
-            /* 3. Barra de progresso e escala */
-            .barra-bg {
-                background: #e0e0e0;
-                border-radius: 10px;
-                height: 20px;
-                width: 100%;
-                margin-top: 10px;
-                border: 1px solid #ddd;
-                overflow: hidden;
-            }
-            .barra-fill {
-                height: 100%;
-                display: flex;
-                align-items: center;
-                justify-content: flex-end;
-                padding-right: 10px;
-                color: white;
-                font-size: 10px;
-                font-weight: bold;
-            }
-            .escala-container {
-                display: flex;
-                justify-content: space-between;
-                font-size: 9px;
-                font-weight: bold;
-                color: #999;
-                margin-top: 2px;
+            /* 4. MENSAGEM DE META (DENTRO DA LINHA) */
+            .alerta-caixa {
+                background: #fff3cd; 
+                color: #856404; 
+                font-size: 10px; 
+                font-weight: bold; 
+                padding: 4px; 
+                border-radius: 4px; 
+                margin-top: 5px; 
+                text-align: center;
+                border: 1px solid #ffeeba;
             }
         </style>
     """, unsafe_allow_html=True)
 
     # --- LAYOUT EM COLUNAS ---
-    col_per, col_des = st.columns([1.2, 1.8])
+    col_per, col_des = st.columns([1.3, 1.7])
 
     with col_per:
-        with st.container(border=True): # O quadro nativo não deixa o conteúdo fugir
+        with st.container(border=True):
             st.markdown("<p style='font-size:10px; font-weight:bold; color:#888; margin:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
-            st.markdown('<span class="titulo-grosso">Ano</span>', unsafe_allow_html=True)
+            st.markdown('<span class="titulo-grosso" style="margin-top:0px !important;">Ano</span>', unsafe_allow_html=True)
             st.session_state.ano_ref = st.segmented_control(
                 "ano", [2026, 2027, 2028, 2029, 2030], 
                 selection_mode="single", default=st.session_state.ano_ref,
-                label_visibility="collapsed", key="v6_ano"
+                label_visibility="collapsed", key="v7_ano"
             )
 
             st.markdown('<span class="titulo-grosso">Mês</span>', unsafe_allow_html=True)
             st.session_state.mes_ref = st.segmented_control(
                 "mes", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
                 selection_mode="single", default=st.session_state.mes_ref,
-                label_visibility="collapsed", key="v6_mes"
+                label_visibility="collapsed", key="v7_mes"
             )
 
     with col_des:
         with st.container(border=True):
             st.markdown("<p style='font-size:10px; font-weight:bold; color:#888; margin:0;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
             
-            # Dados Simulados
+            # Dados de exemplo
             percentual = 72
-            cor_barra = "linear-gradient(90deg, #f1c40f, #f39c12)" # Amarelo
             
             c1, c2 = st.columns([1.2, 1])
             with c1:
-                st.markdown(f'<span class="titulo-grosso">R$ 4.250,00</span>', unsafe_allow_html=True)
+                st.markdown(f'<span class="titulo-grosso" style="margin-top:0px !important;">R$ 4.250,00</span>', unsafe_allow_html=True)
                 st.markdown(f"<p style='font-size:11px; color:#666; margin:0;'>Gasto em {st.session_state.mes_ref}</p>", unsafe_allow_html=True)
             with c2:
                 st.markdown(f'<p style="text-align:right; font-size:16px; font-weight:bold; color:#2ecc71; margin:0;">-5.2%</p>', unsafe_allow_html=True)
-                st.markdown('<p style="text-align:right; font-size:10px; color:#999; margin:0;">vs. mês anterior</p>', unsafe_allow_html=True)
+                st.markdown('<p style="text-align:right; font-size:10px; color:#999; margin:0;">vs. anterior</p>', unsafe_allow_html=True)
 
-            # Barra Customizada
+            # Barra e Escala
             st.markdown(f"""
-                <div class="barra-bg">
-                    <div class="barra-fill" style="width: {percentual}%; background: {cor_barra};">
+                <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%; margin-top:10px; border:1px solid #ddd; overflow:hidden;">
+                    <div style="width:{percentual}%; background:linear-gradient(90deg, #f1c40f, #f39c12); height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold;">
                         {percentual}%
                     </div>
                 </div>
-                <div class="escala-container">
+                <div style="display:flex; justify-content:space-between; font-size:9px; font-weight:bold; color:#999; margin-top:2px;">
                     <span>0%</span><span>50%</span><span>100%</span>
                 </div>
-                <div style="background:#fff3cd; color:#856404; font-size:11px; font-weight:bold; padding:5px; border-radius:5px; margin-top:8px; text-align:center;">
+                <div class="alerta-caixa">
                     ⚠️ Atenção: Gastos aproximando do limite.
                 </div>
             """, unsafe_allow_html=True)
@@ -1054,6 +1048,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
