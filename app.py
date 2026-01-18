@@ -598,45 +598,77 @@ with aba1:
     st.session_state.pagina = "Painel Inicial"
     selecionado = "Painel Inicial"
     
-    # Título personalizado sem linha e com margem ajustada
+    # Título padronizado
     st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
 
-    # CSS Local para subir o conteúdo e encostar no título
+    # CSS para as Labels Cinzas e Quadro Automático
     st.markdown("""
         <style>
+            /* Sobe o container */
             div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
                 margin-top: -25px !important;
+            }
+            
+            /* Container Flex para alinhar Label e Selectbox na mesma linha */
+            .row-periodo {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 8px;
+            }
+
+            /* Estilo da Label Cinza (Estilo crachá/tag) */
+            .label-custom {
+                background-color: #E0E0E0;
+                color: #333333;
+                font-weight: bold;
+                padding: 4px 10px;
+                border-radius: 5px;
+                font-size: 12px;
+                min-width: 50px;
+                text-align: center;
+                display: inline-block;
+            }
+            
+            /* Força o container do Streamlit a ser 'fit-content' (ajuste automático) */
+            [data-testid="stVerticalBlockBorderWrapper"] {
+                width: fit-content !important;
+                min-width: 250px;
             }
         </style>
     """, unsafe_allow_html=True)
 
-# --- QUADRO DE SELEÇÃO DE PERÍODO ---
-    # Definimos colunas com larguras específicas para o combobox não esticar demais
-    # O primeiro valor (0.8) controla a largura total do quadro de filtros
-    col_filtro, col_vazio = st.columns([0.8, 3]) 
+    # --- QUADRO DE SELEÇÃO DE PERÍODO ---
+    # Usamos uma coluna estreita para o quadro não ocupar a tela toda
+    col_filtro, col_vazio = st.columns([1, 3]) 
 
     with col_filtro:
         with st.container(border=True):
             st.markdown("📍 **Período**")
             
             # --- LINHA DO MÊS ---
-            # c_l = coluna da label, c_s = coluna do selectbox
-            # Proporção [0.4, 1] faz o selectbox ter o tamanho ideal para "SETEMBRO/FEVEREIRO"
-            c_l_mes, c_s_mes = st.columns([0.4, 1])
-            with c_l_mes:
-                st.markdown('<p class="label-periodo">MÊS</p>', unsafe_allow_html=True)
-            with c_s_mes:
-                meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
-                         "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
-                mes_selecionado = st.selectbox("", meses, label_visibility="collapsed", key="sel_mes_painel")
+            # Criamos a label em HTML e o selectbox logo ao lado
+            st.markdown('<div class="row-periodo"><span class="label-custom">MÊS</span>', unsafe_allow_html=True)
+            meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+                     "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+            # O st.selectbox fica logo abaixo do markdown, o CSS 'row-periodo' cuida do alinhamento se necessário, 
+            # mas para garantir precisão no Streamlit, usamos colunas internas:
+            
+            c1_mes, c2_mes = st.columns([0.4, 1])
+            with c1_mes:
+                 st.markdown('<div style="margin-top: 5px;"><span class="label-custom">MÊS</span></div>', unsafe_allow_html=True)
+            with c2_mes:
+                mes_selecionado = st.selectbox("Mês", meses, label_visibility="collapsed", key="sel_mes_painel")
 
             # --- LINHA DO ANO ---
-            c_l_ano, c_s_ano = st.columns([0.4, 1])
-            with c_l_ano:
-                st.markdown('<p class="label-periodo">ANO</p>', unsafe_allow_html=True)
-            with c_s_ano:
-                anos = ["2026", "2027", "2028"]
-                ano_selecionado = st.selectbox("", anos, label_visibility="collapsed", key="sel_ano_painel")
+            c1_ano, c2_ano = st.columns([0.4, 1])
+            with c1_ano:
+                st.markdown('<div style="margin-top: 5px;"><span class="label-custom">ANO</span></div>', unsafe_allow_html=True)
+            with c2_ano:
+                anos = ["2024", "2025", "2026"]
+                ano_selecionado = st.selectbox("Ano", anos, label_visibility="collapsed", key="sel_ano_painel")
+
+    st.write("")
 
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -993,6 +1025,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
