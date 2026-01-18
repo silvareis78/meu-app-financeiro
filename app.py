@@ -697,9 +697,12 @@ with aba2:
                                 st.session_state.formas_pagamento.pop(i)
                                 salvar_configuracoes_nuvem()
                                 st.rerun()
+                                
 with aba3:
+   with aba3:
     # --- TELA DE VISUALIZAÇÃO ---
     st.session_state.pagina = "Lançamentos"
+    selecionado = "Lançamentos" # Garante que a variável exista para evitar NameError
     st.subheader("📊 Histórico de Lançamentos")
     st.markdown("---")
 
@@ -747,7 +750,7 @@ with aba3:
                 df_display['Data Compra'] = df_display['Data Compra'].dt.date
                 df_display['Vencimento'] = df_display['Vencimento'].dt.date
 
-                # --- 2. TRATAMENTO DA PARCELA (LÓGICA ORIGINAL) ---
+                # --- 2. TRATAMENTO DA PARCELA (CORREÇÃO LEVE PARA EVITAR ERRO) ---
                 if 'Parcela' in df_display.columns:
                     def limpar_parcela(row):
                         if str(row.get('Tipo', '')).lower() == 'receita':
@@ -755,7 +758,8 @@ with aba3:
                         val = row['Parcela']
                         if pd.isna(val) or str(val).lower() in ['nat', 'nan', 'none', '']:
                             return ""
-                        if isinstance(val, (pd.Timestamp, datetime.date)):
+                        # Ajustado de 'datetime.date' para 'pd.Timestamp' que o pandas usa
+                        if isinstance(val, (pd.Timestamp, pd.Series)):
                             return f"{val.day}/{val.month}"
                         if str(val).strip() == "None":
                             return ""
@@ -779,27 +783,27 @@ with aba3:
                 st.markdown("---") # Linha divisória dentro do quadro
 
                 # Abas dentro do quadro único
-                tab1, tab2, tab3 = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
+                tab_g, tab_d, tab_r = st.tabs(["📑 Geral", "🔴 Despesas", "🟢 Receitas"])
 
                 df_receitas = df_display[df_display['Tipo'] == 'Receita'].copy()
                 df_despesas = df_display[df_display['Tipo'].isin(['Fixa', 'Variável'])].copy()
                 cols_exibir = [c for c in df_display.columns if c != 'Mes_Filtro']
 
-                with tab1:
+                with tab_g:
                     st.dataframe(df_display[cols_exibir], use_container_width=True, hide_index=True, column_config=config_datas, height=600)
 
-                with tab2:
+                with tab_d:
                     if not df_despesas.empty:
                         st.dataframe(df_despesas[cols_exibir], use_container_width=True, hide_index=True, column_config=config_datas, height=600)
                         st.metric("Total Gasto", f"R$ {df_despesas['Valor'].sum():,.2f}")
 
-                with tab3:
+                with tab_r:
                     if not df_receitas.empty:
                         st.dataframe(df_receitas[cols_exibir], use_container_width=True, hide_index=True, column_config=config_datas, height=600)
                         st.metric("Total Recebido", f"R$ {df_receitas['Valor'].sum():,.2f}")
 
     except Exception as e:
-        st.error(f"Erro ao processar os dados: {e}")
+        st.error(f"Erro ao processar os dados: {e}") 
 
 with aba4:
     # --- TELA DE CARTÕES ---
@@ -940,6 +944,7 @@ with aba4:
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
   
+
 
 
 
