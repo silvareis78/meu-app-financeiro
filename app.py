@@ -292,7 +292,7 @@ st.markdown("""
     .titulo-painel {
         font-size: 15px !important;
         font-weight: bold !important;
-        margin-top: -25px !important;
+        margin-top: -30px !important;
         margin-bottom: 5px !important;
         color: #333 !important;
     }
@@ -1041,6 +1041,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
