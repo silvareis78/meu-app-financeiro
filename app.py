@@ -610,6 +610,34 @@ with aba1:
         </style>
     """, unsafe_allow_html=True)
 
+# --- QUADRO DE SELEÇÃO DE PERÍODO ---
+    # Definimos colunas com larguras específicas para o combobox não esticar demais
+    # O primeiro valor (0.8) controla a largura total do quadro de filtros
+    col_filtro, col_vazio = st.columns([0.8, 3]) 
+
+    with col_filtro:
+        with st.container(border=True):
+            st.markdown("📍 **Período**")
+            
+            # --- LINHA DO MÊS ---
+            # c_l = coluna da label, c_s = coluna do selectbox
+            # Proporção [0.4, 1] faz o selectbox ter o tamanho ideal para "SETEMBRO/FEVEREIRO"
+            c_l_mes, c_s_mes = st.columns([0.4, 1])
+            with c_l_mes:
+                st.markdown('<p class="label-periodo">MÊS</p>', unsafe_allow_html=True)
+            with c_s_mes:
+                meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", 
+                         "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+                mes_selecionado = st.selectbox("", meses, label_visibility="collapsed", key="sel_mes_painel")
+
+            # --- LINHA DO ANO ---
+            c_l_ano, c_s_ano = st.columns([0.4, 1])
+            with c_l_ano:
+                st.markdown('<p class="label-periodo">ANO</p>', unsafe_allow_html=True)
+            with c_s_ano:
+                anos = ["2026", "2027", "2028"]
+                ano_selecionado = st.selectbox("", anos, label_visibility="collapsed", key="sel_ano_painel")
+
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
     st.session_state.pagina = "Cadastros Iniciais"
@@ -965,6 +993,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
