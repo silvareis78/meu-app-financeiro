@@ -598,77 +598,71 @@ with aba1:
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS PARA DEIXAR O QUADRO "JUSTO" E SEM LINHAS ---
+    # --- CSS PARA ESPAÇAMENTO JUSTO E RÓTULOS MAIORES ---
     st.markdown("""
         <style>
-            /* Quadro que abraça o conteúdo (Periodo) */
-            .quadro-periodo {
+            /* Quadro ultra justo */
+            .quadro-compacto {
                 border: 1px solid #ddd;
                 border-radius: 8px;
-                padding: 10px 15px;
-                background-color: white;
-                width: fit-content; /* Faz o quadro não ocupar a tela toda */
-                margin-bottom: 20px;
+                padding: 12px;
+                background-color: #f9f9f9;
+                width: fit-content;
+                display: inline-block;
             }
             
-            /* Remove espaços extras que o Streamlit coloca entre os elementos */
-            [data-testid="stVerticalBlock"] > div {
+            /* Remove o espaço vertical padrão do Streamlit entre os elementos */
+            .quadro-compacto [data-testid="stVerticalBlock"] {
                 gap: 0rem !important;
             }
 
-            /* Estilização do rótulo do Ano para ficar discreto */
-            .label-ano {
-                font-size: 10px;
-                font-weight: bold;
-                color: #888;
-                margin-bottom: 2px;
+            /* Estilo dos Rótulos: Maior e Negrito */
+            .label-periodo {
+                font-size: 13px; /* Aumentado */
+                font-weight: bold; /* Negrito */
+                color: #333;
+                margin-bottom: -10px; /* Aproxima o menu de abas */
+                margin-top: 8px;
+            }
+            .label-periodo:first-child { margin-top: 0; }
+
+            /* Ajuste de altura das abas para ficar proporcional */
+            div[data-testid="stSegmentedControl"] button {
+                padding: 4px 10px !important;
+                min-height: 32px !important;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # Início do Quadro Justo
-    st.write('<div class="quadro-periodo">', unsafe_allow_html=True)
+    # Início do Quadro
+    st.write('<div class="quadro-compacto">', unsafe_allow_html=True)
     
-    st.markdown("<p style='font-size:11px; font-weight:bold; margin:0 0 10px 0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+    st.markdown("<p style='font-size:11px; color: #888; margin: 0 0 10px 0;'>📍 PERÍODO DE CONSULTA</p>", unsafe_allow_html=True)
 
-    # 1. SELEÇÃO DE ANO (2026 a 2030)
-    # Usamos o radio horizontal mas com estilo bem pequeno
-    anos = [2026, 2027, 2028, 2029, 2030]
-    st.write('<div class="label-ano">ANO</div>', unsafe_allow_html=True)
-    st.session_state.ano_ref = st.radio(
-        "Ano", anos, 
-        index=anos.index(st.session_state.ano_ref) if st.session_state.ano_ref in anos else 0, 
-        horizontal=True,
+    # 1. ANO EM CIMA
+    st.write('<div class="label-periodo">Ano</div>', unsafe_allow_html=True)
+    anos_lista = [2026, 2027, 2028, 2029, 2030]
+    st.session_state.ano_ref = st.segmented_control(
+        "ano_sel", anos_lista, 
+        selection_mode="single", 
+        default=st.session_state.ano_ref,
         label_visibility="collapsed",
-        key="radio_ano"
+        key="ctrl_ano_v3"
     )
 
-    st.write('<div style="margin-top:10px;"></div>', unsafe_allow_html=True)
-
-    # 2. SELETOR DE MÊS (Menu de abas moderno)
-    meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
-    
-    st.write('<div class="label-ano">MÊS</div>', unsafe_allow_html=True)
+    # 2. MÊS ABAIXO
+    st.write('<div class="label-periodo">Mês</div>', unsafe_allow_html=True)
+    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
     st.session_state.mes_ref = st.segmented_control(
-        "Mês", meses, 
+        "mes_sel", meses_lista, 
         selection_mode="single", 
         default=st.session_state.mes_ref,
         label_visibility="collapsed",
-        key="seg_mes"
+        key="ctrl_mes_v3"
     )
 
     st.write('</div>', unsafe_allow_html=True)
-    # Fim do Quadro
-
-    # --- CONTEÚDO DINÂMICO ABAIXO (Exemplo de como aparece após o quadro) ---
-    col_r, col_d, col_s = st.columns(3)
-    with col_r:
-        st.metric("Receitas", "R$ 12.000", border=True)
-    with col_d:
-        st.metric("Despesas", "R$ 6.750", border=True)
-    with col_s:
-        st.metric("Saldo", "R$ 5.250", border=True)
-                    
+    
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
     st.session_state.pagina = "Cadastros Iniciais"
@@ -1024,6 +1018,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
