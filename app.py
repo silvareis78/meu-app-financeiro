@@ -555,30 +555,30 @@ if st.sidebar.button("📋 Visualizar Lançamentos", use_container_width=True):
 if st.sidebar.button("💳 Cartões", use_container_width=True):
     st.session_state.pagina = "Cartões"
 
-# CSS REVISADO: Alinhamento forçado à esquerda
+# CSS DEFINITIVO: Alinhamento à esquerda forçando o flex-child
 st.markdown("""
     <style>
-        /* 1. Alinha o container do botão */
-        [data-testid="stSidebarNav"] button, 
-        [data-testid="stSidebar"] button {
+        /* Alinha o botão e remove o centro automático */
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] {
             display: flex !important;
-            justify-content: flex-start !important; /* Move para a esquerda */
-            text-align: left !important;
+            justify-content: flex-start !important;
+            align-items: center !important;
+            width: 100% !important;
+            border: none !important; /* Opcional: remove borda se desejar */
             padding-left: 10px !important;
         }
 
-        /* 2. Alinha o texto/ícone que fica dentro do botão */
-        [data-testid="stSidebar"] button div[data-testid="stMarkdownContainer"] p {
+        /* Alinha o texto que fica dentro do botão */
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] div {
+            display: flex !important;
+            justify-content: flex-start !important;
             text-align: left !important;
-            display: flex !important;
-            justify-content: flex-start !important;
-            width: 100% !important;
         }
-        
-        /* 3. Garante que o span interno não centralize */
-        [data-testid="stSidebar"] button span {
-            display: flex !important;
-            justify-content: flex-start !important;
+
+        /* Garante que o parágrafo do Markdown não centralize */
+        [data-testid="stSidebar"] [data-testid="baseButton-secondary"] p {
+            margin: 0 !important;
+            text-align: left !important;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -929,6 +929,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
