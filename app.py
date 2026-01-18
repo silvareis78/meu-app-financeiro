@@ -598,42 +598,76 @@ with aba1:
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # 1. LINHA DE SELEÇÃO DE ANO (Discreta no topo)
-    anos = [2024, 2025, 2026, 2027]
+    # --- CSS PARA DEIXAR O QUADRO "JUSTO" E SEM LINHAS ---
+    st.markdown("""
+        <style>
+            /* Quadro que abraça o conteúdo (Periodo) */
+            .quadro-periodo {
+                border: 1px solid #ddd;
+                border-radius: 8px;
+                padding: 10px 15px;
+                background-color: white;
+                width: fit-content; /* Faz o quadro não ocupar a tela toda */
+                margin-bottom: 20px;
+            }
+            
+            /* Remove espaços extras que o Streamlit coloca entre os elementos */
+            [data-testid="stVerticalBlock"] > div {
+                gap: 0rem !important;
+            }
+
+            /* Estilização do rótulo do Ano para ficar discreto */
+            .label-ano {
+                font-size: 10px;
+                font-weight: bold;
+                color: #888;
+                margin-bottom: 2px;
+            }
+        </style>
+    """, unsafe_allow_html=True)
+
+    # Início do Quadro Justo
+    st.write('<div class="quadro-periodo">', unsafe_allow_html=True)
+    
+    st.markdown("<p style='font-size:11px; font-weight:bold; margin:0 0 10px 0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+
+    # 1. SELEÇÃO DE ANO (2026 a 2030)
+    # Usamos o radio horizontal mas com estilo bem pequeno
+    anos = [2026, 2027, 2028, 2029, 2030]
+    st.write('<div class="label-ano">ANO</div>', unsafe_allow_html=True)
     st.session_state.ano_ref = st.radio(
-        "Ano:", anos, 
-        index=anos.index(st.session_state.ano_ref), 
+        "Ano", anos, 
+        index=anos.index(st.session_state.ano_ref) if st.session_state.ano_ref in anos else 0, 
         horizontal=True,
-        label_visibility="collapsed" # Esconde o texto "Ano" para ficar limpo
+        label_visibility="collapsed",
+        key="radio_ano"
     )
 
-    # 2. SELETOR DE MÊS ESTILO "PILL" (Ocupa pouco espaço e é muito bonito)
-    # O st.segmented_control é o componente mais moderno do Streamlit hoje
+    st.write('<div style="margin-top:10px;"></div>', unsafe_allow_html=True)
+
+    # 2. SELETOR DE MÊS (Menu de abas moderno)
     meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
     
+    st.write('<div class="label-ano">MÊS</div>', unsafe_allow_html=True)
     st.session_state.mes_ref = st.segmented_control(
         "Mês", meses, 
         selection_mode="single", 
         default=st.session_state.mes_ref,
-        label_visibility="collapsed"
+        label_visibility="collapsed",
+        key="seg_mes"
     )
 
-    st.divider() # Uma linha fina para separar
+    st.write('</div>', unsafe_allow_html=True)
+    # Fim do Quadro
 
-    # 3. CONTEÚDO DINÂMICO ABAIXO
-    col_receita, col_despesa, col_saldo = st.columns(3)
-    
-    with col_receita:
-        st.success(f"Receitas {st.session_state.mes_ref}")
-        st.title("R$ 12.000")
-        
-    with col_despesa:
-        st.error(f"Despesas {st.session_state.mes_ref}")
-        st.title("R$ 6.750")
-
-    with col_saldo:
-        st.info("Saldo Atual")
-        st.title("R$ 5.250")
+    # --- CONTEÚDO DINÂMICO ABAIXO (Exemplo de como aparece após o quadro) ---
+    col_r, col_d, col_s = st.columns(3)
+    with col_r:
+        st.metric("Receitas", "R$ 12.000", border=True)
+    with col_d:
+        st.metric("Despesas", "R$ 6.750", border=True)
+    with col_s:
+        st.metric("Saldo", "R$ 5.250", border=True)
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -990,6 +1024,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
