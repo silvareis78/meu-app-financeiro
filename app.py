@@ -675,7 +675,7 @@ if selecionado == "Painel Inicial":
             st.markdown("<div style='margin-top: 4px;'></div>", unsafe_allow_html=True)
             
             # 4. Descrição do Ano
-            st.markdown("<div style='margin-top: -5px;'font-size: 0.75rem; line-height: 1;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top: -1px;'font-size: 0.75rem; line-height: 1;'><b>Selecione o Ano:</b></div>", unsafe_allow_html=True)
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_des:
@@ -1072,6 +1072,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
