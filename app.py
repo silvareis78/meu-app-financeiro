@@ -655,14 +655,14 @@ with aba1:
             st.markdown("📍 **Período**")
             
             # --- LINHA DO MÊS ---         
-            c1_m, c2_m, = st.columns([0.45, 0.85])
+            c1_m, c2_m, = st.columns([0.45, 0.80])
             with c1_m:
                  st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             with c2_m:
                  meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
                  mes_selecionado = st.selectbox("Mes", meses, label_visibility="collapsed", key="sel_mes_painel")
             # --- LINHA DO ANO ---
-            c1_a, c2_a, = st.columns([0.45, 0.85])
+            c1_a, c2_a, = st.columns([0.45, 0.80])
             with c1_a:
                 st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
             with c2_a:
@@ -1026,6 +1026,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
