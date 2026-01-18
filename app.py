@@ -591,73 +591,73 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
+
 with aba1:
     # --- LÓGICA DE ESTADO ---
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS DE PRECISÃO TOTAL ---
+    # --- CSS ULTRA-COMPACTO E JUSTO ---
     st.markdown("""
         <style>
-            /* 1. FORÇAR ALTURA IGUAL NOS CONTAINERS */
+            /* 1. ALTURA IGUAL E QUADROS JUSTOS */
             [data-testid="stHorizontalBlock"] {
                 align-items: stretch !important;
+                gap: 10px !important;
             }
             [data-testid="stVerticalBlockBorderWrapper"], 
             [data-testid="stVerticalBlockBorderWrapper"] > div {
                 height: 100% !important;
             }
 
-            /* 2. TRAVA DEFINITIVA: MÊS EM UMA LINHA SÓ */
+            /* 2. TRAVA DE LINHA ÚNICA + FONTE CONDENSADA */
             div[data-testid="stSegmentedControl"] > div {
-                flex-wrap: nowrap !important; /* Proíbe quebrar linha */
-                overflow-x: hidden !important; /* Garante que não apareça barra lateral */
-                gap: 1px !important; /* Espaço mínimo absoluto */
+                flex-wrap: nowrap !important;
+                gap: 1px !important;
                 width: 100% !important;
             }
             
             div[data-testid="stSegmentedControl"] button {
-                padding: 1px 2px !important; /* Espaçamento interno mínimo */
-                min-height: 26px !important;
-                flex: 1 1 0% !important; /* Divide o espaço igualmente entre os 12 meses */
-                font-size: 8.5px !important; /* Tamanho limite para não quebrar */
+                padding: 1px 2px !important;
+                min-height: 24px !important;
+                flex: 1 1 auto !important;
+                font-size: 8px !important; /* Fonte pequena para caber no quadro justo */
                 min-width: 0px !important;
+                letter-spacing: -0.5px; /* Aperta as letras para ganhar espaço */
             }
 
-            /* 3. TÍTULOS E RÓTULOS */
+            /* 3. TÍTULOS E TEXTOS */
             .titulo-grosso {
-                font-size: 16px !important;
+                font-size: 15px !important;
                 font-weight: 900 !important;
                 color: #111 !important;
-                margin-top: 5px !important;
-                margin-bottom: -8px !important;
+                margin-top: 4px !important;
+                margin-bottom: -10px !important;
                 display: block;
             }
             .sub-topo {
-                font-size: 10px; 
+                font-size: 9px; 
                 font-weight: bold; 
                 color: #888; 
                 margin: 0;
             }
 
-            /* 4. ALERTA COMPACTO */
+            /* 4. ALERTA */
             .alerta-caixa {
                 background: #fff3cd; 
                 color: #856404; 
                 font-size: 10px; 
                 font-weight: bold; 
-                padding: 5px; 
+                padding: 4px; 
                 border-radius: 4px; 
                 margin-top: 10px; 
                 text-align: center;
-                border: 1px solid #ffeeba;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- LAYOUT EM COLUNAS ---
-    # Col_per levemente maior (1.1) para dar fôlego aos 12 meses lado a lado
-    col_per, col_des = st.columns([1.1, 1.9])
+    # --- LAYOUT EM COLUNAS (Período bem estreito na esquerda) ---
+    col_per, col_des = st.columns([0.8, 2.2])
 
     with col_per:
         with st.container(border=True):
@@ -667,32 +667,34 @@ with aba1:
             st.session_state.ano_ref = st.segmented_control(
                 "ano", [2026, 2027, 2028, 2029, 2030], 
                 selection_mode="single", default=st.session_state.ano_ref,
-                label_visibility="collapsed", key="v9_ano"
+                label_visibility="collapsed", key="v10_ano"
             )
 
             st.markdown('<span class="titulo-grosso">Mês</span>', unsafe_allow_html=True)
             st.session_state.mes_ref = st.segmented_control(
                 "mes", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
                 selection_mode="single", default=st.session_state.mes_ref,
-                label_visibility="collapsed", key="v9_mes"
+                label_visibility="collapsed", key="v10_mes"
             )
 
     with col_des:
         with st.container(border=True):
             st.markdown("<p class='sub-topo'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
             
-            # Dados de exemplo
-            percentual = 72
+            # Exemplo de lógica dinâmica para a barra
+            gasto = 4250.0
+            meta = 5000.0
+            percentual = int(min((gasto/meta)*100, 100))
             
             c1, c2 = st.columns([1.2, 1])
             with c1:
-                st.markdown(f'<span class="titulo-grosso" style="margin-top:0px !important;">R$ 4.250,00</span>', unsafe_allow_html=True)
+                st.markdown(f'<span class="titulo-grosso" style="margin-top:0px !important;">R$ {gasto:,.2f}</span>', unsafe_allow_html=True)
                 st.markdown(f"<p style='font-size:11px; color:#666; margin:0;'>Gasto em {st.session_state.mes_ref}</p>", unsafe_allow_html=True)
             with c2:
                 st.markdown(f'<p style="text-align:right; font-size:16px; font-weight:bold; color:#2ecc71; margin:0;">-5.2%</p>', unsafe_allow_html=True)
                 st.markdown('<p style="text-align:right; font-size:10px; color:#999; margin:0;">vs. anterior</p>', unsafe_allow_html=True)
 
-            # Barra de Progresso
+            # Barra e Escala
             st.markdown(f"""
                 <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%; margin-top:10px; border:1px solid #ddd; overflow:hidden;">
                     <div style="width:{percentual}%; background:linear-gradient(90deg, #f1c40f, #f39c12); height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold;">
@@ -1062,6 +1064,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
