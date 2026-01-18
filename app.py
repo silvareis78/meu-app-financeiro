@@ -653,12 +653,11 @@ with aba1:
                 margin-bottom: 15px;
             }
 
-            /* Barra de Progresso Grossa e Estilizada */
             .progress-container {
                 width: 100%;
                 background-color: #E0E0E0;
                 border-radius: 12px;
-                height: 35px; /* Barra mais grossa */
+                height: 35px;
                 position: relative;
                 overflow: hidden;
                 box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
@@ -677,7 +676,6 @@ with aba1:
                 transition: width 0.5s ease-in-out;
             }
 
-            /* Marcadores 0-50-100 */
             .markers {
                 display: flex;
                 justify-content: space-between;
@@ -691,32 +689,33 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # --- LAYOUT DE COLUNAS ---
-    # col_per (Filtros) e col_des (Desempenho)
     col_per, col_des, col_vazio = st.columns([1.1, 2.5, 0.5]) 
 
-    with col_filtro:
+    # QUADRO 1: PERÍODO (Corrigido para usar col_per)
+    with col_per:
         with st.container(border=True):
             st.markdown("📍 **Período**")
             
-            # --- LINHA DO MÊS ---         
-            c1_m, c2_m, = st.columns([0.35, 0.80])
+            # --- LINHA DO MÊS ---          
+            c1_m, c2_m = st.columns([0.35, 0.80])
             with c1_m:
                  st.markdown('<div class="label-cinza">MÊS</div>', unsafe_allow_html=True)
             with c2_m:
                  meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
                  mes_selecionado = st.selectbox("Mes", meses, label_visibility="collapsed", key="sel_mes_painel")
+            
             # --- LINHA DO ANO ---
-            c1_a, c2_a, = st.columns([0.35, 0.80])
+            c1_a, c2_a = st.columns([0.35, 0.80])
             with c1_a:
                 st.markdown('<div class="label-cinza">ANO</div>', unsafe_allow_html=True)
             with c2_a:
                 anos = ["2026", "2027", "2028"]
                 ano_selecionado = st.selectbox("Ano", anos, label_visibility="collapsed", key="sel_ano_painel")
 
-   # --- QUADRO 2: DESEMPENHO MENSAL (A SURPRESA) ---
+    # --- QUADRO 2: DESEMPENHO MENSAL ---
     with col_des:
         with st.container(border=True):
-            # Exemplo de valores (isso virá da sua planilha depois)
+            # Exemplo de valores
             receita_total = 12500.00
             despesa_total = 7800.00
             saldo = receita_total - despesa_total
@@ -1104,6 +1103,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
