@@ -598,57 +598,101 @@ with aba1:
     st.session_state.pagina = "Painel Inicial"
     selecionado = "Painel Inicial"
     
-    # Título padronizado
     st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
 
-    # CSS para Labels Cinzas, Alinhamento e Quadro Automático
+    # --- CSS AVANÇADO: DESIGN FINO E PROFISSIONAL ---
     st.markdown("""
         <style>
-            /* Sobe o container geral */
+            /* Sobe o container e remove espaços inúteis */
             div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
                 margin-top: -25px !important;
             }
             
-            /* Ajusta o quadro para envolver apenas o conteúdo (encolher) */
+            /* Ajuste de largura automática para os containers */
             div[data-testid="stVerticalBlockBorderWrapper"] {
-                width: fit-content !important;
-                min-width: 50px !important;
-                padding-top: 10rem !important;
+                padding: 15px !important;
             }
 
-            /* Container para alinhar Label e Selectbox na mesma linha e altura */
-            .flex-container {
-                display: flex;
-                align-items: center; /* Centraliza verticalmente */
-                gap: 10px;
-                margin-bottom: 10px;
-                width: 100%;
-            }
-
-            /* Estilo da Label Cinza em Negrito */
+            /* Estilo da Label de Período (Colada) */
             .label-cinza {
-                background-color: #E0E0E0;
-                color: #333333;
+                background-color: #F0F2F6;
+                color: #31333F;
                 font-weight: bold;
-                padding: 6px 12px;
-                border-radius: 6px;
-                font-size: 13px;
-                white-space: nowrap; /* Impede quebra de linha */
+                padding: 0px 12px;
+                border-radius: 8px 0px 0px 8px;
+                font-size: 11px;
                 display: flex;
                 align-items: center;
-                height: 38px; /* Mesma altura padrão da combobox do Streamlit */
+                height: 38px;
+                border: 1px solid #DCDCDC;
+                border-right: none;
+                letter-spacing: 0.5px;
             }
 
-            /* Remove espaços extras do Streamlit dentro do flex */
-            .flex-container div {
-                margin-top: 0 !important;
+            /* --- DESIGN DO QUADRO DESEMPENHO --- */
+            .card-titulo {
+                font-size: 14px;
+                font-weight: 700;
+                color: #555;
+                margin-bottom: 15px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+            .valor-grande {
+                font-size: 28px;
+                font-weight: 800;
+                color: #1E1E1E;
+                margin: 5px 0px;
+            }
+
+            .sub-info {
+                font-size: 12px;
+                color: #888;
+                margin-bottom: 15px;
+            }
+
+            /* Barra de Progresso Grossa e Estilizada */
+            .progress-container {
+                width: 100%;
+                background-color: #E0E0E0;
+                border-radius: 12px;
+                height: 35px; /* Barra mais grossa */
+                position: relative;
+                overflow: hidden;
+                box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+            }
+
+            .progress-bar {
+                height: 100%;
+                background: linear-gradient(90deg, #008080 0%, #00b3b3 100%);
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: flex-end;
+                padding-right: 15px;
+                color: white;
+                font-weight: bold;
+                transition: width 0.5s ease-in-out;
+            }
+
+            /* Marcadores 0-50-100 */
+            .markers {
+                display: flex;
+                justify-content: space-between;
+                padding: 5px 2px 0;
+                font-size: 10px;
+                color: #AAA;
+                font-weight: bold;
+                text-transform: uppercase;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- QUADRO DE SELEÇÃO DE PERÍODO ---
-    # Usamos uma coluna estreita para o quadro ficar no canto esquerdo
-    col_filtro, col_vazio = st.columns([0.6, 3.5]) 
+    # --- LAYOUT DE COLUNAS ---
+    # col_per (Filtros) e col_des (Desempenho)
+    col_per, col_des, col_vazio = st.columns([1.1, 2.5, 0.5]) 
 
     with col_filtro:
         with st.container(border=True):
@@ -668,6 +712,40 @@ with aba1:
             with c2_a:
                 anos = ["2026", "2027", "2028"]
                 ano_selecionado = st.selectbox("Ano", anos, label_visibility="collapsed", key="sel_ano_painel")
+
+   # --- QUADRO 2: DESEMPENHO MENSAL (A SURPRESA) ---
+    with col_des:
+        with st.container(border=True):
+            # Exemplo de valores (isso virá da sua planilha depois)
+            receita_total = 12500.00
+            despesa_total = 7800.00
+            saldo = receita_total - despesa_total
+            porcentagem_gasto = min((despesa_total / receita_total) * 100, 100) if receita_total > 0 else 0
+            
+            st.markdown('<div class="card-titulo">📈 DESEMPENHO MENSAL</div>', unsafe_allow_html=True)
+            
+            c_txt, c_val = st.columns([1.5, 1])
+            with c_txt:
+                st.markdown(f'<div class="sub-info">DISPONIBILIDADE ATUAL (SALDO)</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="valor-grande">R$ {saldo:,.2f}</div>', unsafe_allow_html=True)
+            
+            with c_val:
+                st.markdown(f'<div style="text-align:right" class="sub-info">LIMITE DE GASTOS UTILIZADO</div>', unsafe_allow_html=True)
+                st.markdown(f'<div style="text-align:right; font-size: 24px; font-weight: 800; color: #008080;">{porcentagem_gasto:.1f}%</div>', unsafe_allow_html=True)
+
+            # Barra de Progresso Robusta
+            st.markdown(f"""
+                <div class="progress-container">
+                    <div class="progress-bar" style="width: {porcentagem_gasto}%;">
+                        {porcentagem_gasto:.0f}%
+                    </div>
+                </div>
+                <div class="markers">
+                    <span>0% (Início)</span>
+                    <span>50% (Alerta)</span>
+                    <span>100% (Limite)</span>
+                </div>
+            """, unsafe_allow_html=True)
 
     st.write("")
 
@@ -1026,6 +1104,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
