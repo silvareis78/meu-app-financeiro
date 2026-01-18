@@ -596,46 +596,59 @@ with aba1:
     if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
     if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
 
-    # --- CSS DEFINITIVO PARA AJUSTE DE ESPAÇO ---
+    # --- CSS DE PRECISÃO TOTAL ---
     st.markdown("""
         <style>
-            /* 1. FORÇAR MESES EM UMA LINHA E DIMINUIR BOTÕES */
+            /* 1. FORÇAR ALTURA IGUAL NOS CONTAINERS */
+            [data-testid="stHorizontalBlock"] {
+                align-items: stretch !important;
+            }
+            [data-testid="stVerticalBlockBorderWrapper"], 
+            [data-testid="stVerticalBlockBorderWrapper"] > div {
+                height: 100% !important;
+            }
+
+            /* 2. TRAVA DEFINITIVA: MÊS EM UMA LINHA SÓ */
             div[data-testid="stSegmentedControl"] > div {
-                flex-wrap: nowrap !important; /* Impede quebra de linha */
-                gap: 2px !important; /* Espaço mínimo entre botões */
+                flex-wrap: nowrap !important; /* Proíbe quebrar linha */
+                overflow-x: hidden !important; /* Garante que não apareça barra lateral */
+                gap: 1px !important; /* Espaço mínimo absoluto */
+                width: 100% !important;
             }
             
             div[data-testid="stSegmentedControl"] button {
-                padding: 1px 4px !important; /* Padding mínimo */
-                min-height: 25px !important;
-                min-width: 32px !important; /* Largura mínima pequena para caber todos */
-                font-size: 9px !important; /* Fonte menor para garantir encaixe */
+                padding: 1px 2px !important; /* Espaçamento interno mínimo */
+                min-height: 26px !important;
+                flex: 1 1 0% !important; /* Divide o espaço igualmente entre os 12 meses */
+                font-size: 8.5px !important; /* Tamanho limite para não quebrar */
+                min-width: 0px !important;
             }
 
-            /* 2. AJUSTE DE ALTURA DOS CONTAINERS */
-            div[data-testid="stVerticalBlockBorderWrapper"] > div {
-                min-height: 190px !important; /* Força altura igual e suficiente */
-            }
-
-            /* 3. TÍTULOS E TEXTOS */
+            /* 3. TÍTULOS E RÓTULOS */
             .titulo-grosso {
                 font-size: 16px !important;
                 font-weight: 900 !important;
                 color: #111 !important;
-                margin-top: 2px !important;
-                margin-bottom: -10px !important;
+                margin-top: 5px !important;
+                margin-bottom: -8px !important;
                 display: block;
             }
+            .sub-topo {
+                font-size: 10px; 
+                font-weight: bold; 
+                color: #888; 
+                margin: 0;
+            }
 
-            /* 4. MENSAGEM DE META (DENTRO DA LINHA) */
+            /* 4. ALERTA COMPACTO */
             .alerta-caixa {
                 background: #fff3cd; 
                 color: #856404; 
                 font-size: 10px; 
                 font-weight: bold; 
-                padding: 4px; 
+                padding: 5px; 
                 border-radius: 4px; 
-                margin-top: 5px; 
+                margin-top: 10px; 
                 text-align: center;
                 border: 1px solid #ffeeba;
             }
@@ -643,29 +656,30 @@ with aba1:
     """, unsafe_allow_html=True)
 
     # --- LAYOUT EM COLUNAS ---
-    col_per, col_des = st.columns([1.3, 1.7])
+    # Col_per levemente maior (1.1) para dar fôlego aos 12 meses lado a lado
+    col_per, col_des = st.columns([1.1, 1.9])
 
     with col_per:
         with st.container(border=True):
-            st.markdown("<p style='font-size:10px; font-weight:bold; color:#888; margin:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+            st.markdown("<p class='sub-topo'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
             st.markdown('<span class="titulo-grosso" style="margin-top:0px !important;">Ano</span>', unsafe_allow_html=True)
             st.session_state.ano_ref = st.segmented_control(
                 "ano", [2026, 2027, 2028, 2029, 2030], 
                 selection_mode="single", default=st.session_state.ano_ref,
-                label_visibility="collapsed", key="v7_ano"
+                label_visibility="collapsed", key="v9_ano"
             )
 
             st.markdown('<span class="titulo-grosso">Mês</span>', unsafe_allow_html=True)
             st.session_state.mes_ref = st.segmented_control(
                 "mes", ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"],
                 selection_mode="single", default=st.session_state.mes_ref,
-                label_visibility="collapsed", key="v7_mes"
+                label_visibility="collapsed", key="v9_mes"
             )
 
     with col_des:
         with st.container(border=True):
-            st.markdown("<p style='font-size:10px; font-weight:bold; color:#888; margin:0;'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
+            st.markdown("<p class='sub-topo'>📈 DESEMPENHO MENSAL</p>", unsafe_allow_html=True)
             
             # Dados de exemplo
             percentual = 72
@@ -678,7 +692,7 @@ with aba1:
                 st.markdown(f'<p style="text-align:right; font-size:16px; font-weight:bold; color:#2ecc71; margin:0;">-5.2%</p>', unsafe_allow_html=True)
                 st.markdown('<p style="text-align:right; font-size:10px; color:#999; margin:0;">vs. anterior</p>', unsafe_allow_html=True)
 
-            # Barra e Escala
+            # Barra de Progresso
             st.markdown(f"""
                 <div style="background:#e0e0e0; border-radius:10px; height:18px; width:100%; margin-top:10px; border:1px solid #ddd; overflow:hidden;">
                     <div style="width:{percentual}%; background:linear-gradient(90deg, #f1c40f, #f39c12); height:100%; display:flex; align-items:center; justify-content:center; color:white; font-size:10px; font-weight:bold;">
@@ -1048,6 +1062,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
