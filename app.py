@@ -635,7 +635,7 @@ def modal_forma_pagamento():
                     st.rerun()
                     
 
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO ALINHADA E PROFISSIONAL) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (MELHORIA NA BARRA DE DESEMPENHO) ---
 
 # CSS Corretivo para Sidebar, Cards e Alinhamento
 st.markdown("""
@@ -680,6 +680,17 @@ st.markdown("""
             font-weight: 800;
             color: #1E1E1E;
         }
+        
+        /* Estilo para as marcações da barra */
+        .escala-container {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: bold;
+            margin-top: -10px; /* Aproxima da barra */
+            padding: 0 2px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
@@ -703,16 +714,14 @@ if selecionado == "Painel Inicial":
     col_esquerda, col_direita = st.columns([1, 2])
 
     with col_esquerda:
-        with st.container(height=160, border=True):
+        with st.container(height=175, border=True):
             st.markdown("🔍 **Período**")
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_direita:
-        with st.container(height=160, border=True):
-            # Lógica de cor baseada no consumo (surpresa interativa)
+        with st.container(height=175, border=True):
             consumo = 49 # Simulação
-            cor_status = "#008080" if consumo < 70 else "#D4AF37" if consumo < 90 else "#FF4B4B"
             
             st.markdown(f"""
                 <div class="status-box">
@@ -721,8 +730,20 @@ if selecionado == "Painel Inicial":
                 </div>
             """, unsafe_allow_html=True)
             
+            # Barra de progresso (Ocupando espaço visual)
+            st.write("") # Espaçador para a barra respirar
             st.progress(consumo / 100)
             
+            # Marcações da Escala
+            st.markdown("""
+                <div class="escala-container">
+                    <span>0%</span>
+                    <span>50%</span>
+                    <span>100%</span>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.write("") # Espaçador inferior
             if consumo < 50:
                 st.caption("🟢 Excelente! Seu nível de gastos está abaixo da média projetada.")
             elif consumo < 80:
@@ -1093,6 +1114,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
