@@ -685,7 +685,7 @@ if selecionado == "Painel Inicial":
             
             # Cabeçalho Desempenho subindo para evitar scroll
             st.markdown(f"""
-                <div style="margin-top: -15px;">
+                <div style="margin-top: -10px;">
                     <span style="font-size: 0.8rem; font-weight: bold; color: #555; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</span>
                     <h3 style="margin: 0px; padding: 0px; font-size: 1.3rem;">{consumo}% <span style="font-size: 0.8rem; font-weight: normal; color: #666;">utilizado</span></h3>
                 </div>
@@ -1072,6 +1072,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
