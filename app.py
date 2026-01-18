@@ -659,7 +659,7 @@ with aba1:
             st.markdown("<p style='font-size:11px; font-weight:bold; margin-bottom:5px;'>📍 PERÍODO</p>", unsafe_allow_html=True)
             
             # --- LINHA MÊS ---
-            m_c1, m_c2, m_c3 = st.columns([0.08, 2.4, 1.80])
+            m_c1, m_c2, m_c3 = st.columns([0.06, 2.4, 1.94])
             with m_c1:
                 if st.button("❮", key="m_p"): 
                     st.session_state.idx_m = (st.session_state.idx_m - 1) % 12
@@ -677,7 +677,7 @@ with aba1:
                     st.rerun()
 
             # --- LINHA ANO ---
-            a_c1, a_c2, a_c3 = st.columns([0.08, 2.4, 1.92])
+            a_c1, a_c2, a_c3 = st.columns([0.06, 2.5, 1.94])
             with a_c1:
                 if st.button("❮", key="a_p"): 
                     st.session_state.val_a -= 1
@@ -1067,6 +1067,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
