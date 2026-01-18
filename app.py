@@ -228,11 +228,11 @@ st.markdown("""
     </script>
 
     <style>
-    /* 1. ESTRUTURA */
+    /* 1. ESTRUTURA GERAL */
     .block-container { padding-top: 1.5rem !important; } 
     footer { visibility: hidden; display: none !important; }
     
-    /* 2. CARDS KPI */
+    /* 2. CARDS KPI (Receita, Despesa, Saldo) */
     .card {
         padding: 30px 45px !important;
         font-size: 20px !important;
@@ -288,33 +288,34 @@ st.markdown("""
 
     /* --- AJUSTES EXCLUSIVOS PAINEL INICIAL (FILTROS) --- */
     
-    /* Título do quadro */
     .titulo-painel {
         font-size: 15px !important;
         font-weight: bold !important;
         margin-top: -15px !important;
-        margin-bottom: 1px !important;
-        color: #333 !important;
+        margin-bottom: 5px !important;
     }
 
-    /* Texto 'Selecione o Mês/Ano' */
     .label-painel {
         font-size: 13px !important;
         font-weight: bold !important;
         color: #000000 !important;
-        margin-bottom: -5px !important; /* Aproxima o texto da caixa */
         display: block !important;
+        margin-bottom: 0px !important;
     }
 
-    /* Caixa de Seleção Ajustada */
+    /* FORÇANDO A SUBIDA: Mirando no container do widget */
+    .selectbox-painel [data-testid="stSelectbox"] {
+        margin-top: -30px !important;  /* Puxa o componente inteiro para cima */
+    }
+
+    /* Ajuste da altura interna da caixa */
     .selectbox-painel div[data-baseweb="select"] > div {
         height: 28px !important;
         min-height: 28px !important;
         font-size: 14px !important;
-        margin-top: -25px !important; /* Puxa a caixa para cima do texto */
     }
 
-    /* Remove gaps do Streamlit neste bloco */
+    /* Elimina espaços vazios entre as linhas do Streamlit */
     .selectbox-painel [data-testid="stVerticalBlock"] > div {
         gap: 0px !important;
         padding-top: 0px !important;
@@ -1041,6 +1042,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
