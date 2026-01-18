@@ -634,7 +634,7 @@ def modal_forma_pagamento():
                     salvar_configuracoes_nuvem()
                     st.rerun()
                     
-# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (BARRA FORÇADA) ---
+# --- 9. NAVEGAÇÃO E ESTRUTURA DO PAINEL INICIAL (VERSÃO BLINDADA) ---
 
 # CSS para o Menu e Correção de Layout
 st.markdown("""
@@ -645,13 +645,6 @@ st.markdown("""
             text-align: left !important;
             width: 100% !important;
             padding-left: 15px !important;
-        }
-        .card, .card-vertical {
-            width: 100% !important;
-            box-sizing: border-box !important;
-            margin: 0px !important; 
-            padding: 15px !important;
-            border-radius: 8px;
         }
     </style>
 """, unsafe_allow_html=True)
@@ -675,70 +668,67 @@ if selecionado == "Painel Inicial":
     col_esquerda, col_direita = st.columns([1, 2])
 
     with col_esquerda:
-        # Quadro Mês e Ano
-        with st.container(height=190, border=True):
+        with st.container(height=200, border=True):
             st.markdown("🔍 **Período**")
             mes_sel = st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], index=0, label_visibility="collapsed")
             ano_sel = st.selectbox("Ano", ["2024", "2025", "2026"], index=2, label_visibility="collapsed")
 
     with col_direita:
-        # Quadro de Desempenho com Barra Grossa e Escala
-        with st.container(height=190, border=True):
+        with st.container(height=200, border=True):
             consumo = 49  # Valor para teste
-            
-            # Definindo a cor da barra dinamicamente
             cor_barra = "#008080" if consumo < 70 else "#FF4B4B"
             
-            # HTML COMPLETO DA BARRA (Estilo embutido para não falhar)
+            # --- TÍTULO E VALOR ---
             st.markdown(f"""
                 <div style="font-family: sans-serif;">
-                    <div style="font-size: 0.85rem; font-weight: bold; color: #555; text-transform: uppercase; margin-bottom: 5px;">
-                        Desempenho de Gastos em {mes_sel}
-                    </div>
-                    <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 10px;">
-                        {consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #666;">utilizado</span>
-                    </div>
-                    
-                    <div style="width: 100%; background-color: #E0E0E0; border-radius: 20px; height: 25px; position: relative; border: 1px solid #CCC;">
-                        <div style="width: {consumo}%; background-color: {cor_barra}; height: 100%; border-radius: 20px; transition: width 0.5s ease-in-out;">
-                        </div>
-                    </div>
-                    
-                    <div style="display: flex; justify-content: space-between; margin-top: 5px; font-size: 0.75rem; font-weight: bold; color: #444; padding: 0 5px;">
-                        <span>0%</span>
-                        <span>50%</span>
-                        <span>100%</span>
-                    </div>
+                    <div style="font-size: 0.8rem; font-weight: bold; color: #666; text-transform: uppercase;">Desempenho de Gastos em {mes_sel}</div>
+                    <div style="font-size: 1.6rem; font-weight: 800; margin-top: 5px;">{consumo}% <span style="font-size: 0.9rem; font-weight: normal; color: #888;">utilizado</span></div>
                 </div>
             """, unsafe_allow_html=True)
             
-            # Mensagem de rodapé do quadro
+            # --- BARRA DE PROGRESSO GROSSA (FORÇADA) ---
+            # Criamos o fundo cinza e o preenchimento colorido
+            st.markdown(f"""
+                <div style="width: 100%; background-color: #E0E0E0; border-radius: 50px; height: 30px; margin-top: 10px; border: 1px solid #CCC; overflow: hidden;">
+                    <div style="width: {consumo}%; background-color: {cor_barra}; height: 100%; border-radius: 50px; transition: width 0.8s ease-in-out;"></div>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            # --- MARCAÇÕES 0% - 50% - 100% ---
+            # Usamos colunas do próprio Streamlit para garantir que fiquem no lugar certo abaixo da barra
+            m1, m2, m3 = st.columns([1, 1, 1])
+            m1.markdown("<p style='font-size: 11px; font-weight: bold; color: #444; margin-top: -5px;'>0%</p>", unsafe_allow_html=True)
+            m2.markdown("<p style='font-size: 11px; font-weight: bold; color: #444; text-align: center; margin-top: -5px;'>50%</p>", unsafe_allow_html=True)
+            m3.markdown("<p style='font-size: 11px; font-weight: bold; color: #444; text-align: right; margin-top: -5px;'>100%</p>", unsafe_allow_html=True)
+            
             if consumo < 50:
-                st.caption("🟢 Excelente! Gastos sob controle.")
+                st.caption("🟢 Excelente! Gastos dentro do planejado.")
+            elif consumo < 80:
+                st.caption("🟡 Atenção: Orçamento em nível médio.")
             else:
-                st.caption("🟡 Atenção ao limite orçamentário.")
-
-    # --- LINHA 2: RESUMO FINANCEIRO (KPIs) ---
+                st.caption("🔴 Alerta: Limite próximo do esgotamento.")
+                
+    # --- LINHA 2: RESUMO FINANCEIRO (COM CORREÇÃO DE LARGURA) ---
     with st.container(border=True):
         st.markdown("**💰 Consolidado Mensal**")
         c_rec, c_desp, c_sal = st.columns(3)
         with c_rec:
-            st.markdown('<div class="card receita">RECEITA<br>R$ 5.000,00</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card receita" style="width:100%; box-sizing: border-box; padding:15px; border-radius:8px; background-color:#008080; color:white;">RECEITA<br><b>R$ 5.000,00</b></div>', unsafe_allow_html=True)
         with c_desp:
-            st.markdown('<div class="card despesa">DESPESA<br>R$ 2.450,00</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card despesa" style="width:100%; box-sizing: border-box; padding:15px; border-radius:8px; background-color:#FF4B4B; color:white;">DESPESA<br><b>R$ 2.450,00</b></div>', unsafe_allow_html=True)
         with c_sal:
-            st.markdown('<div class="card saldo">SALDO<br>R$ 2.550,00</div>', unsafe_allow_html=True)
+            st.markdown('<div class="card saldo" style="width:100%; box-sizing: border-box; padding:15px; border-radius:8px; background-color:#D4AF37; color:white;">SALDO<br><b>R$ 2.550,00</b></div>', unsafe_allow_html=True)
 
     # --- LINHA 3: STATUS DETALHADO ---
     st.markdown("### 📊 Status por Categoria")
     with st.container(border=True):
         c1, c2, c3 = st.columns(3)
         with c1:
-            st.markdown('<div class="card-vertical card-pagar"><b>A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical" style="width:100%; padding:15px; background-color:#FF914D; color:white; border-radius:8px;"><b>A PAGAR<br>R$ 1.200,00</b></div>', unsafe_allow_html=True)
         with c2:
-            st.markdown('<div class="card-vertical card-prevista"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical" style="width:100%; padding:15px; background-color:#666; color:white; border-radius:8px;"><b>PREVISTA<br>R$ 800,00</b></div>', unsafe_allow_html=True)
         with c3:
-            st.markdown('<div class="card-vertical card-cartao"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
+            st.markdown('<div class="card-vertical" style="width:100%; padding:15px; background-color:#007BFF; color:white; border-radius:8px;"><b>NUBANK<br>R$ 450,00</b></div>', unsafe_allow_html=True)
             
 
 # --- 10. TELA DE CONFIGURAÇÕES E CADASTROS (SCROLL FORÇADO) ---
@@ -1081,6 +1071,7 @@ if selecionado == "Cartões":
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
