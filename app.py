@@ -595,87 +595,45 @@ st.markdown(f"""
 
 with aba1:
     # --- LÓGICA DE ESTADO ---
-    if 'idx_m' not in st.session_state: st.session_state.idx_m = 1 
-    if 'val_a' not in st.session_state: st.session_state.val_a = 2026
+    if 'mes_ref' not in st.session_state: st.session_state.mes_ref = "MAI"
+    if 'ano_ref' not in st.session_state: st.session_state.ano_ref = 2026
+
+    # 1. LINHA DE SELEÇÃO DE ANO (Discreta no topo)
+    anos = [2024, 2025, 2026, 2027]
+    st.session_state.ano_ref = st.radio(
+        "Ano:", anos, 
+        index=anos.index(st.session_state.ano_ref), 
+        horizontal=True,
+        label_visibility="collapsed" # Esconde o texto "Ano" para ficar limpo
+    )
+
+    # 2. SELETOR DE MÊS ESTILO "PILL" (Ocupa pouco espaço e é muito bonito)
+    # O st.segmented_control é o componente mais moderno do Streamlit hoje
+    meses = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
     
-    meses_lista = ["JAN", "FEV", "MAR", "ABR", "MAI", "JUN", 
-                   "JUL", "AGO", "SET", "OUT", "NOV", "DEZ"]
+    st.session_state.mes_ref = st.segmented_control(
+        "Mês", meses, 
+        selection_mode="single", 
+        default=st.session_state.mes_ref,
+        label_visibility="collapsed"
+    )
 
-    # --- CSS PARA DEIXAR O COMBOBOX "MINIMALISTA" ---
-    st.markdown("""
-        <style>
-            /* Diminuir a altura e a fonte dos seletores */
-            div[data-testid="stSelectbox"] label {
-                display: none; /* Esconde o rótulo padrão para economizar espaço */
-            }
-            div[data-testid="stSelectbox"] div[data-baseweb="select"] {
-                height: 32px !important;
-                min-height: 32px !important;
-            }
-            div[data-testid="stSelectbox"] div[role="button"] {
-                padding-top: 0px !important;
-                padding-bottom: 0px !important;
-                font-size: 11px !important;
-                font-weight: bold !important;
-            }
-            
-            /* Quadro de fundo para o conjunto */
-            .area-periodo {
-                background-color: #f1f3f6;
-                padding: 10px;
-                border-radius: 8px;
-                border: 1px solid #ddd;
-                display: flex;
-                flex-direction: column;
-                gap: 5px;
-                width: 140px; /* Largura fixa e pequena para o quadro todo */
-            }
-            
-            .rotulo-superior {
-                font-size: 10px;
-                font-weight: bold;
-                color: #666;
-                margin-bottom: -5px;
-            }
-        </style>
-    """, unsafe_allow_html=True)
+    st.divider() # Uma linha fina para separar
 
-    col_per, col_des, _ = st.columns([0.6, 1.4, 1.5])
-
-    with col_per:
-        # Criamos um "Card" manual para o período
-        st.write('<div class="area-periodo">', unsafe_allow_html=True)
-        st.markdown("<p style='font-size:11px; font-weight:bold; margin:0;'>📍 PERÍODO</p>", unsafe_allow_html=True)
+    # 3. CONTEÚDO DINÂMICO ABAIXO
+    col_receita, col_despesa, col_saldo = st.columns(3)
+    
+    with col_receita:
+        st.success(f"Receitas {st.session_state.mes_ref}")
+        st.title("R$ 12.000")
         
-        # Seletor de Mês
-        st.write('<span class="rotulo-superior">MÊS</span>', unsafe_allow_html=True)
-        mes_selecionado = st.selectbox(
-            "Mês", meses_lista, 
-            index=st.session_state.idx_m, 
-            key="combo_mes"
-        )
-        # Atualiza o estado se mudar
-        st.session_state.idx_m = meses_lista.index(mes_selecionado)
+    with col_despesa:
+        st.error(f"Despesas {st.session_state.mes_ref}")
+        st.title("R$ 6.750")
 
-        # Seletor de Ano
-        st.write('<span class="rotulo-superior">ANO</span>', unsafe_allow_html=True)
-        ano_selecionado = st.selectbox(
-            "Ano", [2024, 2025, 2026, 2027], 
-            index=2, # Corresponde a 2026
-            key="combo_ano"
-        )
-        st.session_state.val_a = ano_selecionado
-        
-        st.write('</div>', unsafe_allow_html=True)
-
-    with col_des:
-        # Mantendo o container de desempenho para compor o layout
-        with st.container(border=True):
-            st.markdown("<p style='font-size:11px; font-weight:bold; margin:0;'>📈 RESUMO DE DESEMPENHO</p>", unsafe_allow_html=True)
-            st.write("")
-            c1, c2 = st.columns(2)
-            c1.metric("Saldo", "R$ 5.250,00", "+5%")
-            c2.metric("Mês Ref.", f"{mes_selecionado}/{ano_selecionado}")
+    with col_saldo:
+        st.info("Saldo Atual")
+        st.title("R$ 5.250")
                     
 with aba2:
     # --- TELA DE CONFIGURAÇÕES E CADASTROS ---
@@ -1032,6 +990,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
