@@ -596,135 +596,139 @@ st.markdown(f"""
 with aba1:
     # --- TELA PAINEL INICIAL ---
     st.session_state.pagina = "Painel Inicial"
-    selecionado = "Painel Inicial"
     
-    st.markdown("<h3 style='color: #008080; margin-bottom: -10px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
+    st.markdown("<h3 style='color: #008080; margin-bottom: 5px;'>🏠 Painel de Controle</h3>", unsafe_allow_html=True)
 
-    # --- CSS MINIMALISTA E ESCALONADO ---
+    # --- CSS: PRECISO E DINÂMICO ---
     st.markdown("""
         <style>
-            /* Sobe o conteúdo para encostar no título */
-            div[data-testid="stVerticalBlock"] > div:has(div[data-testid="stVerticalBlockBorderWrapper"]) {
-                margin-top: -25px !important;
-            }
-            
-            /* Containers com altura fixa e escala reduzida */
+            /* Ajuste de altura e padding dos quadros */
             div[data-testid="stVerticalBlockBorderWrapper"] {
-                padding: 10px 15px !important;
-                min-height: 150px !important;
-                background: #ffffff !important;
-                border-radius: 8px !important;
-                border: 1px solid #E0E0E0 !important;
+                min-height: 165px !important;
+                padding: 15px !important;
+                background-color: #ffffff !important;
             }
 
-            /* Label Cinza Compacta */
-            .label-compacta {
-                background-color: #F0F2F6;
-                color: #444;
+            /* Label Cinza e Negrito - Colada na lateral da Combobox */
+            .label-unida {
+                background-color: #E0E0E0;
+                color: #333;
                 font-weight: bold;
-                padding: 0px 8px;
+                padding: 0px 10px;
                 border-radius: 4px 0px 0px 4px;
-                font-size: 10px;
+                font-size: 11px;
                 display: flex;
                 align-items: center;
-                height: 32px; /* Altura reduzida */
-                border: 1px solid #DCDCDC;
+                justify-content: center;
+                height: 38px;
+                border: 1px solid #dcdcdc;
                 border-right: none;
+                width: 60px;
             }
 
-            /* Títulos dos Cards */
-            .text-titulo {
-                font-size: 11px;
-                font-weight: 700;
-                color: #888;
-                margin-bottom: 8px;
-                text-transform: uppercase;
-            }
-
-            /* Valores em escala menor */
-            .valor-saldo-small {
-                font-size: 20px;
-                font-weight: 800;
-                color: #1A1A1A;
-                line-height: 1;
-            }
-
-            .label-caption {
-                font-size: 9px;
-                color: #AAA;
-                font-weight: 600;
-                margin-bottom: 2px;
-            }
-
-            /* Barra de Progresso Fina */
-            .bar-container-small {
+            /* Container da Barra com Posicionamento para o Indicador */
+            .barra-fundo {
                 width: 100%;
-                background: #F5F5F5;
+                background-color: #F0F2F6;
+                height: 25px;
                 border-radius: 4px;
-                height: 10px;
-                margin-top: 8px;
-                overflow: hidden;
+                margin-top: 20px;
+                border: 1px solid #ddd;
+                position: relative; /* Necessário para o indicador flutuante */
             }
 
-            .bar-progress-small {
+            .barra-progresso {
                 height: 100%;
-                background: #008080;
-                border-radius: 4px;
+                background-color: #008080;
+                border-radius: 3px 0px 0px 3px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 11px;
+                font-weight: bold;
+                transition: width 0.5s ease-in-out;
             }
 
-            .marker-labels {
+            /* Marcador flutuante que segue a barra */
+            .indicador-ponta {
+                position: absolute;
+                top: -18px; /* Fica acima da barra */
+                transform: translateX(-50%);
+                background-color: #008080;
+                color: white;
+                font-size: 10px;
+                padding: 2px 6px;
+                border-radius: 3px;
+                font-weight: bold;
+            }
+            
+            /* Seta do marcador */
+            .indicador-ponta::after {
+                content: "";
+                position: absolute;
+                top: 100%;
+                left: 50%;
+                margin-left: -4px;
+                border-width: 4px;
+                border-style: solid;
+                border-color: #008080 transparent transparent transparent;
+            }
+
+            .indicadores-escala {
                 display: flex;
                 justify-content: space-between;
-                font-size: 8px;
-                color: #CCC;
-                font-weight: 700;
-                margin-top: 2px;
+                font-size: 10px;
+                font-weight: bold;
+                color: #999;
+                margin-top: 5px;
             }
         </style>
     """, unsafe_allow_html=True)
 
-    # --- LAYOUT DE COLUNAS ---
-    # Reduzi a largura total ocupada pelos quadros para ficar mais centralizado
-    col_per, col_des, col_vazio = st.columns([0.8, 1.4, 1.8]) 
+    # --- LAYOUT ---
+    col_per, col_des, col_vazio = st.columns([1, 1.8, 1])
 
-    # --- QUADRO 1: PERÍODO (Escala Reduzida) ---
+    # --- QUADRO 1: PERÍODO ---
     with col_per:
         with st.container(border=True):
-            st.markdown('<div class="text-titulo">📍 Período</div>', unsafe_allow_html=True)
+            st.markdown("**📍 PERÍODO**")
             
-            # Mês
+            # Linha Mês
             c1m, c2m = st.columns([0.4, 1])
-            with c1m: st.markdown('<div class="label-compacta">MÊS</div>', unsafe_allow_html=True)
-            with c2m: st.selectbox("Mês", ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"], label_visibility="collapsed", key="m_p")
-            
-            # Ano
-            c1a, c2a = st.columns([0.4, 1])
-            with c1a: st.markdown('<div class="label-compacta">ANO</div>', unsafe_allow_html=True)
-            with c2a: st.selectbox("Ano", ["2026", "2027", "2028"], label_visibility="collapsed", key="a_p")
+            with c1m:
+                st.markdown('<div class="label-unida">MÊS</div>', unsafe_allow_html=True)
+            with c2m:
+                meses = ["JANEIRO", "FEVEREIRO", "MARÇO", "ABRIL", "MAIO", "JUNHO", "JULHO", "AGOSTO", "SETEMBRO", "OUTUBRO", "NOVEMBRO", "DEZEMBRO"]
+                st.selectbox("Mês", meses, label_visibility="collapsed", key="mes_v4")
 
-    # --- QUADRO 2: DESEMPENHO (Design Fino e Compacto) ---
+            # Linha Ano
+            c1a, c2a = st.columns([0.4, 1])
+            with c1a:
+                st.markdown('<div class="label-unida">ANO</div>', unsafe_allow_html=True)
+            with c2a:
+                anos = ["2026", "2027", "2028"]
+                st.selectbox("Ano", anos, label_visibility="collapsed", key="ano_v4")
+
+    # --- QUADRO 2: DESEMPENHO MENSAL ---
     with col_des:
         with st.container(border=True):
-            saldo_atual = 4250.00
-            percent_uso = 55.0
+            saldo_val = 5250.80
+            percent_val = 75 # Este valor moverá o indicador automaticamente
             
-            st.markdown('<div class="text-titulo">📈 Desempenho</div>', unsafe_allow_html=True)
-            
-            col_info, col_perc = st.columns([1.2, 0.8])
-            with col_info:
-                st.markdown('<div class="label-caption">SALDO ATUAL</div>', unsafe_allow_html=True)
-                st.markdown(f'<div class="valor-saldo-small">R$ {saldo_atual:,.2f}</div>', unsafe_allow_html=True)
-            
-            with col_perc:
-                st.markdown('<div style="text-align:right" class="label-caption">USO DO LIMITE</div>', unsafe_allow_html=True)
-                st.markdown(f'<div style="text-align:right; font-size: 16px; font-weight: 800; color: #008080;">{percent_uso}%</div>', unsafe_allow_html=True)
+            st.markdown("**📈 DESEMPENHO MENSAL**")
+            st.markdown(f"Saldo Disponível: **R$ {saldo_val:,.2f}**")
 
-            # Barra fina e profissional
+            # Barra com Marcador Dinâmico
             st.markdown(f"""
-                <div class="bar-container-small">
-                    <div class="bar-progress-small" style="width: {percent_uso}%;"></div>
+                <div class="barra-fundo">
+                    <div class="indicador-ponta" style="left: {percent_val}%;">
+                        {percent_val}%
+                    </div>
+                    <div class="barra-progresso" style="width: {percent_val}%;">
+                    </div>
                 </div>
-                <div class="marker-labels">
+                <div class="indicadores-escala">
                     <span>0%</span>
                     <span>50%</span>
                     <span>100%</span>
@@ -1088,6 +1092,7 @@ with aba4:
 
     except Exception as e:
         st.error(f"Erro ao carregar a tela: {e}")
+
 
 
 
